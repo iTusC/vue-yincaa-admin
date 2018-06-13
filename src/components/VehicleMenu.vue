@@ -1,0 +1,339 @@
+<template>
+    <div class="vehicle-menu">
+       <div class="vehicle-list">
+           <ul>
+               <template v-for="(vehicleL,i) in vehicleList">
+                   <li class="yc-vehicle-list-items" :class="{'yc-active-list-items':vehicleL.ind === ind}">
+                       <div class="title" @click.stop="showFun($event,i)" :key="i" :class="{'yc-is-opened':vehicleL.ind === ind}">
+                           <i class="icon-chosen iconfont yc-icon-jiegou"></i>
+                           {{ vehicleL.title }}({{ vehicleL.onlineN }}/{{ vehicleL.sum }})
+                           <i class="el-submenu__icon-arrow el-icon-arrow-down"></i>
+                        </div>
+                       <ul :class="{'active':vehicleL.ind === ind}" class="vehicle-list-items">
+                           <template v-for="(chr,i) in vehicleL.chr">
+                                <li class="vehilce-list-item">
+                                    <div class="vehile-item-title" @click.stop="itemOpened(i)">
+                                        <i :class="chr.status?'online':'offline'"></i>
+                                        {{ chr.title }}
+                                        <i class="icon-user iconfont yc-icon-yonghu">{{ chr.numb }}</i>
+                                    </div>
+                                    <ul class="vehile-item-list" :class="{'vehile-item-list-isopened':chr.ind === itemEnd}">
+                                        <template v-for="chrls in chr.chrl">
+                                            <li>
+                                                {{ chrls.name }}
+                                                <i class="item-time">{{ chrls.time }}</i>
+                                            </li>
+                                        </template>
+                                    </ul>
+                                </li>
+                           </template>
+                       </ul>
+                   </li>
+               </template>
+           </ul>
+       </div>
+    </div>
+</template>
+
+<script>
+    export default {
+        data(){
+            return {
+                itemEnd:'',
+                ind:'',
+                vehiclelmenu:false,
+                active:'active',
+                vehicleList:[
+                    {
+                        title:'粤运化工',
+                        onlineN:'3',
+                        sum:'5',
+                        ind:'1',
+                        chr:[
+                            {
+                                title:'粤A2K532',
+                                numb:'3',
+                                ind:'1',
+                                status:true,
+                                chrl:[
+                                    {
+                                        name:'邱小刚',
+                                        time:'08:00-12:00',
+                                        ind:'1',
+                                    },
+                                    {
+                                        name:'邱小刚',
+                                        time:'08:00-12:00',
+                                        ind:'1',
+                                    },
+                                    {
+                                        name:'邱小刚',
+                                        time:'08:00-12:00',
+                                        ind:'1',
+                                    }
+                                ]
+                            },
+                            {
+                                title:'粤A2K532',
+                                numb:'3',
+                                ind:'2',
+                                status:true,
+                                chrl:[
+                                    {
+                                        name:'邱小刚',
+                                        time:'08:00-12:00',
+                                        ind:'2',
+                                    }
+                                ]
+                            },
+                            {
+                                title:'粤A2K532',
+                                numb:'3',
+                                ind:'3',
+                                status:true,
+                                chrl:[
+                                    {
+                                        name:'邱小刚',
+                                        time:'08:00-12:00',
+                                        ind:'3',
+                                    }
+                                ]
+                            },
+                            {
+                                title:'粤A2K532',
+                                numb:'3',
+                                ind:'4',
+                                status:false,
+                                chrl:[
+                                    {
+                                        name:'邱小刚',
+                                        time:'08:00-12:00',
+                                        ind:'4',
+                                    }
+                                ]
+                            },
+                            {
+                                title:'粤A2K532',
+                                numb:'3',
+                                ind:'5',
+                                status:false,
+                                chrl:[
+                                    {
+                                        name:'邱小刚',
+                                        time:'08:00-12:00',
+                                        ind:'5',
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        title:'粤运化工',
+                        onlineN:'3',
+                        sum:'5',
+                        ind:'2',
+                        chr:[
+                            {
+                                title:'粤A2K532',
+                                numb:'3',
+                                ind:'2',
+                                status:false,
+                                chrl:[
+                                    {
+                                        name:'邱小刚',
+                                        time:'08:00-12:00',
+                                        ind:'2',
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        title:'粤运化工',
+                        onlineN:'3',
+                        sum:'5',
+                        ind:'3',
+                        chr:[
+                            {
+                                title:'粤A2K532',
+                                numb:'3',
+                                ind:'3',
+                                status:false,
+                                chrl:[
+                                    {
+                                        name:'邱小刚',
+                                        time:'08:00-12:00',
+                                        ind:'3',
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                ]
+            }
+        },
+        methods: {
+            showFun(e,i){
+                if(this.ind === i+1+''){
+                    this.ind = ''
+                }else{
+                    this.ind =i+1+'' ;
+                }  
+            },
+            itemOpened(i){
+                if(this.itemEnd === i+1+''){
+                    this.itemEnd = ''
+                }else{
+                    this.itemEnd =i+1+'' ;
+                }  
+            }
+        }
+    }
+</script>
+
+<style scoped>
+@import url("../assets/css/iconfont");
+.el-menu-vertical-demo{
+        background-color: #f5f5f5;
+        text-align: left;
+}
+.el-submenu__title:hover {
+    background-color: #333;
+}
+.el-submenu__title:focus, .el-submenu__title:hover {
+    outline: 0;
+    background-color: #333;
+}
+.el-menu-vertical-demo .el-submenu__title{
+    padding: 0;
+}
+.yc-menu-vehicle .el-submenu__title:hover{
+    background-color: #fff;
+}
+.yc-menu-vehicle .el-menu--inline{
+    background-color: #f5f5f5;
+}
+.yc-menu-vehicle .el-menu-item:hover{
+    background-color: #fff;
+}
+.yc-menu-vehicle .el-menu-item.is-active{
+    color: #333;
+    font-weight: 700;
+    background-color: #fff;
+}
+.online{
+  position: absolute;
+  left: -20px;
+  width: 9px;
+  height: 9px;
+  background-color: #52a261;
+  border-radius: 50%;
+  top: 35%;
+}
+.offline{
+  position: absolute;
+  left: -20px;
+  width: 9px;
+  height: 9px;
+  background-color: #b1b5b6;
+  border-radius: 50%;
+  top: 35%;
+}
+.icon-vehicle{
+   font-size: 16px;
+    color: #868c91;
+    margin-right: 10px;
+}
+.vehicle-list{
+    width: 100%;
+    min-height: 600px;
+    margin: 0 auto;
+    text-align: left;
+    margin-top: 10px;
+    overflow-x: auto;
+}
+.vehicle-list li div.title{
+    font-size: 14px;
+    color: #474747;
+    position: relative;
+    height: 48px;
+    line-height: 48px;
+    
+}
+.el-submenu__icon-arrow{
+    right: 0px;
+}
+.vehilce-list-item{
+    position: relative;
+    height: auto;
+    line-height: 32px;
+    font-size: 12px;
+    color: #474747;
+    padding-left: 46px;
+}
+.icon-driver{
+    font-size:12px;
+}
+.icon-user{
+    position: absolute;
+    right: 5%;
+    top:0;
+    color: #767676;
+    font-size: 12px;
+}
+.icon-chosen{
+    margin-right: 10px;
+}
+.icon-user:before{
+    margin-right: 6px;
+}
+.vehile-item-list li{
+    position: relative;
+    color: #5a5a5a
+}
+.item-time{
+    position: absolute;
+    right: 5%;
+    top: 0;
+    font-style: normal;
+}
+.vehile-item-title{
+    color: #474747;
+    position: relative;
+}
+.title{
+    cursor: pointer;
+    padding: 0 5%;
+}
+.vehicle-list ul.vehicle-list-items{
+    display: none;
+}
+.vehicle-list ul.active{
+    display: block;
+    background-color:#fbfbfb;
+}
+.yc-is-opened{
+    background-color: #fff;
+}
+.yc-is-opened i.el-submenu__icon-arrow{
+    transform: rotate(180deg);
+}
+.el-icon-arrow-down{
+    transition: transform .3s;
+    right: 5%;
+}
+
+.yc-active-list-items{
+    background-color: #fff;
+}
+.vehile-item-list{
+    display: none;
+    cursor: pointer;
+}
+.vehile-item-list-isopened{
+    display: block;
+}
+.vehile-item-title{
+    cursor: pointer;
+}
+</style>
