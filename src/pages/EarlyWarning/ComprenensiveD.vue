@@ -104,7 +104,7 @@
                     </el-col>
                 </el-row>
                 <div class="ul-itme">
-                    <c-table @getLocation="getLocation" :tableListDatas="tableListData" :tableTitle="tableTitle" :tableH="tableH" ></c-table>
+                    <c-table :ctcspan="ctcspan" :showText="showText" :tableData="tableData" @showList="showList" :tableListShowi="tableListShowi"></c-table>
                 </div>
             </section>
         </div>
@@ -370,6 +370,164 @@ export default {
           label: "北京烤鸭"
         }
       ],
+      tableData:[
+        {
+          LicensePlate:"粤A2K532",
+          Drivers:"萧大双",
+          VehicleAlarmN:"23",
+          DriverWarningN:"6",
+          chr:[
+            {
+              VehicleAlarm:"车距时距监测",
+              DriverWarning:"——",
+              address:"2018-05-27  11:46 / 507创意园",
+              path:""
+            },
+            {
+              VehicleAlarm:"——",
+              DriverWarning:"车距时距监测",
+              address:"2018-05-27  11:46 / 507创意园",
+              path:""
+            },
+            {
+              VehicleAlarm:"车距时距监测",
+              DriverWarning:"——",
+              address:"2018-05-27  11:46 / 507创意园",
+              path:""
+            }
+          ]
+        },
+        {
+          LicensePlate:"粤A2K532",
+          Drivers:"萧大双",
+          VehicleAlarmN:"23",
+          DriverWarningN:"6",
+          chr:[
+            {
+              VehicleAlarm:"车距时距监测",
+              DriverWarning:"——",
+              address:"2018-05-27  11:46 / 507创意园",
+              path:""
+            },
+            {
+              VehicleAlarm:"——",
+              DriverWarning:"车距时距监测",
+              address:"2018-05-27  11:46 / 507创意园",
+              path:""
+            },
+            {
+              VehicleAlarm:"车距时距监测",
+              DriverWarning:"——",
+              address:"2018-05-27  11:46 / 507创意园",
+              path:""
+            }
+          ]
+        },
+        {
+          LicensePlate:"粤A2K532",
+          Drivers:"萧大双",
+          VehicleAlarmN:"23",
+          DriverWarningN:"6",
+          chr:[
+            {
+              VehicleAlarm:"车距时距监测",
+              DriverWarning:"——",
+              address:"2018-05-27  11:46 / 507创意园",
+              path:""
+            },
+            {
+              VehicleAlarm:"——",
+              DriverWarning:"车距时距监测",
+              address:"2018-05-27  11:46 / 507创意园",
+              path:""
+            },
+            {
+              VehicleAlarm:"车距时距监测",
+              DriverWarning:"——",
+              address:"2018-05-27  11:46 / 507创意园",
+              path:""
+            }
+          ]
+        },
+        {
+          LicensePlate:"粤A2K532",
+          Drivers:"萧大双",
+          VehicleAlarmN:"23",
+          DriverWarningN:"6",
+          chr:[
+            {
+              VehicleAlarm:"车距时距监测",
+              DriverWarning:"——",
+              address:"2018-05-27  11:46 / 507创意园",
+              path:""
+            },
+            {
+              VehicleAlarm:"——",
+              DriverWarning:"车距时距监测",
+              address:"2018-05-27  11:46 / 507创意园",
+              path:""
+            },
+            {
+              VehicleAlarm:"车距时距监测",
+              DriverWarning:"——",
+              address:"2018-05-27  11:46 / 507创意园",
+              path:""
+            }
+          ]
+        },
+        {
+          LicensePlate:"粤A2K532",
+          Drivers:"萧大双",
+          VehicleAlarmN:"23",
+          DriverWarningN:"6",
+          chr:[
+            {
+              VehicleAlarm:"车距时距监测",
+              DriverWarning:"——",
+              address:"2018-05-27  11:46 / 507创意园",
+              path:""
+            },
+            {
+              VehicleAlarm:"——",
+              DriverWarning:"车距时距监测",
+              address:"2018-05-27  11:46 / 507创意园",
+              path:""
+            },
+            {
+              VehicleAlarm:"车距时距监测",
+              DriverWarning:"——",
+              address:"2018-05-27  11:46 / 507创意园",
+              path:""
+            }
+          ]
+        },
+        {
+          LicensePlate:"粤A2K532",
+          Drivers:"萧大双",
+          VehicleAlarmN:"23",
+          DriverWarningN:"6",
+          chr:[
+            {
+              VehicleAlarm:"车距时距监测",
+              DriverWarning:"——",
+              address:"2018-05-27  11:46 / 507创意园",
+              path:""
+            },
+            {
+              VehicleAlarm:"——",
+              DriverWarning:"车距时距监测",
+              address:"2018-05-27  11:46 / 507创意园",
+              path:""
+            },
+            {
+              VehicleAlarm:"车距时距监测",
+              DriverWarning:"——",
+              address:"2018-05-27  11:46 / 507创意园",
+              path:""
+            }
+          ]
+        }
+      ],
       isshow: false,
       lng: 116.404,
       lat: 39.915,
@@ -388,7 +546,10 @@ export default {
       skcolor:'',
       onlineD:false,//车辆在线率与车辆在线,
       onlineone:false, //在线与离线
-      legendWith:0 //图例居中显示
+      legendWith:0, //图例居中显示
+      ctcspan:0,  //表格展开时跨行
+      showText:"展开本行",//表格展开收起切换
+      tableListShowi:'',
     };
   },
   methods: {
@@ -426,6 +587,17 @@ export default {
     },
     CBValue(value) {
       console.log(value);
+    },
+    //表格展开更多内容
+    showList(i){
+      if(this.tableListShowi === i){
+        this.tableListShowi = '展开本行';
+      }
+      else{
+        this.ctcspan = 3
+        this.tableListShowi = i
+        this.showText = '收起本行'
+      }
     }
   },
   computed:{
