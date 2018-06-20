@@ -22,23 +22,15 @@
 import {saveSearch} from '../../static/js/cache'
 import storage from 'good-storage'
     export default {
+        props:{
+            resL:Array,
+        },
         data(){
             return {
                 searchtxt: '',
                 restaurants: [],
                 historyxs:false ,
                 recording:false,
-                resL:[
-                    {
-                        "value":'123'
-                    },
-                    {
-                        "value":'123'
-                    },
-                    {
-                        "value":'123'
-                    }
-                ],
                 stext:"搜索李四"
             }
         },

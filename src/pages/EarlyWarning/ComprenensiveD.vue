@@ -7,8 +7,8 @@
                     <img src="" alt="">
                     <h3>粤运综合物流有限公司</h3>
                 </div>
-                <vehicle-list></vehicle-list>
-                <vehicle-menu></vehicle-menu>
+                <vehicle-list @handleSelect="handleSelect" :resL="resL"></vehicle-list>
+                <vehicle-menu @showFun="showFun" @itemOpened="itemOpened" :vehicleList="vehicleList" :ind="ind" :itemEnd="itemEnd"></vehicle-menu>
             </div>
           </div>
         </div>
@@ -52,9 +52,11 @@
                       <el-col :span="6" style="padding-right:0">
                         <h3>预警统计</h3>
                       </el-col>
-                      <el-col :span="6">
-                          <date-w :datewSize="datewSize"></date-w>
+                      
+                      <el-col :span="8">
+                        <date-w :datewSize="datewSize"></date-w>
                       </el-col>
+                      
                     </el-row>
                   </el-col>
                   <el-col :span="5" :offset="9">
@@ -88,7 +90,7 @@
                 <el-row :gutter="20" class="cd-table-select">
                     <el-col :span="6">
                         <p class="table-select-title">时间筛选</p>
-                        <date-picker @PcickValue="PcickValue" :size="size"></date-picker>
+                        <date-picker @pcickValue="pcickValue" :size="size"></date-picker>
                     </el-col>
                     <el-col :span="6" :offset="12">
                         <el-row :gutter="20">
@@ -124,6 +126,7 @@ import DateW from "../../components/Datew";
 import "echarts/lib/component/legend";
 import invcat from "../../assets/invalid-name.png";
 import invd from "../../assets/invalid-name2.png";
+
 export default {
   data() {
     return {
@@ -286,6 +289,7 @@ export default {
           more: true
         }
       ],
+      //表格列表数据格式
       tableListData: [
         {
           drivers: "邱小刚",
@@ -348,6 +352,133 @@ export default {
           lat: "23.001511"
         }
       ],
+      vehicleList:[
+                    {
+                        title:'粤运化工',
+                        onlineN:'3',
+                        sum:'5',
+                        ind:'1',
+                        chr:[
+                            {
+                                title:'粤A2K532',
+                                numb:'3',
+                                ind:'1',
+                                status:true,
+                                chrl:[
+                                    {
+                                        name:'邱小刚',
+                                        time:'08:00-12:00',
+                                        ind:'1',
+                                    },
+                                    {
+                                        name:'邱小刚',
+                                        time:'08:00-12:00',
+                                        ind:'1',
+                                    },
+                                    {
+                                        name:'邱小刚',
+                                        time:'08:00-12:00',
+                                        ind:'1',
+                                    }
+                                ]
+                            },
+                            {
+                                title:'粤A2K532',
+                                numb:'3',
+                                ind:'2',
+                                status:true,
+                                chrl:[
+                                    {
+                                        name:'邱小刚',
+                                        time:'08:00-12:00',
+                                        ind:'2',
+                                    }
+                                ]
+                            },
+                            {
+                                title:'粤A2K532',
+                                numb:'3',
+                                ind:'3',
+                                status:true,
+                                chrl:[
+                                    {
+                                        name:'邱小刚',
+                                        time:'08:00-12:00',
+                                        ind:'3',
+                                    }
+                                ]
+                            },
+                            {
+                                title:'粤A2K532',
+                                numb:'3',
+                                ind:'4',
+                                status:false,
+                                chrl:[
+                                    {
+                                        name:'邱小刚',
+                                        time:'08:00-12:00',
+                                        ind:'4',
+                                    }
+                                ]
+                            },
+                            {
+                                title:'粤A2K532',
+                                numb:'3',
+                                ind:'5',
+                                status:false,
+                                chrl:[
+                                    {
+                                        name:'邱小刚',
+                                        time:'08:00-12:00',
+                                        ind:'5',
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        title:'粤运化工',
+                        onlineN:'3',
+                        sum:'5',
+                        ind:'2',
+                        chr:[
+                            {
+                                title:'粤A2K532',
+                                numb:'3',
+                                ind:'2',
+                                status:false,
+                                chrl:[
+                                    {
+                                        name:'邱小刚',
+                                        time:'08:00-12:00',
+                                        ind:'2',
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        title:'粤运化工',
+                        onlineN:'3',
+                        sum:'5',
+                        ind:'3',
+                        chr:[
+                            {
+                                title:'粤A2K532',
+                                numb:'3',
+                                ind:'3',
+                                status:false,
+                                chrl:[
+                                    {
+                                        name:'邱小刚',
+                                        time:'08:00-12:00',
+                                        ind:'3',
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                ],
       options: [
         {
           value: "选项1",
@@ -550,6 +681,13 @@ export default {
       ctcspan:0,  //表格展开时跨行
       showText:"展开本行",//表格展开收起切换
       tableListShowi:'',
+      resL:[
+        {
+          value:'1'
+        }
+      ],
+      ind:'',//车辆列表展开，
+      itemEnd:''//车辆列表收起
     };
   },
   methods: {
@@ -582,7 +720,7 @@ export default {
       this.infoWT = row.warningTime;
       this.infoL = row.location;
     },
-    PcickValue(time) {
+    pcickValue(time) {
       console.log(time);
     },
     CBValue(value) {
@@ -598,7 +736,29 @@ export default {
         this.tableListShowi = i
         this.showText = '收起本行'
       }
-    }
+    },
+    //搜索列表
+    handleSelect(itemV){
+      console.log(itemV)
+    },
+    //条件车辆列表
+    showFun(msg){
+      if(this.ind === msg.i+1+''){
+          this.ind = ''
+      }else{
+          this.ind =msg.i+1+'' ;
+      }
+      console.log(msg.e.target.innerText)
+    },
+    itemOpened(msg){
+      if(this.itemEnd === msg.i+1+''){
+          this.itemEnd = ''
+      }else{
+          this.itemEnd =msg.i+1+'' ;
+      }
+      let text = msg.e.target.innerText
+      console.log(text.substring(7,0))
+    }  
   },
   computed:{
       skcolors(){

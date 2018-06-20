@@ -6,7 +6,8 @@
         format="第 WW 周"
         placeholder="选择周"
         :size="datewSize"
-        style="width:110px;">
+        style="width:110px;"
+        @click="dataMothe">
         </el-date-picker>
     </div>
 </template>
@@ -22,6 +23,11 @@
         data(){
             return {
                 value3:''
+            }
+        },
+        methods:{
+            dataMothe(){
+                this.$emit('dataMothe')
             }
         }
     }

@@ -12,7 +12,7 @@
                        <ul :class="{'active':vehicleL.ind === ind}" class="vehicle-list-items">
                            <template v-for="(chr,i) in vehicleL.chr">
                                 <li class="vehilce-list-item">
-                                    <div class="vehile-item-title" @click.stop="itemOpened(i)">
+                                    <div class="vehile-item-title" @click.stop="itemOpened($event,i)">
                                         <i :class="chr.status?'online':'offline'"></i>
                                         {{ chr.title }}
                                         <i class="icon-user iconfont yc-icon-yonghu">{{ chr.numb }}</i>
@@ -37,155 +37,29 @@
 
 <script>
     export default {
+        props:['vehicleList','ind','itemEnd'],
         data(){
             return {
-                itemEnd:'',
-                ind:'',
                 vehiclelmenu:false,
                 active:'active',
-                vehicleList:[
-                    {
-                        title:'粤运化工',
-                        onlineN:'3',
-                        sum:'5',
-                        ind:'1',
-                        chr:[
-                            {
-                                title:'粤A2K532',
-                                numb:'3',
-                                ind:'1',
-                                status:true,
-                                chrl:[
-                                    {
-                                        name:'邱小刚',
-                                        time:'08:00-12:00',
-                                        ind:'1',
-                                    },
-                                    {
-                                        name:'邱小刚',
-                                        time:'08:00-12:00',
-                                        ind:'1',
-                                    },
-                                    {
-                                        name:'邱小刚',
-                                        time:'08:00-12:00',
-                                        ind:'1',
-                                    }
-                                ]
-                            },
-                            {
-                                title:'粤A2K532',
-                                numb:'3',
-                                ind:'2',
-                                status:true,
-                                chrl:[
-                                    {
-                                        name:'邱小刚',
-                                        time:'08:00-12:00',
-                                        ind:'2',
-                                    }
-                                ]
-                            },
-                            {
-                                title:'粤A2K532',
-                                numb:'3',
-                                ind:'3',
-                                status:true,
-                                chrl:[
-                                    {
-                                        name:'邱小刚',
-                                        time:'08:00-12:00',
-                                        ind:'3',
-                                    }
-                                ]
-                            },
-                            {
-                                title:'粤A2K532',
-                                numb:'3',
-                                ind:'4',
-                                status:false,
-                                chrl:[
-                                    {
-                                        name:'邱小刚',
-                                        time:'08:00-12:00',
-                                        ind:'4',
-                                    }
-                                ]
-                            },
-                            {
-                                title:'粤A2K532',
-                                numb:'3',
-                                ind:'5',
-                                status:false,
-                                chrl:[
-                                    {
-                                        name:'邱小刚',
-                                        time:'08:00-12:00',
-                                        ind:'5',
-                                    }
-                                ]
-                            }
-                        ]
-                    },
-                    {
-                        title:'粤运化工',
-                        onlineN:'3',
-                        sum:'5',
-                        ind:'2',
-                        chr:[
-                            {
-                                title:'粤A2K532',
-                                numb:'3',
-                                ind:'2',
-                                status:false,
-                                chrl:[
-                                    {
-                                        name:'邱小刚',
-                                        time:'08:00-12:00',
-                                        ind:'2',
-                                    }
-                                ]
-                            }
-                        ]
-                    },
-                    {
-                        title:'粤运化工',
-                        onlineN:'3',
-                        sum:'5',
-                        ind:'3',
-                        chr:[
-                            {
-                                title:'粤A2K532',
-                                numb:'3',
-                                ind:'3',
-                                status:false,
-                                chrl:[
-                                    {
-                                        name:'邱小刚',
-                                        time:'08:00-12:00',
-                                        ind:'3',
-                                    }
-                                ]
-                            }
-                        ]
-                    }
-                ]
             }
         },
         methods: {
             showFun(e,i){
-                if(this.ind === i+1+''){
-                    this.ind = ''
-                }else{
-                    this.ind =i+1+'' ;
-                }  
+                // if(this.ind === i+1+''){
+                //     this.ind = ''
+                // }else{
+                //     this.ind =i+1+'' ;
+                // }  
+                this.$emit('showFun',{i:i,e:e});
             },
-            itemOpened(i){
-                if(this.itemEnd === i+1+''){
-                    this.itemEnd = ''
-                }else{
-                    this.itemEnd =i+1+'' ;
-                }  
+            itemOpened(e,i){
+                // if(this.itemEnd === i+1+''){
+                //     this.itemEnd = ''
+                // }else{
+                //     this.itemEnd =i+1+'' ;
+                // }  
+                this.$emit('itemOpened',{i:i,e:e})
             }
         }
     }

@@ -36,7 +36,7 @@
               <td>{{ tableData.DriverWarningN }} 次</td>
               <td></td>
             </template>
-            <td @click="showList(i)" :tableListShow="tableListShow" class="show">{{ showText }}</td>
+            <td @click="showList(i)" :tableListShow="tableListShowi" class="show">{{ showText }}</td>
         </tr>
       </template>
     </table>

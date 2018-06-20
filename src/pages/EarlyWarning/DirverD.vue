@@ -20,6 +20,9 @@
                       <el-col :span="4" style="padding-right:0">
                         <h3>预警统计</h3>
                       </el-col>
+                      <el-col :span="8">
+                         <v-daterange @dateRange="getDateRange"  placeholder="请选择时间范围"></v-daterange>
+                      </el-col>
                       <el-col :span="6">
                           <date-w :datewSize="datewSize"></date-w>
                       </el-col>
@@ -101,6 +104,7 @@ import echarts from "echarts";
 import "echarts/lib/component/legend";
 import invcat from "../../assets/invalid-name.png";
 import invd from "../../assets/invalid-name2.png";
+import VDaterange from "../../components/VDaterange";
 export default {
   data() {
     return {
@@ -408,6 +412,10 @@ export default {
     },
     CBValue(value) {
       console.log(value);
+    },
+    //日期选择
+    getDateRange(dateObj) {  
+      console.log(dateObj.endTime)  // dateObj就可以获得时间范围的时间戳  
     }
   },
   computed: {
@@ -443,7 +451,8 @@ export default {
     DatePicker,
     Selects,
     DateW,
-    vehicleMenu
+    vehicleMenu,
+    VDaterange
   }
 };
 </script>

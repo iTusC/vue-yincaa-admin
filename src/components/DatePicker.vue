@@ -3,7 +3,7 @@
     <el-date-picker
       v-model="value6"
       type="daterange"
-      @change="PcickValue"
+      @change="pcickValue"
       :size="size"
       range-separator="至"
       start-placeholder="开始日期"
@@ -28,13 +28,13 @@
       }
     },
     methods:{
-        PcickValue(){
+        pcickValue(){
             if(this.value6.length){
                 let time = []
                 for(let i = 0; i<this.value6.length;i++){
                     time.push(this.value6[i].toLocaleDateString())
                 }
-                this.$emit('PcickValue',time+'')
+                this.$emit('pcickValue',time+'')
             }
             
         }
