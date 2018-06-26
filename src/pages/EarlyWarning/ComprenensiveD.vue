@@ -63,18 +63,27 @@
                       </el-col>
                       
                       <el-col :span="8">
-                        <date-w :datewSize="datewSize"></date-w>
+                        <date-w :datewSize="datewSize"  @dataMothe="dataMothe"></date-w>
                       </el-col>
                       
                     </el-row>
                   </el-col>
                   <el-col :span="5" :offset="9">
-                      <selects @CBValue="CBValue" :size="selectSize"  :options="options"></selects>
+                      <el-cascader
+                            :options="echartsOptions"
+                            v-model="echartsOptionsModel"
+                            @change="echartshandleChange"
+                            @active-item-change="echartshandleItemChange"
+                            size="mini"
+                            :props="echartsProps"
+                            v-if="onlineS"
+                            >
+                          </el-cascader>
                   </el-col>
                 </div>
                 <div ref="legend" class="legend" :style="{'margin-left':'-'+legendWith+'px'}">
-                    <p><span></span>车辆预警</p>
-                    <p><span></span>驾驶员预警</p>                 
+                    <p v-if="ishowDLegend" class="legendD"><span></span>车辆预警</p>
+                    <p v-if="ishowVLegend" class="legendV"><span></span>驾驶员预警</p>                 
                 </div>
                 <chart :options="polar" :autoResize="true"></chart>
             </section>
@@ -136,9 +145,19 @@ import "echarts/lib/component/legend";
 import invcat from "../../assets/invalid-name.png";
 import invd from "../../assets/invalid-name2.png";
 // import '../../mock/mock'
-import { teamTree,searchByName,searchByNameChr,teamTreeSelect,composAlarmCount } from '../../api/getData'
- 
+import { 
+  teamTree,
+  searchByName,
+  searchByNameChr,
+  teamTreeSelect,
+  composAlarmCount,
+  onlineRateAll,
+  onlineRate,
+  composAlarmCountVehicle,
+  composAlarmCountDeriver } from '../../api/getData'
+import { getDay,getWeek } from '../../../static/js/data'
 export default {
+  
   data() {
     return {
       polar: {
@@ -160,14 +179,6 @@ export default {
           itemGap:30,
           symbolKeepAspect:false,
           data: [
-            {
-              name: "车辆预警",
-              icon: "image://" + invd
-            },
-            {
-              name: "驾驶员预警",
-              icon: "image://" + invcat
-            }
           ]
         },
         grid: {
@@ -184,7 +195,7 @@ export default {
         },
         xAxis: {
           type: "category",
-          data: ["5/12", "5/13", "5/14", "5/15", "5/16", "5/17", "5/18"],
+          data: [],
           show: true,
           axisLine: {
             show: false,
@@ -245,7 +256,7 @@ export default {
           {
             name: "车辆预警",
             type: "line",
-            data: [5, 10, 30, 20, 95, 100, 70],
+            data: [],
             smooth: true,
             itemStyle: {
               normal: {
@@ -259,7 +270,7 @@ export default {
           {
             name: "驾驶员预警",
             type: "line",
-            data: [30, 20, 10, 50, 85, 74, 20],
+            data: [],
             smooth: true,
             itemStyle: {
               color: "#1672d8",
@@ -382,6 +393,9 @@ export default {
         onlineChr:[]
       }
       ],
+      echartsOptions:[{
+        echartsChr:[]
+      }],
       tableData:[
         {
           LicensePlate:"粤A2K532",
@@ -576,9 +590,22 @@ export default {
       deriverisOnline:1,//车辆在心情况
       selectedOptions:[],
       onlineProps:{
-        children:'onlineChr'
+        children:'onlineChr' //在线率自定义chr
       },
-      onlineS:false //显示搜索框
+      echartsProps:{
+        children:'echartsChr',
+        // // value:'deriveName',
+        // label:'value'//预警统计自定义chr
+
+      },
+      onlineS:false, //显示搜索框
+      starData:'',//默认开始时间
+      endData:'',// 默认结束时间
+      echartsOptions:[],//预警统计mode
+      echartsOptionsModel:[],//预警图表下拉选择
+      ishowDLegend:true,//图例
+      ishowVLegend:true,
+      valueDate:''//周日期控件选择
 };
   },
   methods: {
@@ -616,6 +643,8 @@ export default {
     },
     CBValue(value) {
       console.log(value);
+      
+
     },
     //表格展开更多内容
     showList(i){
@@ -643,7 +672,7 @@ export default {
         }
       );
     },
-    //条件车辆列表&&车辆在线率
+    //条件车辆列表&&车辆在线率&&预警统计下拉选择
     showFun(msg){
       let reg = /[\(（][^\)）]+[\)）]$/
       let dirverName = msg.e.target.innerText
@@ -653,16 +682,21 @@ export default {
       }else{
           this.ind =msg.i;
       }
-       composAlarmCount(this.vehicleList[msg.i].companyCode,this.vehicleList[msg.i].teamCode).then(
+       onlineRate(this.vehicleList[msg.i].companyCode,this.vehicleList[msg.i].teamCode).then(
             res=>{
               this.onlineD = true
               this.rate = res.onLineRate
               this.onlineRate = res
           })
       teamTreeSelect(this.companyCode,this.dName).then(res=>{
+        console.log(res)
         this.onlineS = true
         this.onlineOptions = res
-        this.onlineOptions[0].onlineChr= res[0].vehicleList
+        this.onlineOptions[0].onlineChr = res[0].vehicleList
+        this.echartsOptions = res[0].vehicleList
+        for(let i = 0; i <  this.echartsOptions.length; i++){
+          this.echartsOptions[i].echartsChr = this.echartsOptions[i].deriverList
+        }
       })
     },
     itemOpened(msg){
@@ -709,13 +743,71 @@ export default {
     },
     handleItemChange(val){
       this.selectedOptions = val
-      composAlarmCount(this.companyCode,val ).then(
+      onlineRate(this.companyCode,val ).then(
             res=>{
               this.onlineD = true
               this.rate = res.onLineRate
               this.onlineRate = res
           })
+    },
+
+    //预警统计
+    echartshandleChange(value){
+      this.polar.xAxis.data = []
+      for(let i = 0; i<this.polar.series.length; i++){
+        this.polar.series[i].data = [];
+      }
+      composAlarmCountDeriver(this.companyCode,value[0],this.starData,this.endData).then(res=>{
+        this.ishowVLegend = true
+        this.ishowDLegend = false
+        res.deriverCount.forEach(element => {
+          this.polar.xAxis.data.push(element.everyDate.slice(5).replace(/-/,'/'))
+        })
+          res.deriverCount.forEach(
+          element=>{
+            this.polar.series[1].data.push(element.alarmCount)
+          }
+        )
+      })
+    },
+    echartshandleItemChange(val){
+      this.echartsOptionsModel = val
+      this.polar.xAxis.data = []
+      for(let i = 0; i<this.polar.series.length; i++){
+        this.polar.series[i].data = [];
+      }
+      composAlarmCountVehicle(this.companyCode,val[0],this.starData,this.endData).then(
+            res=>{
+              this.ishowVLegend = false
+              this.ishowDLegend = true
+              res.vehicleCount.forEach(element => {
+                  this.polar.xAxis.data.push(element.everyDate.slice(5).replace(/-/,'/'))
+                })
+                res.vehicleCount.forEach(element=>{
+                    this.polar.series[0].data.push(element.alarmCount)
+                  }
+                )
+        })
+    },
+    //图表时间选择
+    dataMothe(val){
+      var now = new Date(val); 
+      var nowTime = now.getTime() ; 
+      var day = now.getDay();
+      var oneDayLong = 24*60*60*1000 ; 
+
+
+      var MondayTime = nowTime - (day-1)*oneDayLong  ; 
+      var SundayTime =  nowTime + (7-day)*oneDayLong ; 
+
+
+      var monday = new Date(MondayTime);
+      var sunday = new Date(SundayTime);
+      console.log(monday) ; 
+      console.log(sunday) ; 
+ 
     }
+
     // getVehicleList(){
     //   let _this = this
     //   this.$ajax.get('getVehicleList').then(function(res){
@@ -735,7 +827,7 @@ export default {
       legend.scrollWidth;
     this.legendWith = width / 2;
     console.log(this.legendWith);
-
+    
     //获取车辆列表 搜索车辆个数
     teamTree(this.companyCode).then(
       res =>{
@@ -752,10 +844,34 @@ export default {
     )
 
     //默认车辆在线数
-    composAlarmCount(this.companyCode,this.companyCode).then(
+    onlineRateAll(this.companyCode).then(
       res=>{
         this.onlineRate = res
         this.rate = res.onLineRate
+      }
+    )
+    //图表查询默认时间（按照往后推7天）
+    this.endData = getDay(0) + ' 23:23:59'
+    this.starData = getDay(-6) + ' 00:00:00'
+    
+    console.log(this.starData)
+    console.log(this.endData)
+    //默认图表数据
+    composAlarmCount(this.companyCode,this.starData,this.endData).then(
+      res=>{
+        res.deriverCount.forEach(element => {
+          this.polar.xAxis.data.push(element.everyDate.slice(5).replace(/-/,'/'))
+        });
+        res.deriverCount.forEach(
+          element=>{
+            this.polar.series[0].data.push(element.alarmCount)
+          }
+        )
+        res.vehicleCount.forEach(element =>{
+          this.polar.series[1].data.push(element.alarmCount)
+        })
+        // this.polar.xAxis.data = res.deriverCount.everyDate
+        // this.polar.series.data = res.deriverCount.alarmCount
       }
     )
   },
@@ -767,7 +883,7 @@ export default {
           else{
               return this.skcolor = "#d85b5b"
           }
-      }
+      },
   },
   watch: {
     linew: function() {
@@ -1035,11 +1151,11 @@ export default {
 .legend p span{
   border-radius: 50%;
 }
-.legend p:nth-child(2) span {
+.legend p.legendV span {
   background-image: url("../../assets/invalid-name.png");
   background-repeat: no-repeat;
 }
-.legend p:nth-child(1) span {
+.legend p.legendD span {
   background-image: url("../../assets/invalid-name2.png");
   background-repeat: no-repeat;
 }

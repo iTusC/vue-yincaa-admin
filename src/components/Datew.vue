@@ -7,7 +7,7 @@
         placeholder="选择周"
         :size="datewSize"
         style="width:110px;"
-        @click="dataMothe">
+        @change="dataMothe">
         </el-date-picker>
     </div>
 </template>
@@ -27,7 +27,7 @@
         },
         methods:{
             dataMothe(){
-                this.$emit('dataMothe')
+                this.$emit('dataMothe',this.value3)
             }
         }
     }
