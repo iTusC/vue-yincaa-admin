@@ -3,25 +3,25 @@
        <div class="vehicle-list">
            <ul>
                <template v-for="(vehicleL,i) in vehicleList">
-                   <li class="yc-vehicle-list-items" :class="{'yc-active-list-items':vehicleL.ind === ind}">
-                       <div class="title" @click.stop="showFun($event,i)" :key="i" :class="{'yc-is-opened':vehicleL.ind === ind}">
+                   <li class="yc-vehicle-list-items" :class="{'yc-active-list-items':i === ind}">
+                       <div class="title" @click.stop="showFun($event,i)" :key="i" :class="{'yc-is-opened':i === ind}">
                            <i class="icon-chosen iconfont yc-icon-jiegou"></i>
-                           {{ vehicleL.title }}({{ vehicleL.onlineN }}/{{ vehicleL.sum }})
+                           {{ vehicleL.teamName }}({{ vehicleL.onlineSum }}/{{ vehicleL.vehicleSum }})
                            <i class="el-submenu__icon-arrow el-icon-arrow-down"></i>
                         </div>
-                       <ul :class="{'active':vehicleL.ind === ind}" class="vehicle-list-items">
-                           <template v-for="(chr,i) in vehicleL.chr">
+                       <ul :class="{'active':i === ind}" class="vehicle-list-items">
+                           <template v-for="(chr,ind) in vehicleL.vehicleList">
                                 <li class="vehilce-list-item">
-                                    <div class="vehile-item-title" @click.stop="itemOpened($event,i)">
-                                        <i :class="chr.status?'online':'offline'"></i>
-                                        {{ chr.title }}
-                                        <i class="icon-user iconfont yc-icon-yonghu">{{ chr.numb }}</i>
+                                    <div class="vehile-item-title" @click.stop="itemOpened($event,ind)">
+                                        <i :class="chr.isOnline?'online':'offline'"></i>
+                                        {{ chr.vehicleCode }}
+                                        <i class="icon-user iconfont yc-icon-yonghu">{{ chr.deriverSum }}</i>
                                     </div>
-                                    <ul class="vehile-item-list" :class="{'vehile-item-list-isopened':chr.ind === itemEnd}">
-                                        <template v-for="chrls in chr.chrl">
+                                    <ul class="vehile-item-list" :class="{'vehile-item-list-isopened':ind === itemEnd}">
+                                        <template v-for="chrls in chr.deriverList">
                                             <li>
-                                                {{ chrls.name }}
-                                                <i class="item-time">{{ chrls.time }}</i>
+                                                {{ chrls.deriveName }}
+                                                <i class="item-time">{{ chrls.workerDate }}</i>
                                             </li>
                                         </template>
                                     </ul>

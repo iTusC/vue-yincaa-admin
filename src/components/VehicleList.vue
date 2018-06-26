@@ -4,7 +4,7 @@
             <el-autocomplete
             class="yc-select"
             v-model="searchtxt"
-            :fetch-suggestions="querySearch"
+            :fetch-suggestions="querySearchAsync"
             placeholder="输入车队名称或车牌号"
             @select="handleSelect"
             @focus="ckFcus"
@@ -13,7 +13,14 @@
             :stext="stext"
             >
             </el-autocomplete>
-            <div class="yc-list-selectif">搜索结果：2个</div>
+            <div class="yc-list-selectif" v-if="selectShow">
+                <span v-if="selectNull">
+                    搜索结果：{{ selectNumber }}个
+                </span>
+                <span v-else>
+                    搜索结果：暂无结果
+                </span>
+            </div>
         </div>
     </div>
 </template>
@@ -24,6 +31,9 @@ import storage from 'good-storage'
     export default {
         props:{
             resL:Array,
+            selectNumber:Number,
+            selectShow:Boolean,
+            selectNull:Boolean,
         },
         data(){
             return {
@@ -31,7 +41,7 @@ import storage from 'good-storage'
                 restaurants: [],
                 historyxs:false ,
                 recording:false,
-                stext:"搜索李四"
+                stext:""
             }
         },
         methods:{
@@ -49,6 +59,7 @@ import storage from 'good-storage'
                 }
             },
             Subm(){
+                this.$emit('Subm',this.searchtxt)
                 if(this.searchtxt!=''){ //搜索框不为空
                 saveSearch(this.searchtxt); // 本地存储搜索的内容
                     // this.$router.push({ 
@@ -56,23 +67,27 @@ import storage from 'good-storage'
                     //         });
                     this.historyxs=false;
                     this.searchtxt='';
+                    this.focused = false;
                 }	 		
             },
-            querySearch(queryString, cb) {
-                this.Recording = false
+            querySearchAsync(queryString, cb) {
                 var restaurants = this.restaurants;
                 var results = queryString ? restaurants.filter(this.createStateFilter(queryString)) : restaurants;
-                
-                // 调用 callback 返回建议列表的数据
+
+                clearTimeout(this.timeout);
+                this.timeout = setTimeout(() => {
                 cb(results);
+                }, 500 * Math.random());
             },
             createStateFilter(queryString) {
                 return (state) => {
-                return (state.value.toLowerCase().indexOf(queryString.toLowerCase()) === 0);
+                    return (state.value.toLowerCase().indexOf(queryString.toLowerCase()) === 0);
                 };
             },
             handleSelect(item) {
-                console.log(item.value);
+                // console.log(item.value);
+                this.$emit('handleSelect',item)
+                
             },
             inputBlur(){
                 this.Recording = false

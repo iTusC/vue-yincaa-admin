@@ -8,7 +8,7 @@
         </svg>  
       </template>
       <template v-else>
-        <template v-if="onlineone">
+        <template v-if="onlineone === 1">
           <img src="../../src/assets/positive.png" alt="">
         </template>
         <template v-else>
@@ -22,7 +22,7 @@ export default {
   props: {
     rate: {
       type: Number,
-      default: 0.5
+      default: 0.6
     },
     skcolor: {
       type: String,
@@ -33,8 +33,8 @@ export default {
       default:true
     },
     onlineone:{
-      type:Boolean,
-      default:false
+      type:Number,
+      default:1
     }
   },
   data() {

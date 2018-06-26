@@ -1,6 +1,6 @@
 <template>
     <div class="pr">
-      <template v-if="online">
+      <template v-if="online === 1">
         <img src="../../src/assets/invalid-name2.png" alt="">
       </template>
       <template v-else>
@@ -12,8 +12,8 @@
 export default {
   props: {
     online: {
-      type: Boolean,
-      default: true
+      type: Number,
+      default: 1
     }
   },
   data() {

@@ -7,8 +7,8 @@
                     <img src="" alt="">
                     <h3>粤运综合物流有限公司</h3>
                 </div>
-                <vehicle-list @handleSelect="handleSelect" :resL="resL"></vehicle-list>
-                <vehicle-menu @showFun="showFun" @itemOpened="itemOpened" :vehicleList="vehicleList" :ind="ind" :itemEnd="itemEnd"></vehicle-menu>
+                <vehicle-list @handleSelect="handleSelect" :resL="resL" :selectNumber="selectNumber" :selectShow="selectShow" @Subm="Subm" :selectNull="selectNull"></vehicle-list>
+                <vehicle-menu @showFun="showFun" @itemOpened="itemOpened" :vehicleList="vehicleList" :ind="ind" :itemEnd="itemEnd" :isListShow="isListShow"></vehicle-menu>
             </div>
           </div>
         </div>
@@ -20,7 +20,16 @@
                           <h3>实时车辆在线率</h3>
                       </el-col>
                       <el-col :span="8" :offset="6">
-                          <selects @CBValue="CBValue" :size="selectSize"  :options="options"></selects>
+                          <el-cascader
+                            :options="onlineOptions"
+                            v-model="selectedOptions"
+                            @change="handleChange"
+                            @active-item-change="handleItemChange"
+                            size="mini"
+                            :props="onlineProps"
+                            v-if="onlineS"
+                            >
+                          </el-cascader>
                       </el-col>
                     </el-row>
                 </div>
@@ -30,16 +39,16 @@
                     </div>
                     <template v-if="onlineD">
                       <div class="online-info">
-                        <p><span :class="rate > 0.5 || rate == 0.5 || onlineone ? 'infoGreen' : 'infoRed'" class="info-sty"></span><i class="info-name">在线车辆：</i> <i class="info-car-number">43</i><i class="info-car">辆</i></p>
-                        <p><i class="info-car-all">所有车辆：</i><i class="info-car-numbers">67 辆</i></p>
-                        <p><i class="info-car-all">离线车辆：</i><i class="info-car-numbers">24 辆</i></p>
+                        <p><span :class="rate > 0.5 || rate == 0.5 || onlineone ? 'infoGreen' : 'infoRed'" class="info-sty"></span><i class="info-name">在线车辆：</i> <i class="info-car-number">{{ onlineRate.onLine }}</i><i class="info-car">辆</i></p>
+                        <p><i class="info-car-all">所有车辆：</i><i class="info-car-numbers">{{ onlineRate.count }} 辆</i></p>
+                        <p><i class="info-car-all">离线车辆：</i><i class="info-car-numbers">{{ onlineRate.offLine }} 辆</i></p>
                     </div>
                     </template>
                     <template v-else>
                       <div class="online-info">
-                        <p><span :class="onlineone ? 'infoGreen' : 'infooff'" class="info-sty"></span><i class="info-name">在线情况：</i> <i class="info-car-number">43</i><i class="info-car">辆</i></p>
-                        <p><i class="info-car-all">所属车队：</i><i class="info-car-numbers">粤运化工</i></p>
-                        <p><i class="info-car-all">驾驶人数：</i><i class="info-car-numbers">2 人</i></p>
+                        <p><span :class="deriverisOnline === 1? 'infoGreen' : 'infooff'" class="info-sty"></span><i class="info-name">在线情况：</i> <i class="info-car-number" style="width:50px;" v-text="deriverisOnline === 1?'在线':'离线'"></i><i class="info-car"></i></p>
+                        <p><i class="info-car-all">所属车队：</i><i class="info-car-numbers">{{ dName }}</i></p>
+                        <p><i class="info-car-all">驾驶人数：</i><i class="info-car-numbers">{{ deriverSum }} 人</i></p>
                     </div>
                     </template>
                     
@@ -126,7 +135,9 @@ import DateW from "../../components/Datew";
 import "echarts/lib/component/legend";
 import invcat from "../../assets/invalid-name.png";
 import invd from "../../assets/invalid-name2.png";
-
+// import '../../mock/mock'
+import { teamTree,searchByName,searchByNameChr,teamTreeSelect,composAlarmCount } from '../../api/getData'
+ 
 export default {
   data() {
     return {
@@ -352,133 +363,7 @@ export default {
           lat: "23.001511"
         }
       ],
-      vehicleList:[
-                    {
-                        title:'粤运化工',
-                        onlineN:'3',
-                        sum:'5',
-                        ind:'1',
-                        chr:[
-                            {
-                                title:'粤A2K532',
-                                numb:'3',
-                                ind:'1',
-                                status:true,
-                                chrl:[
-                                    {
-                                        name:'邱小刚',
-                                        time:'08:00-12:00',
-                                        ind:'1',
-                                    },
-                                    {
-                                        name:'邱小刚',
-                                        time:'08:00-12:00',
-                                        ind:'1',
-                                    },
-                                    {
-                                        name:'邱小刚',
-                                        time:'08:00-12:00',
-                                        ind:'1',
-                                    }
-                                ]
-                            },
-                            {
-                                title:'粤A2K532',
-                                numb:'3',
-                                ind:'2',
-                                status:true,
-                                chrl:[
-                                    {
-                                        name:'邱小刚',
-                                        time:'08:00-12:00',
-                                        ind:'2',
-                                    }
-                                ]
-                            },
-                            {
-                                title:'粤A2K532',
-                                numb:'3',
-                                ind:'3',
-                                status:true,
-                                chrl:[
-                                    {
-                                        name:'邱小刚',
-                                        time:'08:00-12:00',
-                                        ind:'3',
-                                    }
-                                ]
-                            },
-                            {
-                                title:'粤A2K532',
-                                numb:'3',
-                                ind:'4',
-                                status:false,
-                                chrl:[
-                                    {
-                                        name:'邱小刚',
-                                        time:'08:00-12:00',
-                                        ind:'4',
-                                    }
-                                ]
-                            },
-                            {
-                                title:'粤A2K532',
-                                numb:'3',
-                                ind:'5',
-                                status:false,
-                                chrl:[
-                                    {
-                                        name:'邱小刚',
-                                        time:'08:00-12:00',
-                                        ind:'5',
-                                    }
-                                ]
-                            }
-                        ]
-                    },
-                    {
-                        title:'粤运化工',
-                        onlineN:'3',
-                        sum:'5',
-                        ind:'2',
-                        chr:[
-                            {
-                                title:'粤A2K532',
-                                numb:'3',
-                                ind:'2',
-                                status:false,
-                                chrl:[
-                                    {
-                                        name:'邱小刚',
-                                        time:'08:00-12:00',
-                                        ind:'2',
-                                    }
-                                ]
-                            }
-                        ]
-                    },
-                    {
-                        title:'粤运化工',
-                        onlineN:'3',
-                        sum:'5',
-                        ind:'3',
-                        chr:[
-                            {
-                                title:'粤A2K532',
-                                numb:'3',
-                                ind:'3',
-                                status:false,
-                                chrl:[
-                                    {
-                                        name:'邱小刚',
-                                        time:'08:00-12:00',
-                                        ind:'3',
-                                    }
-                                ]
-                            }
-                        ]
-                    }
-                ],
+      vehicleList:[],
       options: [
         {
           value: "选项1",
@@ -492,14 +377,10 @@ export default {
           value: "选项3",
           label: "蚵仔煎"
         },
-        {
-          value: "选项4",
-          label: "龙须面"
-        },
-        {
-          value: "选项5",
-          label: "北京烤鸭"
-        }
+      ],
+      onlineOptions:[{
+        onlineChr:[]
+      }
       ],
       tableData:[
         {
@@ -673,22 +554,32 @@ export default {
       zoom: 12,
       selectSize: "mini", //下拉框大小,
       datewSize: "mini" ,//日历选择,
-      rate: 0.49,//在线率
+      onlineRate:[],
+      rate: 1,//在线率
       skcolor:'',
-      onlineD:false,//车辆在线率与车辆在线,
-      onlineone:false, //在线与离线
+      onlineD:true,//车辆在线率与车辆在线,
+      onlineone:1, //在线与离线
       legendWith:0, //图例居中显示
       ctcspan:0,  //表格展开时跨行
       showText:"展开本行",//表格展开收起切换
       tableListShowi:'',
-      resL:[
-        {
-          value:'1'
-        }
-      ],
+      isListShow:'vehile-item-list-isopened',//车辆列表显示子导航
+      resL:[],
       ind:'',//车辆列表展开，
-      itemEnd:''//车辆列表收起
-    };
+      itemEnd:'',//车辆列表收起
+      companyCode:'0000000001',//车队查询id
+      selectNumber:0, //搜索结果数
+      selectShow:false,//是否显示搜索结果
+      selectNull:false,//搜索无结果时
+      dName:'', //车辆参数查询
+      deriverSum:'',//驾驶员人数
+      deriverisOnline:1,//车辆在心情况
+      selectedOptions:[],
+      onlineProps:{
+        children:'onlineChr'
+      },
+      onlineS:false //显示搜索框
+};
   },
   methods: {
     coninfo(e, i) {
@@ -738,27 +629,135 @@ export default {
       }
     },
     //搜索列表
-    handleSelect(itemV){
-      console.log(itemV)
+    handleSelect(item){
+      searchByNameChr(this.companyCode,item.value).then(res=>{
+          this.vehicleList = res
+        }
+      )
+      teamTreeSelect(this.companyCode,item.value).then(
+        res =>{
+          this.selectNumber = res.length
+          this.selectShow = true
+          this.vehicleList = res
+          this.selectNumber = res.length
+        }
+      );
     },
-    //条件车辆列表
+    //条件车辆列表&&车辆在线率
     showFun(msg){
-      if(this.ind === msg.i+1+''){
-          this.ind = ''
+      let reg = /[\(（][^\)）]+[\)）]$/
+      let dirverName = msg.e.target.innerText
+      this.dName = dirverName.replace(reg,'').substring(1)
+      if(this.ind === msg.i){
+          this.ind = null
       }else{
-          this.ind =msg.i+1+'' ;
+          this.ind =msg.i;
       }
-      console.log(msg.e.target.innerText)
+       composAlarmCount(this.vehicleList[msg.i].companyCode,this.vehicleList[msg.i].teamCode).then(
+            res=>{
+              this.onlineD = true
+              this.rate = res.onLineRate
+              this.onlineRate = res
+          })
+      teamTreeSelect(this.companyCode,this.dName).then(res=>{
+        this.onlineS = true
+        this.onlineOptions = res
+        this.onlineOptions[0].onlineChr= res[0].vehicleList
+      })
     },
     itemOpened(msg){
-      if(this.itemEnd === msg.i+1+''){
-          this.itemEnd = ''
+      let text = msg.e.target.innerText.substring(7,0)
+      if(this.itemEnd === msg.i){
+          this.itemEnd = null
       }else{
-          this.itemEnd =msg.i+1+'' ;
+          this.itemEnd =msg.i;
+          msg.e.currentTarget.nextElementSibling.addClass = 'vehile-item-list-isopened'
+          
       }
-      let text = msg.e.target.innerText
-      console.log(text.substring(7,0))
-    }  
+      msg.e.currentTarget.nextElementSibling.addClass = 'vehile-item-list-isopened'
+          this.onlineD = false
+          teamTreeSelect(this.companyCode,text).then(res=>{
+            this.deriverSum = res[0].vehicleList[0].deriverSum
+            this.deriverisOnline = res[0].vehicleList[0].isOnline
+            this.onlineone = res[0].vehicleList[0].isOnline
+          })
+    },
+    //enter搜索
+    Subm(item){
+      teamTreeSelect(this.companyCode,item).then(
+        res =>{
+          if(res.length === 0){
+            this.selectNull = false;
+          }else{
+            this.selectNull = true
+            this.selectNumber = res.length
+            this.selectShow = true
+            this.vehicleList = res
+            this.selectNumber = res.length
+          }
+        }
+      );
+    },
+    //在线率选择框
+    handleChange(value){
+      this.onlineD = false
+      teamTreeSelect(this.companyCode,value[1]).then(res=>{
+        this.deriverSum = res[0].vehicleList[0].deriverSum
+        this.deriverisOnline = res[0].vehicleList[0].isOnline
+        this.onlineone = res[0].vehicleList[0].isOnline
+      })
+    },
+    handleItemChange(val){
+      this.selectedOptions = val
+      composAlarmCount(this.companyCode,val ).then(
+            res=>{
+              this.onlineD = true
+              this.rate = res.onLineRate
+              this.onlineRate = res
+          })
+    }
+    // getVehicleList(){
+    //   let _this = this
+    //   this.$ajax.get('getVehicleList').then(function(res){
+    //     _this.vehicleList = res.data.getVehicleList
+    //     console.log(res.data.getVehicleList)
+    //   })
+    // }
+  },
+  mounted: function() {
+
+    //预统计图表图例位置
+    let legend = this.$refs.legend;
+    let width =
+      legend.style.width ||
+      legend.clientWidth ||
+      legend.offsetWidth ||
+      legend.scrollWidth;
+    this.legendWith = width / 2;
+    console.log(this.legendWith);
+
+    //获取车辆列表 搜索车辆个数
+    teamTree(this.companyCode).then(
+      res =>{
+        this.selectNull = true
+        this.vehicleList = res
+        this.selectNumber = res.length
+      }
+    );
+    //默认下拉列表
+    searchByName(this.companyCode).then(
+      res=>{
+        this.resL = res
+      }
+    )
+
+    //默认车辆在线数
+    composAlarmCount(this.companyCode,this.companyCode).then(
+      res=>{
+        this.onlineRate = res
+        this.rate = res.onLineRate
+      }
+    )
   },
   computed:{
       skcolors(){
@@ -774,16 +773,6 @@ export default {
     linew: function() {
       console.log(this.linew);
     }
-  },
-  mounted: function() {
-    let legend = this.$refs.legend;
-    let width =
-      legend.style.width ||
-      legend.clientWidth ||
-      legend.offsetWidth ||
-      legend.scrollWidth;
-    this.legendWith = width / 2;
-    console.log(this.legendWith);
   },
   components: {
     BmlMarkerClusterer,

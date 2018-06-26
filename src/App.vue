@@ -196,7 +196,7 @@ body,
   font-size: 12px;
   color: #474747;
 }
-.el-scrollbar__wrap{
+/* .el-scrollbar__wrap{
   overflow-x: auto;
-}
+} */
 </style>
