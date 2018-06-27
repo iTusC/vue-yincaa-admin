@@ -12,7 +12,9 @@
             </div>
           </div>
         </div>
+         <el-scrollbar style="height:100%;" class="yc-scrollbar">
         <div class="yc-cd-mains">
+         
              <section class="cd-online">
                 <div class="cd-online-title">
                     <el-row :gutter="20">
@@ -91,10 +93,14 @@
                 <div class="cd-map-title">
                     <h3>预警统计列表</h3>
                 </div>
-                <baidu-map class="map" center="广州"   :scroll-wheel-zoom="true"  :center="{lng:lng, lat:lat }"   :zoom="zoom" >
+                <baidu-map class="map" center="广州"   :scroll-wheel-zoom="true" :map-click="false"  :center="{lng:lng, lat:lat }" @ready="handler"   :zoom="zoom" >
                     <bml-marker-clusterer :averageCenter="true" >
-                        <bm-marker v-for="(marker,index) in tableListData" :position="{lng:marker.lng, lat:marker.lat }" @click="coninfo($event,index)" :zoom="zoom" :key="index">
-                        </bm-marker> 
+                        <template v-for="marker in tableListData">
+                            <template v-for="(markerlist,index) in marker.alarms">
+                              <bm-marker :position="{lng:markerlist.longit, lat:markerlist.lat }" @click="coninfo($event,index)" :zoom="zoom" >
+                              </bm-marker> 
+                            </template>
+                        </template>
                     </bml-marker-clusterer>   
                     <map-box :position="{lng: lng, lat: lat}" v-if="isshow">
                         <i @click="close">x</i>
@@ -108,26 +114,46 @@
                 <el-row :gutter="20" class="cd-table-select">
                     <el-col :span="6">
                         <p class="table-select-title">时间筛选</p>
-                        <date-picker @pcickValue="pcickValue" :size="size"></date-picker>
+                        <date-picker @pcickValue="pcickValue" :size="size" ></date-picker>
                     </el-col>
                     <el-col :span="6" :offset="12">
                         <el-row :gutter="20">
                             <el-col :span="12">
-                                <p class="table-select-title">车辆/驾驶员筛选</p>
-                                <selects @CBValue="CBValue" :size="selectSize"  :options="options"></selects>
+                                <p v-if="onlineS" class="table-select-title">车辆/驾驶员筛选</p>
+                                <el-cascader
+                                  :options="echartsOptions"
+                                  v-model="listOptionsModel"
+                                  @change="listhandleChange"
+                                  @active-item-change="listhandleItemChange"
+                                  size="mini"
+                                  :props="echartsProps"
+                                  v-if="onlineS"
+                                  >
+                                </el-cascader>
                             </el-col>
                             <el-col :span="12">
-                                <p class="table-select-title">驾驶员预警类型</p>
-                                <selects @CBValue="CBValue" :size="selectSize"  :options="options"></selects>
+                                <p v-if="onlineS" class="table-select-title">预警类型</p>
+                                <el-cascader
+                                  :options="echartsOptions"
+                                  v-model="echartsOptionsModel"
+                                  @change="echartshandleChange"
+                                  @active-item-change="echartshandleItemChange"
+                                  size="mini"
+                                  :props="echartsProps"
+                                  v-if="onlineS"
+                                  >
+                                </el-cascader>
                             </el-col>
                         </el-row>
                     </el-col>
                 </el-row>
                 <div class="ul-itme">
-                    <c-table :ctcspan="ctcspan" :showText="showText" :tableData="tableData" @showList="showList" :tableListShowi="tableListShowi"></c-table>
+                    <c-table :ctcspan="ctcspan" :showText="showText" :tableData="tableData" @showList="showList" @getLocation="getLocation" :tableListShowi="tableListShowi"></c-table>
                 </div>
             </section>
+           
         </div>
+         </el-scrollbar>
     </div>
 </template>
 
@@ -154,7 +180,10 @@ import {
   onlineRateAll,
   onlineRate,
   composAlarmCountVehicle,
-  composAlarmCountDeriver } from '../../api/getData'
+  composAlarmCountDeriver,
+  composAlarmCountTeamCode,
+  alarmCompsStat,
+  alarmCompsStatVehicle, } from '../../api/getData'
 import { getDay,getWeek } from '../../../static/js/data'
 export default {
   
@@ -209,12 +238,13 @@ export default {
           }
         },
         yAxis: {
-          name: "次数         ",
-          nameGap: 26,
+          name: "次数          ",
+          nameGap:26,
           nameTextStyle: {
-            align: "right",
+            align: "center",
             color: "#656565"
           },
+          boundaryGap:['0%','0%'],
           type: "value",
           show: true,
           axisLine: {
@@ -313,82 +343,8 @@ export default {
       ],
       //表格列表数据格式
       tableListData: [
-        {
-          drivers: "邱小刚",
-          numberPlate: "粤A2K532",
-          typeOfWarning: "分神提醒（低头/瞌睡）",
-          warningTime: "2018-05-03  11:46",
-          location: "507创意园",
-          more: "",
-          lng: "113.363552",
-          lat: "23.116597"
-        },
-        {
-          drivers: "邱小刚",
-          numberPlate: "粤A2K5321",
-          typeOfWarning: "分神提醒（低头/瞌睡）",
-          warningTime: "2018-05-03  11:46",
-          location: "507创意园",
-          more: "",
-          lng: "116.547135",
-          lat: "39.996569"
-        },
-        {
-          drivers: "邱小刚",
-          numberPlate: "粤A2K532",
-          typeOfWarning: "分神提醒（低头/瞌睡）",
-          warningTime: "2018-05-03  11:46",
-          location: "507创意园1",
-          more: "",
-          lng: "116.935203",
-          lat: "39.736504"
-        },
-        {
-          drivers: "邱小刚",
-          numberPlate: "粤A2K532",
-          typeOfWarning: "分神提醒（低头/瞌睡）",
-          warningTime: "2018-05-03  11:46",
-          location: "507创意园2",
-          more: "",
-          lng: "116.743756",
-          lat: "39.335839"
-        },
-        {
-          drivers: "邱小刚",
-          numberPlate: "粤A2K532",
-          typeOfWarning: "分神提醒（低头/瞌睡）",
-          warningTime: "2018-05-03  11:46",
-          location: "507创意园3",
-          more: "",
-          lng: "113.435506",
-          lat: "23.145676"
-        },
-        {
-          drivers: "邱小刚",
-          numberPlate: "粤A2K532",
-          typeOfWarning: "分神提醒（低头/瞌睡）",
-          warningTime: "2018-05-03  11:46",
-          location: "507创意园4",
-          more: "",
-          lng: "113.352718",
-          lat: "23.001511"
-        }
       ],
       vehicleList:[],
-      options: [
-        {
-          value: "选项1",
-          label: "黄金糕"
-        },
-        {
-          value: "选项2",
-          label: "双皮奶"
-        },
-        {
-          value: "选项3",
-          label: "蚵仔煎"
-        },
-      ],
       onlineOptions:[{
         onlineChr:[]
       }
@@ -397,162 +353,6 @@ export default {
         echartsChr:[]
       }],
       tableData:[
-        {
-          LicensePlate:"粤A2K532",
-          Drivers:"萧大双",
-          VehicleAlarmN:"23",
-          DriverWarningN:"6",
-          chr:[
-            {
-              VehicleAlarm:"车距时距监测",
-              DriverWarning:"——",
-              address:"2018-05-27  11:46 / 507创意园",
-              path:""
-            },
-            {
-              VehicleAlarm:"——",
-              DriverWarning:"车距时距监测",
-              address:"2018-05-27  11:46 / 507创意园",
-              path:""
-            },
-            {
-              VehicleAlarm:"车距时距监测",
-              DriverWarning:"——",
-              address:"2018-05-27  11:46 / 507创意园",
-              path:""
-            }
-          ]
-        },
-        {
-          LicensePlate:"粤A2K532",
-          Drivers:"萧大双",
-          VehicleAlarmN:"23",
-          DriverWarningN:"6",
-          chr:[
-            {
-              VehicleAlarm:"车距时距监测",
-              DriverWarning:"——",
-              address:"2018-05-27  11:46 / 507创意园",
-              path:""
-            },
-            {
-              VehicleAlarm:"——",
-              DriverWarning:"车距时距监测",
-              address:"2018-05-27  11:46 / 507创意园",
-              path:""
-            },
-            {
-              VehicleAlarm:"车距时距监测",
-              DriverWarning:"——",
-              address:"2018-05-27  11:46 / 507创意园",
-              path:""
-            }
-          ]
-        },
-        {
-          LicensePlate:"粤A2K532",
-          Drivers:"萧大双",
-          VehicleAlarmN:"23",
-          DriverWarningN:"6",
-          chr:[
-            {
-              VehicleAlarm:"车距时距监测",
-              DriverWarning:"——",
-              address:"2018-05-27  11:46 / 507创意园",
-              path:""
-            },
-            {
-              VehicleAlarm:"——",
-              DriverWarning:"车距时距监测",
-              address:"2018-05-27  11:46 / 507创意园",
-              path:""
-            },
-            {
-              VehicleAlarm:"车距时距监测",
-              DriverWarning:"——",
-              address:"2018-05-27  11:46 / 507创意园",
-              path:""
-            }
-          ]
-        },
-        {
-          LicensePlate:"粤A2K532",
-          Drivers:"萧大双",
-          VehicleAlarmN:"23",
-          DriverWarningN:"6",
-          chr:[
-            {
-              VehicleAlarm:"车距时距监测",
-              DriverWarning:"——",
-              address:"2018-05-27  11:46 / 507创意园",
-              path:""
-            },
-            {
-              VehicleAlarm:"——",
-              DriverWarning:"车距时距监测",
-              address:"2018-05-27  11:46 / 507创意园",
-              path:""
-            },
-            {
-              VehicleAlarm:"车距时距监测",
-              DriverWarning:"——",
-              address:"2018-05-27  11:46 / 507创意园",
-              path:""
-            }
-          ]
-        },
-        {
-          LicensePlate:"粤A2K532",
-          Drivers:"萧大双",
-          VehicleAlarmN:"23",
-          DriverWarningN:"6",
-          chr:[
-            {
-              VehicleAlarm:"车距时距监测",
-              DriverWarning:"——",
-              address:"2018-05-27  11:46 / 507创意园",
-              path:""
-            },
-            {
-              VehicleAlarm:"——",
-              DriverWarning:"车距时距监测",
-              address:"2018-05-27  11:46 / 507创意园",
-              path:""
-            },
-            {
-              VehicleAlarm:"车距时距监测",
-              DriverWarning:"——",
-              address:"2018-05-27  11:46 / 507创意园",
-              path:""
-            }
-          ]
-        },
-        {
-          LicensePlate:"粤A2K532",
-          Drivers:"萧大双",
-          VehicleAlarmN:"23",
-          DriverWarningN:"6",
-          chr:[
-            {
-              VehicleAlarm:"车距时距监测",
-              DriverWarning:"——",
-              address:"2018-05-27  11:46 / 507创意园",
-              path:""
-            },
-            {
-              VehicleAlarm:"——",
-              DriverWarning:"车距时距监测",
-              address:"2018-05-27  11:46 / 507创意园",
-              path:""
-            },
-            {
-              VehicleAlarm:"车距时距监测",
-              DriverWarning:"——",
-              address:"2018-05-27  11:46 / 507创意园",
-              path:""
-            }
-          ]
-        }
       ],
       isshow: false,
       lng: 116.404,
@@ -603,9 +403,13 @@ export default {
       endData:'',// 默认结束时间
       echartsOptions:[],//预警统计mode
       echartsOptionsModel:[],//预警图表下拉选择
+      listOptionsModel:[],//预警图表下拉选择
       ishowDLegend:true,//图例
       ishowVLegend:true,
-      valueDate:''//周日期控件选择
+      valueDate:'',//周日期控件选择
+      valueCode:'',//图表查询时value
+      tabletimestart:'',//统计列表时间
+      tabletimeend:'',//统计列表结束时间
 };
   },
   methods: {
@@ -614,6 +418,10 @@ export default {
       this.lng = e.point.lng;
       this.lat = e.point.lat;
       this.infotext = this.markers[i].text;
+    },
+    //地图配置
+    handler({BMap, map}){
+      console.log(BMap,map)
     },
     //地图弹框显示位置
     draw({ el, BMap, map }) {
@@ -629,18 +437,60 @@ export default {
     },
     //预警定位
     getLocation(row) {
+      this.zoom = 34
       this.isshow = true;
-      this.lng = row.lng;
-      this.lat = row.lat;
-      this.infoD = row.drivers;
-      this.infoNP = row.numberPlate;
-      this.infoTW = row.typeOfWarning;
-      this.infoWT = row.warningTime;
-      this.infoL = row.location;
+      this.lng = row.tablechr[row.index].longit;
+      this.lat = row.tablechr[row.index].lat;
+      this.infoD = row.tableData[row.i].deriveName;
+      this.infoNP = row.tableData[row.i].vehicleCode;
+      this.infoTW = row.tablechr[row.index].alarmName;
+      this.infoWT = row.tablechr[row.index].reportTime;
+      this.infoL = row.tablechr[row.index].locationDesc;
+      
     },
+    //综合统计列表数据获取
     pcickValue(time) {
-      console.log(time);
+      this.tabletimestart = time[0]+'00:00:00'
+      this.tabletimeend = time[1]+'23:59:59'
+      alarmCompsStat(this.companyCode,this.tabletimestart,this.tabletimeend).then(res=>{
+      if(res){
+        console.log(res)
+        this.tableListData = res
+        this.tableData = res
+      }
+    })
     },
+    //统计列表车辆筛选数据获取
+    listhandleChange(val){
+      console.log(val)
+      // if(this.tabletimestart || this.tabletimeend){
+      //   alarmCompsStatVehicle(this.companyCode,val,this.tabletimestart,this.tabletimeend).then(res=>{
+      //     if(res){
+      //       console.log(res)
+      //       this.tableListData = res
+      //       this.tableData = res
+      //     }
+      //   })
+      // }
+    },
+    listhandleItemChange(val){
+        if(this.tabletimestart || this.tabletimeend){
+          alarmCompsStatVehicle(this.companyCode,val[0],this.tabletimestart,this.tabletimeend).then(res=>{
+            if(res){
+              this.tableListData = res
+              this.tableData = res
+            }
+          })
+        }else{
+          alarmCompsStatVehicle(this.companyCode,val[0],this.starData,this.endData).then(res=>{
+            if(res){
+              this.tableListData = res
+              this.tableData = res
+            }
+          })
+        }
+    },
+
     CBValue(value) {
       console.log(value);
       
@@ -682,14 +532,13 @@ export default {
       }else{
           this.ind =msg.i;
       }
-       onlineRate(this.vehicleList[msg.i].companyCode,this.vehicleList[msg.i].teamCode).then(
-            res=>{
-              this.onlineD = true
-              this.rate = res.onLineRate
-              this.onlineRate = res
-          })
+      onlineRate(this.vehicleList[msg.i].companyCode,this.vehicleList[msg.i].teamCode).then(
+          res=>{
+            this.onlineD = true
+            this.rate = res.onLineRate
+            this.onlineRate = res
+        })
       teamTreeSelect(this.companyCode,this.dName).then(res=>{
-        console.log(res)
         this.onlineS = true
         this.onlineOptions = res
         this.onlineOptions[0].onlineChr = res[0].vehicleList
@@ -697,6 +546,29 @@ export default {
         for(let i = 0; i <  this.echartsOptions.length; i++){
           this.echartsOptions[i].echartsChr = this.echartsOptions[i].deriverList
         }
+      })
+
+      composAlarmCountTeamCode(this.vehicleList[msg.i].companyCode,this.vehicleList[msg.i].teamCode,this.starData,this.endData).then(res=>{
+            this.valueCode = this.echartsOptionsModel[1]
+            this.polar.xAxis.data = []
+            this.ishowVLegend = true
+            this.ishowDLegend = true
+            for(let i = 0; i<this.polar.series.length; i++){
+              this.polar.series[i].data = [];
+            }
+            res.deriverCount.forEach(element => {
+              this.polar.xAxis.data.push(element.everyDate.slice(5).replace(/-/,'/'))
+            });
+            res.deriverCount.forEach(
+              element=>{
+                this.polar.series[0].data.push(element.alarmCount)
+              }
+            )
+            res.vehicleCount.forEach(element =>{
+              this.polar.series[1].data.push(element.alarmCount)
+            })
+            // this.polar.xAxis.data = res.deriverCount.everyDate
+            // this.polar.series.data = res.deriverCount.alarmCount
       })
     },
     itemOpened(msg){
@@ -753,6 +625,7 @@ export default {
 
     //预警统计
     echartshandleChange(value){
+      this.valueCode = this.echartsOptionsModel[1]
       this.polar.xAxis.data = []
       for(let i = 0; i<this.polar.series.length; i++){
         this.polar.series[i].data = [];
@@ -771,6 +644,7 @@ export default {
       })
     },
     echartshandleItemChange(val){
+      this.valueCode = val[0]
       this.echartsOptionsModel = val
       this.polar.xAxis.data = []
       for(let i = 0; i<this.polar.series.length; i++){
@@ -791,30 +665,64 @@ export default {
     },
     //图表时间选择
     dataMothe(val){
-      var now = new Date(val); 
-      var nowTime = now.getTime() ; 
-      var day = now.getDay();
-      var oneDayLong = 24*60*60*1000 ; 
-
-
-      var MondayTime = nowTime - (day-1)*oneDayLong  ; 
-      var SundayTime =  nowTime + (7-day)*oneDayLong ; 
-
-
-      var monday = new Date(MondayTime);
-      var sunday = new Date(SundayTime);
-      console.log(monday) ; 
-      console.log(sunday) ; 
+       if (escape(this.valueCode).indexOf( "%u" )<0 && this.valueCode !== ''){
+         this.polar.xAxis.data = []
+          for(let i = 0; i<this.polar.series.length; i++){
+            this.polar.series[i].data = [];
+          }
+          composAlarmCountDeriver(this.companyCode,this.valueCode,val.dataMonday,val.dataSunday).then(res=>{
+            if(res){this.ishowVLegend = true
+            this.ishowDLegend = false
+            res.deriverCount.forEach(element => {
+              this.polar.xAxis.data.push(element.everyDate.slice(5).replace(/-/,'/'))
+            })
+              res.deriverCount.forEach(
+              element=>{
+                this.polar.series[1].data.push(element.alarmCount)
+              }
+            )}
+         })
+       }else if(this.valueCode !== ''){
+          this.polar.xAxis.data = []
+          for(let i = 0; i<this.polar.series.length; i++){
+            this.polar.series[i].data = [];
+          }
+          composAlarmCountVehicle(this.companyCode,this.valueCode,val.dataMonday,val.dataSunday).then(
+                res=>{
+                  if(res){this.ishowVLegend = false
+                  this.ishowDLegend = true
+                  res.vehicleCount.forEach(element => {
+                      this.polar.xAxis.data.push(element.everyDate.slice(5).replace(/-/,'/'))
+                    })
+                    res.vehicleCount.forEach(element=>{
+                        this.polar.series[0].data.push(element.alarmCount)
+                      }
+                    )}
+            })
+       }else{
+          this.polar.xAxis.data = []
+          for(let i = 0; i<this.polar.series.length; i++){
+            this.polar.series[i].data = [];
+          }
+         composAlarmCount(this.companyCode,val.dataMonday,val.dataSunday).then(
+          res=>{
+            if(res){res.deriverCount.forEach(element => {
+              this.polar.xAxis.data.push(element.everyDate.slice(5).replace(/-/,'/'))
+            });
+            res.deriverCount.forEach(
+              element=>{
+                this.polar.series[0].data.push(element.alarmCount)
+              }
+            )
+            res.vehicleCount.forEach(element =>{
+              this.polar.series[1].data.push(element.alarmCount)
+            })}
+          }
+        )
+       }
  
     }
 
-    // getVehicleList(){
-    //   let _this = this
-    //   this.$ajax.get('getVehicleList').then(function(res){
-    //     _this.vehicleList = res.data.getVehicleList
-    //     console.log(res.data.getVehicleList)
-    //   })
-    // }
   },
   mounted: function() {
 
@@ -826,7 +734,6 @@ export default {
       legend.offsetWidth ||
       legend.scrollWidth;
     this.legendWith = width / 2;
-    console.log(this.legendWith);
     
     //获取车辆列表 搜索车辆个数
     teamTree(this.companyCode).then(
@@ -853,9 +760,7 @@ export default {
     //图表查询默认时间（按照往后推7天）
     this.endData = getDay(0) + ' 23:23:59'
     this.starData = getDay(-6) + ' 00:00:00'
-    
-    console.log(this.starData)
-    console.log(this.endData)
+
     //默认图表数据
     composAlarmCount(this.companyCode,this.starData,this.endData).then(
       res=>{
@@ -874,6 +779,16 @@ export default {
         // this.polar.series.data = res.deriverCount.alarmCount
       }
     )
+    //默认综合统计表格数据
+    alarmCompsStat(this.companyCode,this.starData,this.endData).then(res=>{
+      console.log(this.companyCode,this.starData,this.endData)
+      if(res){      
+        this.tableListData = res
+        this.tableData = res
+
+      }
+    })
+
   },
   computed:{
       skcolors(){
@@ -952,9 +867,10 @@ export default {
 }
 .yc-cd-mains {
   height: 100%;
-  margin-left: 260px;
-  padding: 20px 20px 20px 0;
-  overflow: auto;
+    /* margin-left: 260px; */
+    padding: 20px 20px 20px 0;
+    overflow: auto;
+    margin-left: 20px;
 }
 .map {
   width: auto;
@@ -1112,7 +1028,7 @@ export default {
   color: #656565;
 }
 .ul-itme {
-  margin-bottom: 56px;
+  /* margin-bottom: 20px; */
 }
 .has-gutter {
   background: #979797;

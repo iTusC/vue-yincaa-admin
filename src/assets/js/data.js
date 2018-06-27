@@ -19,16 +19,4 @@ function doHandleMonth(month){
           m = "0" + month;    
        }    
        return m;    
-}  
-function getWeek(day,time){    
-    var targetday_milliseconds=time.getTime() + 1000*60*60*24*day;            
- 
-    time.setTime(targetday_milliseconds); //注意，这行是关键代码  
-        
-    var tYear = time.getFullYear();    
-    var tMonth = time.getMonth();    
-    var tDate = time.getDate();    
-    tMonth = doHandleMonth(tMonth + 1);    
-    tDate = doHandleMonth(tDate);    
-    return tYear+"-"+tMonth+"-"+tDate;    
 }    

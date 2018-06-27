@@ -3,12 +3,17 @@
     <el-date-picker
       v-model="value6"
       type="daterange"
+      align="right"
       @change="pcickValue"
-      :size="size"
+      unlink-panels
+      size="mini"
+      style="width:200px；font-size：12px;"
+      :clearable="false"
       range-separator="至"
       start-placeholder="开始日期"
       end-placeholder="结束日期"
-      style="width:220px"
+      value-format="yyyy-MM-dd"
+      :picker-options="pickerOptions1"
       >
     </el-date-picker>
   </div>
@@ -24,7 +29,12 @@
     },
     data() {
       return {
-        value6: ''
+        value6: '',
+         pickerOptions1:{
+                     disabledDate(time) {
+                            return time.getTime() > Date.now();
+                        },
+                }
       }
     },
     methods:{
@@ -32,9 +42,9 @@
             if(this.value6.length){
                 let time = []
                 for(let i = 0; i<this.value6.length;i++){
-                    time.push(this.value6[i].toLocaleDateString())
+                    time.push(this.value6[i])
                 }
-                this.$emit('pcickValue',time+'')
+                this.$emit('pcickValue',time)
             }
             
         }

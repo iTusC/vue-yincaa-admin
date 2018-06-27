@@ -7,8 +7,8 @@
                     <img src="" alt="">
                     <h3>粤运综合物流有限公司</h3>
                 </div>
-                <vehicle-list></vehicle-list>
-                <vehicle-menu></vehicle-menu>
+                <vehicle-list @handleSelect="handleSelect" :resL="resL" :selectNumber="selectNumber" :selectShow="selectShow" @Subm="Subm" :selectNull="selectNull"></vehicle-list>
+                <vehicle-menu @showFun="showFun" @itemOpened="itemOpened" :vehicleList="vehicleList" :ind="ind" :itemEnd="itemEnd" :isListShow="isListShow"></vehicle-menu>
             </div>
           </div>
         </div>
@@ -24,7 +24,7 @@
                          <v-daterange @dateRange="getDateRange"  placeholder="请选择时间范围"></v-daterange>
                       </el-col>
                       <el-col :span="6">
-                          <date-w :datewSize="datewSize"></date-w>
+                          <date-w :datewSize="datewSize"  @dataMothe="dataMothe"></date-w>
                       </el-col>
                     </el-row>
                   </el-col>
@@ -105,6 +105,20 @@ import "echarts/lib/component/legend";
 import invcat from "../../assets/invalid-name.png";
 import invd from "../../assets/invalid-name2.png";
 import VDaterange from "../../components/VDaterange";
+import { 
+  teamTree,
+  searchByName,
+  searchByNameChr,
+  teamTreeSelect,
+  composAlarmCount,
+  onlineRateAll,
+  onlineRate,
+  composAlarmCountVehicle,
+  composAlarmCountDeriver,
+  composAlarmCountTeamCode,
+  alarmCompsStat,
+  alarmCompsStatVehicle, } from '../../api/getData'
+import { getDay,getWeek } from '../../../static/js/data'
 export default {
   data() {
     return {
@@ -243,7 +257,7 @@ export default {
         ],
         animationDuration: 2000
       },
-      tableTitle: [
+     tableTitle: [
         {
           vul: "drivers",
           title: "驾驶员"
@@ -272,89 +286,18 @@ export default {
           more: true
         }
       ],
+      //表格列表数据格式
       tableListData: [
-        {
-          drivers: "邱小刚",
-          numberPlate: "粤A2K532",
-          typeOfWarning: "分神提醒（低头/瞌睡）",
-          warningTime: "2018-05-03  11:46",
-          location: "507创意园",
-          more: "",
-          lng: "113.363552",
-          lat: "23.116597"
-        },
-        {
-          drivers: "邱小刚",
-          numberPlate: "粤A2K5321",
-          typeOfWarning: "分神提醒（低头/瞌睡）",
-          warningTime: "2018-05-03  11:46",
-          location: "507创意园",
-          more: "",
-          lng: "116.547135",
-          lat: "39.996569"
-        },
-        {
-          drivers: "邱小刚",
-          numberPlate: "粤A2K532",
-          typeOfWarning: "分神提醒（低头/瞌睡）",
-          warningTime: "2018-05-03  11:46",
-          location: "507创意园1",
-          more: "",
-          lng: "116.935203",
-          lat: "39.736504"
-        },
-        {
-          drivers: "邱小刚",
-          numberPlate: "粤A2K532",
-          typeOfWarning: "分神提醒（低头/瞌睡）",
-          warningTime: "2018-05-03  11:46",
-          location: "507创意园2",
-          more: "",
-          lng: "116.743756",
-          lat: "39.335839"
-        },
-        {
-          drivers: "邱小刚",
-          numberPlate: "粤A2K532",
-          typeOfWarning: "分神提醒（低头/瞌睡）",
-          warningTime: "2018-05-03  11:46",
-          location: "507创意园3",
-          more: "",
-          lng: "113.435506",
-          lat: "23.145676"
-        },
-        {
-          drivers: "邱小刚",
-          numberPlate: "粤A2K532",
-          typeOfWarning: "分神提醒（低头/瞌睡）",
-          warningTime: "2018-05-03  11:46",
-          location: "507创意园4",
-          more: "",
-          lng: "113.352718",
-          lat: "23.001511"
-        }
       ],
-      options: [
-        {
-          value: "选项1",
-          label: "黄金糕"
-        },
-        {
-          value: "选项2",
-          label: "双皮奶"
-        },
-        {
-          value: "选项3",
-          label: "蚵仔煎"
-        },
-        {
-          value: "选项4",
-          label: "龙须面"
-        },
-        {
-          value: "选项5",
-          label: "北京烤鸭"
-        }
+      vehicleList:[],
+      onlineOptions:[{
+        onlineChr:[]
+      }
+      ],
+      echartsOptions:[{
+        echartsChr:[]
+      }],
+      tableData:[
       ],
       isshow: false,
       lng: 116.404,
@@ -369,13 +312,50 @@ export default {
       size: "mini",
       zoom: 12,
       selectSize: "mini", //下拉框大小,
-      datewSize: "mini", //日历选择,
-      rate: 0.49, //在线率
-      skcolor: "",
-      dataTime: "5/21",
-      dataNumber: "37",
-      legendWith: 0 //图例居中
-    };
+      datewSize: "mini" ,//日历选择,
+      onlineRate:[],
+      rate: 1,//在线率
+      skcolor:'',
+      onlineD:true,//车辆在线率与车辆在线,
+      onlineone:1, //在线与离线
+      legendWith:0, //图例居中显示
+      ctcspan:0,  //表格展开时跨行
+      showText:"展开本行",//表格展开收起切换
+      tableListShowi:'',
+      isListShow:'vehile-item-list-isopened',//车辆列表显示子导航
+      resL:[],
+      ind:'',//车辆列表展开，
+      itemEnd:'',//车辆列表收起
+      companyCode:'0000000001',//车队查询id
+      selectNumber:0, //搜索结果数
+      selectShow:false,//是否显示搜索结果
+      selectNull:false,//搜索无结果时
+      dName:'', //车辆参数查询
+      deriverSum:'',//驾驶员人数
+      deriverisOnline:1,//车辆在心情况
+      selectedOptions:[],
+      onlineProps:{
+        children:'onlineChr' //在线率自定义chr
+      },
+      echartsProps:{
+        children:'echartsChr',
+        // // value:'deriveName',
+        // label:'value'//预警统计自定义chr
+
+      },
+      onlineS:false, //显示搜索框
+      starData:'',//默认开始时间
+      endData:'',// 默认结束时间
+      echartsOptions:[],//预警统计mode
+      echartsOptionsModel:[],//预警图表下拉选择
+      listOptionsModel:[],//预警图表下拉选择
+      ishowDLegend:true,//图例
+      ishowVLegend:true,
+      valueDate:'',//周日期控件选择
+      valueCode:'',//图表查询时value
+      tabletimestart:'',//统计列表时间
+      tabletimeend:'',//统计列表结束时间
+};
   },
   methods: {
     coninfo(e, i) {
@@ -433,6 +413,8 @@ export default {
     }
   },
   mounted: function() {
+
+    //预统计图表图例位置
     let legend = this.$refs.legend;
     let width =
       legend.style.width ||
@@ -440,7 +422,60 @@ export default {
       legend.offsetWidth ||
       legend.scrollWidth;
     this.legendWith = width / 2;
-    console.log(this.legendWith);
+    
+    //获取车辆列表 搜索车辆个数
+    teamTree(this.companyCode).then(
+      res =>{
+        this.selectNull = true
+        this.vehicleList = res
+        this.selectNumber = res.length
+      }
+    );
+    //默认下拉列表
+    searchByName(this.companyCode).then(
+      res=>{
+        this.resL = res
+      }
+    )
+
+    //默认车辆在线数
+    onlineRateAll(this.companyCode).then(
+      res=>{
+        this.onlineRate = res
+        this.rate = res.onLineRate
+      }
+    )
+    //图表查询默认时间（按照往后推7天）
+    this.endData = getDay(0) + ' 23:23:59'
+    this.starData = getDay(-6) + ' 00:00:00'
+
+    //默认图表数据
+    composAlarmCount(this.companyCode,this.starData,this.endData).then(
+      res=>{
+        res.deriverCount.forEach(element => {
+          this.polar.xAxis.data.push(element.everyDate.slice(5).replace(/-/,'/'))
+        });
+        res.deriverCount.forEach(
+          element=>{
+            this.polar.series[0].data.push(element.alarmCount)
+          }
+        )
+        res.vehicleCount.forEach(element =>{
+          this.polar.series[1].data.push(element.alarmCount)
+        })
+        // this.polar.xAxis.data = res.deriverCount.everyDate
+        // this.polar.series.data = res.deriverCount.alarmCount
+      }
+    )
+    //默认综合统计表格数据
+    alarmCompsStat(this.companyCode,this.starData,this.endData).then(res=>{
+      console.log(this.companyCode,this.starData,this.endData)
+      if(res){      
+        this.tableListData = res
+        this.tableData = res
+
+      }
+    })
   },
   components: {
     BmlMarkerClusterer,

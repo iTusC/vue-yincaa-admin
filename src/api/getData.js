@@ -20,11 +20,6 @@ export const searchByNameChr = (companyCode,searchByName) => fetch('/api/searchB
     companyCode,searchByName
 })
 
-// //综合预警统计
-// export const composAlarmCount = (companyCode,variable) => fetch('/api//alarmInfo/composAlarmCount',{
-
-// })
-
 // //综合车辆在线率
 export const onlineRate = (companyCode,teamCode) => fetch('/api/onlineRate',{
     companyCode,teamCode
@@ -48,4 +43,24 @@ export const composAlarmCountVehicle = (companyCode,vehicleCode,startDate,endDat
 // 图表驾驶员数据
 export const composAlarmCountDeriver = (companyCode,deriverCode,startDate,endDate) => fetch('/api/composAlarmCount',{
     companyCode,deriverCode,startDate,endDate
+})
+
+// 图表车队数据
+export const composAlarmCountTeamCode = (companyCode,teamCode,startDate,endDate) => fetch('/api/composAlarmCount',{
+    companyCode,teamCode,startDate,endDate
+})
+
+//默认综合统计列表
+export const alarmCompsStat = (companyCode,startDate,endDate) => fetch('/api/alarmCompsStat',{
+    companyCode,startDate,endDate
+})
+
+//车辆查询综合统计列表
+export const alarmCompsStatVehicle = (companyCode,vehicleCode,startDate,endDate) => fetch('/api/alarmCompsStat',{
+    companyCode,vehicleCode,startDate,endDate
+})
+
+//车辆查询综合统计列表
+export const alarmCompsStatDeriver = (companyCode,vehicleCode,startDate,endDate) => fetch('/api/alarmCompsStat',{
+    companyCode,vehicleCode,startDate,endDate
 })

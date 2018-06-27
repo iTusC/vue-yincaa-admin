@@ -381,6 +381,7 @@ export default {
     },
     //预警定位
     getLocation(row) {
+      
       this.isshow = true;
       this.lng = row.lng;
       this.lat = row.lat;
@@ -389,6 +390,8 @@ export default {
       this.infoTW = row.typeOfWarning;
       this.infoWT = row.warningTime;
       this.infoL = row.location;
+
+      console.log(row)
     },
     PcickValue(time) {
       console.log(time);

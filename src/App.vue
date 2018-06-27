@@ -199,4 +199,8 @@ body,
 /* .el-scrollbar__wrap{
   overflow-x: auto;
 } */
+
+.yc-scrollbar .el-scrollbar__wrap{
+  overflow-x: auto;
+}
 </style>

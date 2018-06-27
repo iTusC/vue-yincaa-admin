@@ -10,20 +10,20 @@
         <th width="25%"></th>
         <th width="10%">更多操作</th>
       </tr>
-      <template v-for="(tableData,i) in tableData">
+      <template v-for="(tableDatas,i) in tableData">
         <tr >
           <td >{{ i + 1 }}</td>
-          <td >{{ tableData.LicensePlate }}</td>
-          <td >{{ tableData.Drivers }}</td>
+          <td >{{ tableDatas.vehicleCode }}</td>
+          <td >{{ tableDatas.deriveName }}</td>
           <template v-if="tableListShowi === i">
             <td :colspan="ctcspan" style="padding:0;">
               <div class="cm-table-d">
-                <el-scrollbar style="height:100%" class="yc-scrollbar">
+                <el-scrollbar style="height:100%;" class="yc-scrollbar">
                   <table width="100%" class="cm-table">
-                      <tr v-for="tablechr in tableData.chr">
-                        <td width="31%">{{ tablechr.VehicleAlarm }}</td>
-                        <td width="30%">{{ tablechr.DriverWarning }}</td>
-                        <td>{{ tablechr.address }}</td>
+                      <tr v-for="(tablechr,index) in tableDatas.alarms">
+                        <td width="31%">{{ tablechr.vehicleName }}</td>
+                        <td width="30%">{{ tablechr.deriverName }}</td>
+                        <td class="hovers" :title="tablechr.locationDesc " @click="getLocation(tableDatas.alarms,tableData,index,i)">{{ tablechr.reportTime }} {{ tablechr.locationDesc.slice(0,8)+'...' }}</td>
                         <td :to="tablechr.path">查看更多</td>
                       </tr>
                   </table>
@@ -32,8 +32,8 @@
             </td>
             </template>
             <template v-else>
-              <td>{{ tableData.VehicleAlarmN }} 次</td>
-              <td>{{ tableData.DriverWarningN }} 次</td>
+              <td>{{ tableDatas.vehicleCount }} 次</td>
+              <td>{{ tableDatas.deriverCount }} 次</td>
               <td></td>
             </template>
             <td @click="showList(i)" :tableListShow="tableListShowi" class="show">{{ showText }}</td>
@@ -49,6 +49,9 @@ export default {
   methods: {
     showList(i) {
       this.$emit("showList", i);
+    },
+    getLocation(tablechr,tableData,index,i){
+      this.$emit("getLocation",{tablechr,tableData,index,i})
     }
   }
 };
@@ -86,7 +89,7 @@ export default {
   background-color: #fbfbfb;
 }
 .cm-table-d {
-  height: 141px;
+  height: 140px;
   width: 100%;
 }
 .show{
@@ -97,5 +100,8 @@ export default {
   -moz-user-select: none; /* Firefox */
   -ms-user-select: none; /* Internet Explorer/Edge */
   user-select: none; 
+}
+.hovers{
+  cursor: pointer;
 }
 </style>
