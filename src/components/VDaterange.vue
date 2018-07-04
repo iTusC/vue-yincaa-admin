@@ -88,13 +88,19 @@
         this.submitDateRange()  
       },  
       theWeek() {  
-        let tempTime = 0  
-        if (this.nowWeek === 0) {  
-          tempTime = this.oneDay * 6  
-        } else {  
-          tempTime = this.oneDay * (this.nowWeek - 1)  
-        }  
-        this.dateObj.startTime = moment().month(this.nowMonth - 1).date(this.nowDate).hours(0).minutes(0).seconds(0)._d - tempTime   // 本周一  
+        let now = new Date(); 
+        let nowTime = now.getTime() ; 
+        let day = now.getDay();
+        let oneDayLong = 24*60*60*1000 ; 
+
+
+        let MondayTime = nowTime - (day-1)*oneDayLong  ; 
+        let SundayTime =  nowTime + (7-day)*oneDayLong ; 
+        
+        let monday = new Date(MondayTime);
+        let sunday = new Date(SundayTime);
+
+        this.dateObj.startTime = monday   // 本周一  
         this.dateObj.endTime = moment()._d
         this.submitDateRange()  
       },

@@ -20,7 +20,7 @@
                                     <ul class="vehile-item-list" :class="{'vehile-item-list-isopened':ind === itemEnd}">
                                         <template v-for="chrls in chr.deriverList">
                                             <li>
-                                                {{ chrls.deriveName }}
+                                                {{ chrls.deriverName }}
                                                 <i class="item-time">{{ chrls.workerDate }}</i>
                                             </li>
                                         </template>

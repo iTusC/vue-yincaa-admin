@@ -100,11 +100,16 @@ import storage from 'good-storage'
             }
         },
         mounted(){
-            this.restaurants = this.handleinput();
+            if(this.handleinput()){
+                return 
+            }else{
+                this.restaurants = this.handleinput();
+            }
+            
         },
         watch:{
             searchtxt:function() {
-                if(this.searchtxt === ''){
+                if(this.searchtxt === '' || this.handleinput().length !== 0){
                     return this.restaurants  = this.handleinput()
                 }
                 else{

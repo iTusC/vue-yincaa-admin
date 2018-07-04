@@ -1,7 +1,6 @@
 import Vue from 'vue'
 import Router from 'vue-router'
-import Map from '@/components/Map'
-import IndexPage from '@/pages/Index'
+import IndexPage from '../pages/Index'
 import EarlyIndex from '../pages/EarlyWarning/EarlyIndex'
 import ComprenensiveD from '../pages/EarlyWarning/ComprenensiveD'
 import DirverD from '../pages/EarlyWarning/DirverD'
@@ -25,6 +24,7 @@ import ImageS  from '../pages/Operations/ImageS'
 import OperationsS  from '../pages/Operations/OperationsS'
 import StateS  from '../pages/Operations/StateS'
 import UserS  from '../pages/Operations/UserS'
+import { resolve } from 'upath';
 
 Vue.use(Router)
 
@@ -33,8 +33,8 @@ export default new Router({
   routes: [
     {
       path: '/',
-      redirect:'/IndexPage',
-      component: IndexPage,
+      redirect:'/AlarmIndex',
+      component: resolve => require(['../pages/Alarm/AlarmIndex'],resolve),
       meta:{
         breadcrumb:'首页'
       }
@@ -46,35 +46,35 @@ export default new Router({
     {
       path:'/AlarmIndex',
       redirect:'/AlarmS',
-      component:AlarmIndex,
+      component: resolve => require(['../pages/Alarm/AlarmIndex'],resolve),
       meta:{
         breadcrumb:'报警管理'
       },
       children:[
         {
           path:'/AlarmS',
-          component:AlarmS,
+          component: resolve => require(['../pages/Alarm/AlarmIndex'],resolve),
           meta:{
             breadcrumb:'报警统计'
           }
         },
         {
           path:'/VehicleAS',
-          component:VehicleAS,
+          component: resolve => require(['../pages/Alarm/VehicleAS'],resolve),
           meta:{
             breadcrumb:'车辆报警'
           }
         },       
         {
           path:'/FarltAS',
-          component:FarltAS,
+          component: resolve => require(['../pages/Alarm/FarltAS'],resolve),
           meta:{
             breadcrumb:'故障报警'
           }
         },
         {
           path:'/DriverAS',
-          component:DriverAS,
+          component: resolve => require(['../pages/Alarm/DriverAS'],resolve),
           meta:{
             breadcrumb:'司机报警'
           }
@@ -84,35 +84,35 @@ export default new Router({
     {
       path:'/BasicIndex',
       redirect:'/BasicM',
-      component:BasicIndex,
+      component: resolve => require(['../pages/BasicSkills/BasicIndex'],resolve),
       meta:{
         breadcrumb:'基础功能管理'
       },
       children:[
         {
           path:'/BasicM',
-          component:BasicM,
+          component: resolve => require(['../pages/BasicSkills/BasicM'],resolve),
           meta:{
             breadcrumb:'基础功能'
           }
         },
         {
           path:'/SeniorM',
-          component:SeniorM,
+          component: resolve => require(['../pages/BasicSkills/SeniorM'],resolve),
           meta:{
             breadcrumb:'高级功能管理'
           }
         },
         {
           path:'/RoadSafetyM',
-          component:RoadSafetyM,
+          component: resolve => require(['../pages/BasicSkills/RoadSafetyM'],resolve),
           meta:{
             breadcrumb:'道路安全管理'
           }
         },
         {
           path:'/InstallatilM',
-          component:InstallatilM,
+          component: resolve => require(['../pages/BasicSkills/InstallatilM'],resolve),
           meta:{
             breadcrumb:'安装维修管理'
           }
@@ -122,28 +122,28 @@ export default new Router({
     {
       path:'/EarlyIndex',
       redirect:'/ComprenensiveD',
-      component:EarlyIndex,
+      component: resolve => require(['../pages/EarlyWarning/EarlyIndex'],resolve),
       meta:{
         breadcrumb:'预警管理'
       },
       children:[
         {
           path:'/ComprenensiveD',
-          component:ComprenensiveD,
+          component: resolve => require(['../pages/EarlyWarning/ComprenensiveD'],resolve),
           meta:{
             breadcrumb:'综合数据统计'
           }
         },
         {
           path:'/DirverD',
-          component:DirverD,
+          component: resolve => require(['../pages/EarlyWarning/DirverD'],resolve),
           meta:{
             breadcrumb:'司机数据统计'
           }
         },
         {
           path:'/VehicleD',
-          component:VehicleD,
+          component: resolve => require(['../pages/EarlyWarning/VehicleD'],resolve),
           meta:{
             breadcrumb:'车辆数据统计'
           }
@@ -153,28 +153,28 @@ export default new Router({
     {
       path:'/GreenIndex',
       redirect:'/GDSParementerS',
-      component:GreenIndex,
+      component: resolve => require(['../pages/GreenDriving/GreenIndex'],resolve),
       meta:{
         breadcrumb:'绿色安全驾驶'
       },
       children:[
         {
           path:'/GDSParementerS',
-          component:GDSParementerS,
+          component: resolve => require(['../pages/GreenDriving/GDSParementerS'],resolve),
           meta:{
             breadcrumb:'GDS参数管理'
           }
         },
         {
           path:'/OBDcu',
-          component:OBDcu,
+          component: resolve => require(['../pages/GreenDriving/OBDcu'],resolve),
           meta:{
             breadcrumb:'OBD标定升级'
           }
         },
         {
           path:'/KanBanS',
-          component:KanBanS,
+          component: resolve => require(['../pages/GreenDriving/KanBanS'],resolve),
           meta:{
             breadcrumb:'看板'
           }
@@ -184,35 +184,35 @@ export default new Router({
     {
       path:'/OperationsIndex',
       redirect:'/OperationsS',
-      component:OperationsIndex,
+      component: resolve => require(['../pages/Operations/OperationsIndex'],resolve),
       meta:{
         breadcrumb:'运营管理'
       },
       children:[
         {
           path:'/OperationsS',
-          component:OperationsS,
+          component: resolve => require(['../pages/Operations/OperationsS'],resolve),
           meta:{
             breadcrumb:'运营类统计'
           }
         },
         {
           path:'/StateS',
-          component:StateS,
+          component: resolve => require(['../pages/Operations/StateS'],resolve),
           meta:{
             breadcrumb:'状态统计'
           }
         },
         {
           path:'/UserS',
-          component:UserS,
+          component: resolve => require(['../pages/Operations/UserS'],resolve),
           meta:{
             breadcrumb:'用户管理'
           }
         },
         {
           path:'/ImageS',
-          component:ImageS,
+          component: resolve => require(['../pages/Operations/ImageS'],resolve),
           meta:{
             breadcrumb:'图片类报表'
           }

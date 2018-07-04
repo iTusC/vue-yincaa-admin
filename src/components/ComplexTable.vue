@@ -14,7 +14,7 @@
         <tr >
           <td >{{ i + 1 }}</td>
           <td >{{ tableDatas.vehicleCode }}</td>
-          <td >{{ tableDatas.deriveName }}</td>
+          <td >{{ tableDatas.deriverName }}</td>
           <template v-if="tableListShowi === i">
             <td :colspan="ctcspan" style="padding:0;">
               <div class="cm-table-d">

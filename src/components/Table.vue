@@ -17,7 +17,7 @@
             :width="items.widths"
             >
               <template slot-scope="scope">
-                <span style="margin-left: 10px" @click="showDetail(scope.row)">{{ scope.row.location }}</span>
+                <span style="margin-left: 10px" @click="showDetail(scope.row)" :title="scope.row.locationDesc">{{ scope.row.locationDesc.slice(0,8)+'...' }}</span>
               </template>
           </el-table-column>
        </template>
