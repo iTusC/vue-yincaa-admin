@@ -109,7 +109,8 @@ import storage from 'good-storage'
         },
         watch:{
             searchtxt:function() {
-                if(this.searchtxt === '' || this.handleinput().length !== 0){
+                console.log(this.searchtxt)
+                if(this.searchtxt === '' && this.handleinput().length){
                     return this.restaurants  = this.handleinput()
                 }
                 else{

@@ -108,7 +108,7 @@
                     <h3>预警统计列表</h3>
                 </div>
                 <baidu-map class="map" center="广州"   :scroll-wheel-zoom="true" :map-click="false"  :center="{lng:lng, lat:lat }" @ready="handler"   :zoom="zoom" >
-                    <bml-marker-clusterer :averageCenter="true" v-if="isshows">
+                    <bml-marker-clusterer :averageCenter="true" v-if="isshow">
                             <template v-for="(markerlist,index) in tableListData">
                               <bm-marker :position="{lng:markerlist.longit, lat:markerlist.lat }" @click="coninfo($event,index)" :zoom="zoom" >
                               </bm-marker> 
@@ -852,12 +852,9 @@ export default {
         this.legendWith = width / 2;
   },
   beforeDestroy:function(){
-    this.showFun().destroy()
-    this.itemOpened().destroy()
     this.onlineS = false
     this.polar.series[0].data.length = 0;
     this.isshow = false
-    this.isshows = false
   },
   components: {
     BmlMarkerClusterer,

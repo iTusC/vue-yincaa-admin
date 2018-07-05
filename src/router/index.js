@@ -131,14 +131,14 @@ export default new Router({
           path:'/ComprenensiveD',
           component: resolve => require(['../pages/EarlyWarning/ComprenensiveD'],resolve),
           meta:{
-            breadcrumb:'综合数据统计'
+            breadcrumb:'综合统计'
           }
         },
         {
           path:'/DirverD',
           component: resolve => require(['../pages/EarlyWarning/DirverD'],resolve),
           meta:{
-            breadcrumb:'司机数据统计'
+            breadcrumb:'驾驶员数据统计'
           }
         },
         {
