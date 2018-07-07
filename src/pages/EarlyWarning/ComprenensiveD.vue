@@ -429,6 +429,7 @@ export default {
       tabletimestart:'',//统计列表时间
       tabletimeend:'',//统计列表结束时间
       alarmCode:'',//报警类型
+      teamCodeNumber:'0000000001'
 };
   },
   methods: {
@@ -588,7 +589,7 @@ export default {
         }
       })
 
-      composAlarmCountTeamCode(this.vehicleList[msg.i].companyCode,this.vehicleList[msg.i].teamCode,this.starData,this.endData).then(res=>{
+      composAlarmCountTeamCode(this.vehicleList[msg.i].companyCode, this.vehicleList[msg.i].teamCode,this.starData,this.endData).then(res=>{
             this.valueCode = this.echartsOptionsModel[1]
             this.polar.xAxis.data = []
             this.ishowVLegend = true
@@ -790,7 +791,7 @@ export default {
     )
 
     //默认车辆在线数
-    onlineRateAll(this.companyCode).then(
+    onlineRateAll(this.companyCode,this.teamCodeNumber).then(
       res=>{
         this.onlineRate = res
         this.rate = res.onLineRate
@@ -801,7 +802,7 @@ export default {
     this.starData = getDay(-6) + ' 00:00:00'
 
     //默认图表数据
-    composAlarmCount(this.companyCode,this.starData,this.endData).then(
+    composAlarmCount(this.companyCode,this.teamCodeNumber,this.starData,this.endData).then(
       res=>{
         res.deriverCount.forEach(element => {
           this.polar.xAxis.data.push(element.everyDate.slice(5).replace(/-/,'/'))
@@ -819,7 +820,7 @@ export default {
       }
     )
     //默认综合统计表格数据
-    alarmCompsStat(this.companyCode,this.starData,this.endData).then(res=>{
+    alarmCompsStat(this.companyCode,this.teamCodeNumber,this.starData,this.endData).then(res=>{
       if(res){      
         this.tableListData = res
         this.tableData = res

@@ -479,6 +479,7 @@ export default {
       dataTime:'',//图例开始时间
       dataNumber:'',//图例报警个数
       valueName:'',//车辆
+      teamCodeNumber:'0000000001'
 };
   },
   methods: {
@@ -795,7 +796,7 @@ export default {
     )
 
     //默认车辆在线数
-    onlineRateAll(this.companyCode).then(
+    onlineRateAll(this.companyCode,this.teamCode).then(
       res=>{
         this.onlineRate = res
         this.rate = res.onLineRate
@@ -805,7 +806,7 @@ export default {
     this.endData = getDay(0) + ' 23:23:59'
     this.starData = getDay(-6) + ' 00:00:00'
     //默认图表数据
-    vehicleAlarmCount(this.companyCode,this.starData,this.endData).then(
+    vehicleAlarmCount(this.companyCode,this.teamCodeNumber,this.starData,this.endData).then(
       res=>{
             this.polar.series[0].data.length = 0
             res.resultMap.forEach(element => {
@@ -819,7 +820,7 @@ export default {
       }
     )
     //默认综合统计表格数据
-     alarmStatAll(1,10,this.companyCode,this.starData,this.endData,'00').then(res=>{
+     alarmStatAll(1,10,this.companyCode,this.teamCodeNumber,this.starData,this.endData,'00').then(res=>{
       if(res){      
         this.tableListData = res
       }

@@ -13,8 +13,16 @@ import 'element-ui/lib/theme-chalk/index.css'
 import 'echarts/lib/chart/bar'
 import 'echarts/lib/chart/line'
 import 'echarts/lib/component/tooltip'
+// import express from 'express'
+// import 'http-proxy-middleware'
+
+// let app = express()
 
 Vue.config.productionTip = false
+// app.use('/api',Proxy({
+//   target:'http://39.108.152.102:8083/gateway/',
+//   changeOrigin:true
+// }))
 Vue.use(BaiduMap,{
 	ak:'N5k99Bd4TSEVGScmwV4XuEab'
 })

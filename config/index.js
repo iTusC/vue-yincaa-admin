@@ -6,14 +6,13 @@ const path = require('path')
 
 module.exports = {
   dev: {
-
     // Paths
     assetsSubDirectory: 'static',
     assetsPublicPath: '/',
     proxyTable: {
       '/api': {
           // 测试环境
-          target: 'http://192.168.1.201/:8083/gateway/alarm/',  // 接口域名
+          target: 'localhost:8080',  // 接口域名
           changeOrigin: true,  //是否跨域
           pathRewrite: {
               '^/api': ''   //需要rewrite重写的,

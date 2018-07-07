@@ -33,8 +33,8 @@ export default new Router({
   routes: [
     {
       path: '/',
-      redirect:'/AlarmIndex',
-      component: resolve => require(['../pages/Alarm/AlarmIndex'],resolve),
+      redirect:'/ComprenensiveD',
+      component: resolve => require(['../pages/EarlyWarning/EarlyIndex'],resolve),
       meta:{
         breadcrumb:'首页'
       }

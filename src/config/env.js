@@ -16,7 +16,7 @@ if (process.env.NODE_ENV == 'development') {
     imgBaseUrl = '/img/';
 
 }else if(process.env.NODE_ENV == 'production'){
-	baseUrl = 'http://192.168.1.201:8081/v2/api-docs/';
+	baseUrl = 'http://39.108.152.102:8083/gateway';
     imgBaseUrl = '';
 }
 

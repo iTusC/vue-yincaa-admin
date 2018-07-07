@@ -458,6 +458,7 @@ export default {
           label: '驾驶员预警类型',
           options: []
         }],
+        teamCodeNumber:'0000000001'
     }
   },
   methods: {
@@ -847,7 +848,7 @@ export default {
       }
     )
     //默认图表数据
-    deriverAlarmCount(this.companyCode,this.starData,this.endData).then(
+    deriverAlarmCount(this.companyCode,this.teamCodeNumber,this.starData,this.endData).then(
       res=>{
         res.resultMap.forEach(element => {
                 this.polar.xAxis.data.push(element.alarmName)
@@ -862,7 +863,7 @@ export default {
     )
 
     //默认综合统计表格数据
-    alarmStatAll(1,10,this.companyCode,this.starData,this.endData,'01').then(res=>{
+    alarmStatAll(1,10,this.companyCode,this.teamCodeNumber,this.starData,this.endData,'01').then(res=>{
       if(res){      
         this.tableListData = res
       }
