@@ -93,7 +93,7 @@
                 <div class="cd-map-title">
                     <h3>预警统计列表</h3>
                 </div>
-                <baidu-map class="map" center="广州"   :scroll-wheel-zoom="true" :map-click="false"  :center="{lng:lng, lat:lat }" @ready="handler"   :zoom="zoom" >
+                <baidu-map class="map" center="广州"   :scroll-wheel-zoom="true" :map-click="efalse"  :center="{lng:lng, lat:lat }" @ready="handler"   :zoom="zoom" >
                     <bml-marker-clusterer :averageCenter="true" v-if="isshow">
                         <template v-for="marker in tableListData">
                             <template v-for="(markerlist,index) in marker.alarms">

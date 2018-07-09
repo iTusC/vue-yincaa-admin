@@ -8,7 +8,7 @@
               <el-header height="64px" class="yc-header-copy">
                 <headers></headers>
               </el-header>
-                <el-main class="yc-mains">
+                <el-main class="yc-mains" style="padding:0;">
                     <router-view class="yc-main-height"></router-view>
                 </el-main>
           </el-container>
@@ -202,5 +202,8 @@ body,
 
 .yc-scrollbar .el-scrollbar__wrap{
   overflow-x: auto;
+}
+.el-main{
+  padding: 0;
 }
 </style>
