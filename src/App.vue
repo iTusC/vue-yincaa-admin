@@ -143,6 +143,7 @@ select {
 html,
 body,
 #app {
+  min-width: 1410px;
   height: 100%;
   background-color: #eee;
 }

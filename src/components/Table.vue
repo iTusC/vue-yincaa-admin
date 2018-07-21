@@ -1,7 +1,6 @@
 <template>
   <el-table
     :data="tableListDatas"
-    :height="tableH"
     stripe
     style="width: 100%">
     <el-table-column
@@ -73,7 +72,7 @@
 <script>
 export default {
   // tableListDatas:列表详情，tableTitle：列表表头，tableH：表格高度
-  props: ["tableListDatas", "tableTitle", "tableH"],
+  props: ["tableListDatas", "tableTitle"],
   data() {
     return {};
   },

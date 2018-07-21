@@ -8,11 +8,11 @@ module.exports = {
   dev: {
     // Paths
     assetsSubDirectory: 'static',
-    assetsPublicPath: './',
+    assetsPublicPath: '/',
     proxyTable: {
       '/api': {
           // 测试环境
-          target: 'localhost:8080',  // 接口域名
+          target: 'http://39.108.152.102:8083/gateway',  // 接口域名
           changeOrigin: true,  //是否跨域
           pathRewrite: {
               '^/api': ''   //需要rewrite重写的,
@@ -64,7 +64,7 @@ module.exports = {
      * Source Maps
      */
 
-    productionSourceMap: true,
+    productionSourceMap: false,
     // https://webpack.js.org/configuration/devtool/#production
     devtool: '#source-map',
 
@@ -72,7 +72,7 @@ module.exports = {
     // Surge or Netlify already gzip all static assets for you.
     // Before setting to `true`, make sure to:
     // npm install --save-dev compression-webpack-plugin
-    productionGzip: false,
+    productionGzip: true,
     productionGzipExtensions: ['js', 'css'],
 
     // Run the build command with an extra argument to

@@ -59,7 +59,7 @@
                 // }else{
                 //     this.itemEnd =i+1+'' ;
                 // }  
-                this.$emit('itemOpened',{i:i,e:e})
+                this.$emit('itemOpened',{e:e,i:i})
             }
         }
     }

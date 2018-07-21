@@ -20,11 +20,11 @@
               <div class="cm-table-d">
                 <el-scrollbar style="height:100%;" class="yc-scrollbar">
                   <table width="100%" class="cm-table">
-                      <tr v-for="(tablechr,index) in tableDatas.alarms">
+                      <tr v-for="(tablechr,index) in tableDataAlarms">
                         <td width="31%">{{ tablechr.vehicleName }}</td>
                         <td width="30%">{{ tablechr.deriverName }}</td>
-                        <td class="hovers" :title="tablechr.locationDesc " @click="getLocation(tableDatas.alarms,tableData,index,i)">{{ tablechr.reportTime }} {{ tablechr.locationDesc.slice(0,8)+'...' }}</td>
-                        <td :to="tablechr.path">查看更多</td>
+                        <td class="hovers" :title="tablechr.locationDesc " @click="getLocation(tableDataAlarms,tableData,index,i)">{{ tablechr.reportTime }} {{ tablechr.locationDesc.slice(0,8)+'...' }}</td>
+                        <td @click="paths(tableDatas)">查看更多</td>
                       </tr>
                   </table>
                 </el-scrollbar>
@@ -36,7 +36,7 @@
               <td>{{ tableDatas.deriverCount }} 次</td>
               <td></td>
             </template>
-            <td @click="showList(i)" :tableListShow="tableListShowi" class="show">{{ showText }}</td>
+            <td @click="showList(i)" :tableListShow="tableListShowi" class="show" v-text="tableListShowi === i?'收起本行':'展开本行'"></td>
         </tr>
       </template>
     </table>
@@ -45,7 +45,7 @@
 
 <script>
 export default {
-  props: ["ctcspan", "showText", "tableData", "tableListShowi"],
+  props: ["ctcspan", "showText", "tableData", "tableListShowi","tableDataAlarms","paths"],
   methods: {
     showList(i) {
       this.$emit("showList", i);

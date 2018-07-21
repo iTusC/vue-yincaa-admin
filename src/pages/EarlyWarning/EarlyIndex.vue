@@ -1,10 +1,8 @@
 <template>
     <div>
-
-            <transition name="fade">
+        <transition name="fade">
                 <router-view></router-view>
-            </transition>
-     
+        </transition>
     </div>
 </template>
 

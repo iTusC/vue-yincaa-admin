@@ -44,6 +44,13 @@ export default new Router({
       component:IndexPage
     },
     {
+      path:'/details',
+      component:resolve => require(['../pages/DetailPage.vue'],resolve),
+      meta:{
+        breadcrumb:'预警详情'
+      }
+    },
+    {
       path:'/AlarmIndex',
       redirect:'/AlarmS',
       component: resolve => require(['../pages/Alarm/AlarmIndex'],resolve),

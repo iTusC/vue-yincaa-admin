@@ -13,16 +13,11 @@ import 'element-ui/lib/theme-chalk/index.css'
 import 'echarts/lib/chart/bar'
 import 'echarts/lib/chart/line'
 import 'echarts/lib/component/tooltip'
-// import express from 'express'
-// import 'http-proxy-middleware'
+import {post,fetch,patch,put} from '../src/config/fetch'
 
-// let app = express()
-
-Vue.config.productionTip = false
-// app.use('/api',Proxy({
-//   target:'http://39.108.152.102:8083/gateway/',
-//   changeOrigin:true
-// }))
+Vue.config.productionTip = false;
+Vue.config.silent = true;
+Vue.config.performance = true;
 Vue.use(BaiduMap,{
 	ak:'N5k99Bd4TSEVGScmwV4XuEab'
 })
@@ -35,8 +30,20 @@ Vue.use(VueBreadcrumbs,{
 })
 Vue.component('chart',ECharts)
 Vue.use(Echart)
-Vue.prototype.$ajax = Axios
+Vue.Cancel = [];
+router.beforeEach((to, from, next) => {
+    while (Vue.Cancel.length > 0) {
+        Vue.Cancel.shift()('cancel');
+    }
+    next();
+})
 
+
+Vue.prototype.$ajax = Axios
+// Vue.prototype.$post=post;
+// Vue.prototype.$fetch=fetch;
+// Vue.prototype.$patch=patch;
+// Vue.prototype.$put=put;
 
 /* eslint-disable no-new */
 new Vue({

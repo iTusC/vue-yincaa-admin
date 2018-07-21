@@ -12,6 +12,7 @@
             </div>
           </div>
         </div>
+        <el-scrollbar style="height:100%;" class="yc-scrollbar">
         <div class="yc-cd-mains">
             <section class="yc-dd-main">
                 <div class="cd-eachart-title">
@@ -38,15 +39,15 @@
                   </el-col>
                   <el-col :span="3" :offset="11">
                      <el-cascader
-                            :options="echartsOptions"
-                            v-model="echartsOptionsModel"
-                            @change="echartshandleChange"
-                            @active-item-change="echartshandleItemChange"
-                            size="mini"
-                            :props="echartsProps"
-                            v-if="onlineS"
-                            >
-                          </el-cascader>
+                        :options="echartsOptions"
+                        v-model="echartsOptionsModel"
+                        @change="echartshandleChange"
+                        @active-item-change="echartshandleItemChange"
+                        size="mini"
+                        :props="echartsProps"
+                        v-if="onlineS"
+                        >
+                      </el-cascader>
                   </el-col>
                 </div>
                 
@@ -63,7 +64,7 @@
                 <div class="cd-map-title">
                     <h3>预警统计列表</h3>
                 </div>
-                <baidu-map class="map" center="广州"   :scroll-wheel-zoom="true" :map-click="false"  :center="{lng:lng, lat:lat }" @ready="handler"   :zoom="zoom" >
+                <baidu-map class="map" center="广州"   :scroll-wheel-zoom="true" :map-click="false"  :center="{lng:lng, lat:lat }"  :zoom="zoom" >
                     <bml-marker-clusterer :averageCenter="true" v-if="isshow">
                             <template v-for="(markerlist,index) in tableListData">
                               <bm-marker :position="{lng:markerlist.longit, lat:markerlist.lat }" @click="coninfo($event,index)" :zoom="zoom" >
@@ -89,12 +90,12 @@
                             <el-col :span="12">
                                 <p v-if="onlineS" class="table-select-title">车辆/驾驶员筛选</p>
                                 <el-cascader
-                                  :options="onlineOptions"
+                                  :options="echartsOptions"
                                   v-model="listOptionsModel"
                                   @change="listhandleChange"
                                   @active-item-change="listhandleItemChange"
                                   size="mini"
-                                  :props="onlineProps"
+                                  :props="echartsProps"
                                   v-if="onlineS"
                                   >
                                 </el-cascader>
@@ -123,7 +124,11 @@
                     <cd-table @getLocation="getLocation" :tableListDatas="tableListData" :tableTitle="tableTitle" :tableH="tableH" ></cd-table>
                 </div>
             </section>
+            <!-- <template>
+              <el-button type="text" @click="open" v-hidde></el-button>
+            </template> -->
         </div>
+        </el-scrollbar>
     </div>
 </template>
 
@@ -138,38 +143,24 @@ import DatePicker from "../../components/DatePicker";
 import Selects from "../../components/Selects";
 import DateW from "../../components/Datew";
 import echarts from "echarts";
-import VDaterange from '../../components/VDaterange';
+import VDaterange from "../../components/VDaterange";
 import "echarts/lib/component/legend";
 import invcat from "../../assets/invalid-name.png";
 import invd from "../../assets/invalid-name2.png";
-import { 
+import {
   teamTree,
   searchByName,
-  searchByNameChr,
-  teamTreeSelect,
-  composAlarmCount,
-  onlineRateAll,
-  onlineRate,
-  composAlarmCountVehicle,
-  composAlarmCountDeriver,
-  composAlarmCountTeamCode,
-  alarmCompsStat,
-  alarmCompsStatVehicle,
-  alarmCompsStatVehiclelPlice,
-  getByGategory,
-  alarmCompsStatD, 
-  alarmCompsStatVehiclelclass,
+  ByGategory,
   deriverAlarmCount,
-  alarmStatAll,
-  deriverAlarmCountTeamCode,
   alarmStatTeamCode,
   deriverVehicleAlarmCount,
-  deriverVehicleAlarmCountVehicleCode,
-  deriverAlarmCountDeriverCode,
-  deriverAlarmCountVehicleCode,
   alarmStat,
-  alarmStatAlarmCode} from '../../api/getData'
-import { getDay,getWeek } from '../../../static/js/data'
+  alarmStatAlarmCode,
+  alarmStatAll
+} from "../../api/getData";
+import { getDay, getWeek } from "../../../static/js/data";
+import Axios from "axios";
+import _ from "lodash";
 export default {
   data() {
     return {
@@ -262,41 +253,41 @@ export default {
         },
         series: [
           {
-          name: "",
-          type: "bar",
-          data: [],
-          barCategoryGap: "40%",
-          smooth: true,
-          itemStyle: {
-            normal: {
-              color: "#1672d8"
+            name: "",
+            type: "bar",
+            data: [],
+            barCategoryGap: "40%",
+            smooth: true,
+            itemStyle: {
+              normal: {
+                color: "#1672d8"
+              }
+            }
+          },
+          {
+            name: "",
+            type: "bar",
+            data: [],
+            barCategoryGap: "40%",
+            smooth: true,
+            itemStyle: {
+              normal: {
+                color: "#458ee0"
+              }
+            }
+          },
+          {
+            name: "",
+            type: "bar",
+            data: [],
+            barCategoryGap: "40%",
+            smooth: true,
+            itemStyle: {
+              normal: {
+                color: "#73aae8"
+              }
             }
           }
-        },
-        {
-          name: "",
-          type: "bar",
-          data: [],
-          barCategoryGap: "40%",
-          smooth: true,
-          itemStyle: {
-            normal: {
-              color: "#458ee0"
-            }
-          }
-        },
-        {
-          name: "",
-          type: "bar",
-          data: [],
-          barCategoryGap: "40%",
-          smooth: true,
-          itemStyle: {
-            normal: {
-              color: "#73aae8"
-            }
-          }
-        }
         ],
         animationDuration: 2000
       },
@@ -330,28 +321,7 @@ export default {
         }
       ],
       tableListData: [],
-      options: [
-        {
-          value: "选项1",
-          label: "黄金糕"
-        },
-        {
-          value: "选项2",
-          label: "双皮奶"
-        },
-        {
-          value: "选项3",
-          label: "蚵仔煎"
-        },
-        {
-          value: "选项4",
-          label: "龙须面"
-        },
-        {
-          value: "选项5",
-          label: "北京烤鸭"
-        }
-      ],
+      options: [],
       isshow: false,
       lng: 116.404,
       lat: 39.915,
@@ -360,7 +330,6 @@ export default {
       infoTW: "", //报警类型
       infoWT: "", //时间
       infoL: "", //地点,
-      tableH: "300", //表格高度,
       value6: "", //日期选择
       size: "mini",
       zoom: 12,
@@ -371,97 +340,129 @@ export default {
       dataTime: "5/21",
       dataNumber: "37",
       legendWith: 0, //图例居中
-      resL:[], //车辆列表
-      selectNumber:0, //搜索结果数
-      selectShow:false,//是否显示搜索结果
-      selectNull:false,//搜索无结果时
-      vehicleList:[],//车辆树
-      ind:'',//车辆列表展开
-      itemEnd:'',//车辆列表收起
-      isListShow:'vehile-item-list-isopened',//车辆列表显示子导航
-      companyCode:'0000000001',//车队查询id
-      driversD:[],//驾驶员列表报警次数
-      vehicleNumbner:false,//是否渲染驾驶员图例
-      sumCount:'',//预警总次数
-      endData:'',//默认结束时间
-      starData:'',//默认开始时间
-      dirverTimeStart:'',//图例开始时间
-      dirverTimeEnd:'',//图例结束时间
-      onlineS:false,//查询显示隐藏
-      onlineOptions:[{ //下拉搜索列表
-        onlineChr:[]
-      }
+      resL: [], //车辆列表
+      selectNumber: 0, //搜索结果数
+      selectShow: false, //是否显示搜索结果
+      selectNull: false, //搜索无结果时
+      vehicleList: [], //车辆树
+      ind: "", //车辆列表展开
+      itemEnd: "", //车辆列表收起
+      isListShow: "vehile-item-list-isopened", //车辆列表显示子导航
+      companyCode: "0000000001", //车队查询id
+      driversD: [], //驾驶员列表报警次数
+      vehicleNumbner: false, //是否渲染驾驶员图例
+      sumCount: "", //预警总次数
+      endData: "", //默认结束时间
+      starData: "", //默认开始时间
+      dirverTimeStart: "", //图例开始时间
+      dirverTimeEnd: "", //图例结束时间
+      onlineS: false, //查询显示隐藏
+      onlineOptions: [
+        {
+          //下拉搜索列表
+          onlineChr: []
+        }
       ],
-      echartsOptions:[{ //下拉搜索列表
-        echartsChr:[]
-      }],
-      onlineProps:{
-        children:'onlineChr' //在线率自定义chr
+      echartsOptions: [
+        {
+          //下拉搜索列表
+          echartsChr: []
+        }
+      ],
+      onlineProps: {
+        children: "onlineChr" //在线率自定义chr
       },
-      echartsProps:{
-        children:'echartsChr',
+      echartsProps: {
+        children: "echartsChr"
         // // value:'deriveName',
         // label:'value'//预警统计自定义chr
       },
-      echartsOptionsModel:[],//预警图表下拉选择
-      vechartsOptions:[],//报警类型选择
-      egory:'',//预警选择
-     
-         value7: '',
-      listOptionsModel:[],//表格车辆驾驶员选择
+      echartsOptionsModel: [], //预警图表下拉选择
+      vechartsOptions: [], //报警类型选择
+      egory: "", //预警选择
+      value7: "",
+      listOptionsModel: [], //表格车辆驾驶员选择
       //预计图表筛选
       pickerOptions: {
-          disabledDate(time) {
-            return time.getTime() > Date.now();
-          },
-          shortcuts: [{
-            text: '今天',
+        disabledDate(time) {
+          return time.getTime() > Date.now();
+        },
+        shortcuts: [
+          {
+            text: "今天",
             onClick(picker) {
-              picker.$emit('pick', new Date());
-            }
-          }, {
-            text: '昨天',
-            onClick(picker) {
-              const date = new Date();
-              date.setTime(date.getTime() - 3600 * 1000 * 24);
-              picker.$emit('pick', date);
-            }
-          }, {
-            text: '一周前',
-            onClick(picker) {
-              const date = new Date();
-              date.setTime(date.getTime() - 3600 * 1000 * 24 * 7);
-              picker.$emit('pick', date);
+              picker.$emit("pick", new Date());
             }
           },
           {
-            text: '最近一个月',
+            text: "昨天",
+            onClick(picker) {
+              const date = new Date();
+              date.setTime(date.getTime() - 3600 * 1000 * 24);
+              picker.$emit("pick", date);
+            }
+          },
+          {
+            text: "一周前",
+            onClick(picker) {
+              const date = new Date();
+              date.setTime(date.getTime() - 3600 * 1000 * 24 * 7);
+              picker.$emit("pick", date);
+            }
+          },
+          {
+            text: "最近一个月",
             onClick(picker) {
               const end = new Date();
               const start = new Date();
               start.setTime(start.getTime() - 3600 * 1000 * 24 * 30);
-              picker.$emit('pick', start);
+              picker.$emit("pick", start);
             }
-          },]
+          }
+        ]
+      },
+      selectData: "",
+      teamCodes: "", //保存当前车队编号,
+      deriverCodes: [], //驾驶员名称
+      deriverData: [], //驾驶员数据详情
+      xAxisD: [], //图表下列标签
+      isshows: false,
+      //列表报警类型配置
+      options3: [
+        {
+          label: "车辆预警类型",
+          options: []
         },
-        selectData:'',
-        teamCodes:'',//保存当前车队编号,
-        deriverCodes:[],//驾驶员名称
-        deriverData:[],//驾驶员数据详情
-        xAxisD:[],//图表下列标签
-        isshows:false,
-         //列表报警类型配置
-      options3: [{
-          label: '车辆预警类型',
+        {
+          label: "驾驶员预警类型",
           options: []
-        }, {
-          label: '驾驶员预警类型',
-          options: []
-        }],
-        teamCodeNumber:'0000000001'
-    }
+        }
+      ],
+      teamCodeNumber: "0000000001", //..
+      gategorys: "01", //报警类别
+      pageNumber: 1, //页码
+      teamTreeCode: "", //树结构teamCode
+      cd: false,
+      listVehicle: "", //查询车辆
+      listDirver: "", //查询驾驶员
+      tableDataAlarms: [], //综合统计列表
+      pageNumber: 1, //翻页，页数总览
+      listPageNumber: 1, //详细翻页
+      indexShowList:"",//保存点击的行数
+      dd:false,//判断是驾驶员/车辆
+    };
   },
   methods: {
+    //初始化Echarts图表数据
+    eChartsPostion() {
+      this.polar.xAxis.data.length = 0;
+      for (let i = 0; i < this.polar.series.length; i++) {
+        this.polar.series[i].data.length = 0;
+      }
+    },
+    open() {
+      this.$alert("暂无数据内容", "消息提示", {});
+    },
     coninfo(e, i) {
       this.isshow = true;
       this.lng = e.point.lng;
@@ -473,16 +474,15 @@ export default {
       let pixel = map.pointToOverlayPixel(new BMap.Point(this.lng, this.lat));
       el.style.left = pixel.x - 60 + "px";
       el.style.top = pixel.y - 20 + "px";
+      pixel = null
     },
-    isinfo(i) {
-      alert(1);
-    },
+    isinfo(i) {},
     close() {
       this.isshow = false;
     },
     //预警定位
     getLocation(row) {
-      this.zoom = 34
+      this.zoom = 34;
       this.isshow = true;
       this.lng = row.longit;
       this.lat = row.lat;
@@ -498,318 +498,433 @@ export default {
     CBValue(value) {
       console.log(value);
     },
-    //初始化数据赋值
-    pushEchertsData(ele){
-
-    },
-
     //---------- get data function------------//
-    //搜索列表
-    handleSelect(item){
-      searchByNameChr(this.companyCode,item.value).then(res=>{
-          this.vehicleList = res
-        }
-      )
-      teamTreeSelect(this.companyCode,item.value).then(
-        res =>{
-          this.selectNumber = res.length
-          this.selectShow = true
-          this.vehicleList = res
-          this.selectNumber = res.length
-        }
-      );
+
+    //车辆树，搜索数据获取并显示结果
+    handleSelect(item) {
+      this.selectShow = true;
+      this.getSearchByName({
+        companyCode: this.companyCode,
+        teamName: item.value
+      });
+      this.getTeamTree({ companyCode: this.companyCode, teamName: item.value });
     },
-    //enter搜索
-    Subm(item){
-      teamTreeSelect(this.companyCode,item).then(
-        res =>{
-          if(res.length === 0){
-            this.selectNull = false;
-          }else{
-            this.selectNull = true
-            this.selectNumber = res.length
-            this.selectShow = true
-            this.vehicleList = res
-            this.selectNumber = res.length
-          }
-        }
-      );
+    //车辆列表树，搜索框键盘事件enter搜索
+    Subm(item) {
+      if (item) {
+        this.getTeamTree({ companyCode: this.companyCode, teamName: item });
+      } else {
+        this.getTeamTree({ companyCode: this.companyCode });
+      }
     },
+
     //条件车辆列表&&车辆在线率&&预警统计下拉选择
-    //选择车队列表
-    showFun(msg){
-      let reg = /[\(（][^\)）]+[\)）]$/
-      let dirverName = msg.e.target.innerText
-      let teamCodes = this.vehicleList[msg.i].teamCode
-      this.teamCode = this.vehicleList[msg.i].teamCode
-      this.dName = dirverName.replace(reg,'').substring(1)
-      if(this.ind === msg.i){
-          this.ind = null
-      }else{
-          this.ind =msg.i;
+    //选择车队树
+    showFun(msg) {
+      let reg = /[\(（][^\)）]+[\)）]$/;
+      let dirverName = msg.e.target.innerText;
+      this.teamCodes = this.vehicleList[msg.i].teamCode;
+      this.dName = dirverName.replace(reg, "").substring(1);
+      if (this.ind === msg.i) {
+        this.ind = null;
+        this.showFun.destroy()
+      } else {
+        this.ind = msg.i;
+        this.onlineS = true;
       }
-      if(this.vehicleNumbner){
-        this.vehicleNumbner = false
+      //获取echarts数据
+      this.getDeriverAlarmCount({
+        companyCode: this.companyCode,
+        teamCode: this.teamCodes,
+        startDate: this.starData,
+        endDate: this.endData
+      });
+      //获取预警统计列表数据
+      this.getAlarmStatAll({
+        pageNum: this.pageNumber,
+        pageSize: 10,
+        companyCode: this.companyCode,
+        teamCode: this.teamCodes,
+        startDate: this.starData,
+        endDate: this.endData,
+        gategory: this.gategorys
+      });
+
+      //获取下拉选择列表的value值
+      this.getTeamTree(
+        {
+          companyCode: this.vehicleList[msg.i].companyCode,
+          teamName: this.dName
+        },
+        false,
+        true
+      );
+      //获取预警列表预警类型value
+      this.getByGategory({ gategory: "00" }, { gategory: "01" });
+      if (this.vehicleNumbner) {
+        this.vehicleNumbner = false;
       }
-      teamTreeSelect(this.companyCode,this.dName).then(res=>{
-        this.echartsOptions = []
-        this.onlineOptions[0].onlineChr.length  = 0
-        for(let i = 0; i <   this.echartsOptions.length; i++){
-            this.echartsOptions[i].echartsChr.length = 0
-        }
-        this.onlineS = true
-        this.onlineOptions = res
-        this.onlineOptions[0].onlineChr = res[0].vehicleList
-      
-        this.echartsOptions = res[0].vehicleList
-        for(let i = 0; i <  this.echartsOptions.length; i++){
-        this.echartsOptions[i].echartsChr = this.echartsOptions[i].deriverList
-        }
-      })
 
-        getByGategory('00','车辆类型').then(res=>{
-        this.options3[0].options = res
-      })
-      getByGategory('01','驾驶员类型').then(res=>{
-        this.options3[1].options = res
-      })
-
-      //数据统计查询
-      deriverAlarmCountTeamCode(this.companyCode,this.vehicleList[msg.i].teamCode,this.starData,this.endData).then(
-        res=>{
-              this.dirverTimeStart = this.starData
-              this.dirverTimeEnd = this.endData
-              this.polar.xAxis.data.length = 0
-              // this.ishowVLegend = true
-              // this.ishowDLegend = true
-              for(let i = 0; i<this.polar.series.length; i++){
-                this.polar.series[i].data.length = 0;
-              }
-
-              res.resultMap.forEach(element => {
-                this.polar.xAxis.data.push(element.alarmName)
-                this.polar.series[1].data.push(element.alarmCount)
-              });
-              this.sumCount = res.sumCount
-              this.polar.series[1].name = this.vehicleList[0].teamName
-            
-        }
-      )
-
-      //车队查询统计表格查询
-      alarmStatTeamCode(1,30,this.companyCode,teamCodes,this.starData,this.endData,'01').then(res=>{
-          this.tableListData = res
-      })
+      reg = null
+      dirverName = null
 
     },
+
     // 选择车辆列表
-    itemOpened(msg){
-      let text = msg.e.target.innerText.substring(7,0)
-      this.teamCodes = this.vehicleList[msg.i].teamCode
-      if(this.itemEnd === msg.i){
-          this.itemEnd = null
-      }else{
-          this.itemEnd =msg.i;
-          msg.e.currentTarget.nextElementSibling.addClass = 'vehile-item-list-isopened'
+    itemOpened(msg) {
+      let text = msg.e.target.innerText.substring(7, 0);
+      if (this.itemEnd === msg.i) {
+        this.itemEnd = null;
+      } else {
+        this.itemEnd = msg.i;
+        // msg.e.currentTarget.nextElementSibling.addClass = 'vehile-item-list-isopened'
       }
-      msg.e.currentTarget.nextElementSibling.addClass = 'vehile-item-list-isopened'
+      //点击车辆获取echarts数据
+      this.getDeriverVehicleAlarmCount({
+        companyCode: this.companyCode,
+        teamCode: this.teamCodes,
+        vehicleCode: text,
+        startDate: this.starData,
+        endDate: this.endData
+      });
+      //点击获取表格数据
+      this.getAlarmStatAll({
+        pageNum: this.pageNumber,
+        pageSize: 10,
+        companyCode: this.companyCode,
+        vehicleCode: text,
+        startDate: this.starData,
+        endDate: this.endData,
+        gategory: this.gategorys
+      });
 
-      //所属三个驾驶员统计
-      deriverVehicleAlarmCount(this.companyCode,this.teamCodes,text,this.starData,this.endData).then(res=>{
-           if(res.derivers.length>0){
-             this.vehicleNumbner = true
-            this.onlineS = true
-            this.polar.xAxis.data.length = 0 
-            for(let i = 0; i<this.polar.series.length; i++){
-              this.polar.series[i].data.length = 0;
-            }
-
-            res.derivers[0].alarms.forEach(element => {
-                  this.polar.xAxis.data.push(element.alarmName)
-            })
-
-            for(let i = 0; i < res.derivers.length;i++){
-              for(let c = 0; c < res.derivers[0].alarms.length; c++){
-                this.polar.series[i].data.push(res.derivers[i].alarms[c].alarmCount)
-              }
-              this.polar.series[i].name = res.derivers[i].deriverName
-            }
-            this.driversD = res.derivers
-            this.sumCount = res.sumCount
-           }else{
-             console.log('暂无数据')
-           }
-           
-      })
-      
+      text = null
     },
-
-    //驾驶员选择查询
-    echartshandleChange(val){
-      this.vehicleNumbner = false
-      this.valueCode = this.echartsOptionsModel[1]
-      this.polar.xAxis.data = []
-      for(let i = 0; i<this.polar.series.length; i++){
-        this.polar.series[i].data = [];
-      }
-      console.log(val)
-      deriverAlarmCountDeriverCode(this.companyCode,val[1],this.starData,this.endData).then(
-              res=>{
-                console.log(res)
-                this.valueCode = this.echartsOptionsModel[1]
-                res.resultMap.forEach(element => {
-                  this.polar.xAxis.data.push(element.alarmName)
-                  this.polar.series[1].data.push(element.alarmCount)
-                });
-
-                this.dataTime = val
-                this.dataNumber = res.sumCount
-              })
-    },
-    //车辆选这查询
-     echartshandleItemChange(val){
-      this.vehicleNumbner = true
-      this.valueCode = val[0]
-      this.echartsOptionsModel = val
-      this.polar.xAxis.data = []
-      for(let i = 0; i<this.polar.series.length; i++){
-        this.polar.series[i].data = [];
-      }
-      //所属三个驾驶员统计
-      deriverVehicleAlarmCount(this.companyCode,this.teamCodes,val,this.starData,this.endData).then(res=>{
-           if(res.derivers.length>0){
-             this.vehicleNumbner = true
-            this.onlineS = true
-            this.polar.xAxis.data.length = 0 
-            for(let i = 0; i<this.polar.series.length; i++){
-              this.polar.series[i].data.length = 0;
-            }
-
-            res.derivers[0].alarms.forEach(element => {
-                  this.polar.xAxis.data.push(element.alarmName)
-            })
-
-            for(let i = 0; i < res.derivers.length;i++){
-              for(let c = 0; c < res.derivers[0].alarms.length; c++){
-                this.polar.series[i].data.push(res.derivers[i].alarms[c].alarmCount)
-              }
-              this.polar.series[i].name = res.derivers[i].deriverName
-            }
-            this.driversD = res.derivers
-            this.sumCount = res.sumCount
-           }else{
-             console.log('暂无数据')
-           }
-           
+    //echarts驾驶员选择查询
+    echartshandleChange(val) {
+      this.cd = true;
+      this.vehicleNumbner = true;
+      this.valueCode = this.echartsOptionsModel[1];
+      this.getDeriverAlarmCount({
+        companyCode: this.companyCode,
+        deriverCode: this.valueCode,
+        startDate: this.starData,
+        endDate: this.endData
       })
-     },
-     //图表时间选择
-    dataMothe(val){
-        if(this.echartsOptionsModel.length){
-           if(this.valueCode){
-            deriverAlarmCountVehicleCode(this.companyCode,this.valueCode,val+' 00:00:00',this.endData).then(
-              res=>{
-                console.log(this.valueCode)
-                this.valueCode = this.echartsOptionsModel[1]
-                this.polar.series[0].data.length = 0;
-                this.polar.xAxis.data.length =0;
-                res.resultMap.forEach(element => {
-                  this.polar.xAxis.data.push(element.alarmName)
-                  this.polar.series[0].data.push(element.alarmCount)
-                });
-
-                this.dataTime = val
-                this.dataNumber = res.sumCount
-          })
-          }else if(this.valueCode){
-              deriverAlarmCountDeriverCode(this.companyCode,this.valueName,val+' 00:00:00',this.endData).then(
-                res=>{
-                  console.log(1)
-                  this.valueCode = this.echartsOptionsModel[1]
-                this.polar.series[0].data.length = 0;
-                this.polar.xAxis.data.length =0;
-                res.resultMap.forEach(element => {
-                  this.polar.xAxis.data.push(element.alarmName)
-                  this.polar.series[0].data.push(element.alarmCount)
-                });
-
-                this.dataTime = val
-                this.dataNumber = res.sumCount
-                }
-              )
-          }
-          else{
-            vehicleAlarmCount(this.companyCode,val+' 00:00:00',this.endData).then(
-              res=>{
-                    this.polar.series[0].data.length = 0
-                    this.polar.xAxis.data.length = 0
-                    res.resultMap.forEach(element => {
-                      this.polar.xAxis.data.push(element.alarmName)
-                      this.polar.series[0].data.push(element.alarmCount)
-                    });
-                    this.dataTime = val
-                    this.dataNumber = res.sumCount
-                // this.polar.xAxis.data = res.deriverCount.everyDate
-                // this.polar.series.data = res.deriverCount.alarmCount
-              }
-            )
-          }
+    },
+    //echarts车辆选这查询
+    echartshandleItemChange(val) {
+      this.cd = false;
+      this.vehicleNumbner = true;
+      this.valueCode = val[0];
+      this.echartsOptionsModel = val[0];
+      this.getDeriverVehicleAlarmCount({
+        companyCode: this.companyCode,
+        teamCode: this.teamCodes,
+        vehicleCode: this.valueCode,
+        startDate: this.starData,
+        endDate: this.endData
+      })
+    },
+    //echarts时间选择
+    dataMothe(val) {
+      if (this.onlineS) {
+        if (this.valueCode && this.cd) {
+          this.getDeriverAlarmCount({
+            companyCode: this.companyCode,
+            vehicleCode: this.valueCode,
+            startDate: this.selectData + " 00:00:00",
+            endDate: this.endData
+          });
+        } else if (this.valueCode && !this.cd) {
+          this.getDeriverAlarmCount({
+            companyCode: this.companyCode,
+            deriverCode: this.valueCode,
+            startDate: this.selectData + " 00:00:00",
+            endDate: this.endData
+          });
         }
+      } else {
+        this.getDeriverAlarmCount({
+          companyCode: this.companyCode,
+          startDate: this.selectData + " 00:00:00",
+          endDate: this.endData
+        });
+      }
     },
-
-     //统计列表数据获取
+    //预警列表，点击地点获取地图预警定位信息
+    getLocation(row) {
+      this.zoom = 34;
+      this.isshow = true;
+      this.lng = row.longit;
+      this.lat = row.lat;
+      this.infoD = row.deriverName;
+      this.infoNP = row.vehicleCode;
+      this.infoTW = row.alarmName;
+      this.infoWT = row.reportTime;
+      this.infoL = row.locationDesc;
+    },
+    //预警统计列表，点击筛选时间获取数据
     pcickValue(time) {
-      this.tabletimestart = time[0]+'00:00:00'
-      this.tabletimeend = time[1]+'23:59:59'
-       alarmStatAll(1,10,this.companyCode,this.tabletimestart,this.tabletimeend,'00').then(res=>{
-      if(res){      
-        this.tableListData = res
+      this.tabletimestart = time[0] + " 00:00:00";
+      this.tabletimeend = time[1] + " 23:59:59";
+      if (!this.onlineS) {
+        this.getAlarmStatAll({
+          pageNum: this.listPageNumber,
+          pageSize: 10,
+          companyCode: this.companyCode,
+          startDate: this.tabletimestart,
+          endDate: this.tabletimeend,
+          gategory:this.gategorys
+        });
+      } else if (!this.listVehicle == "" && this.alarmCode == "") {
+        this.getAlarmStatAll({
+          pageNum: this.listPageNumber,
+          pageSize: 10,
+          companyCode: this.companyCode,
+          vehicleCode: this.listVehicle,
+          startDate: this.tabletimestart,
+          endDate: this.tabletimeend,
+          gategory:this.gategorys
+        });
+      } else if (!this.listDirver == "" && this.alarmCode == "") {
+        this.getAlarmStatAll({
+          pageNum: this.listPageNumber,
+          pageSize: 10,
+          companyCode: this.companyCode,
+          deriverCode: this.listDirver,
+          startDate: this.tabletimestart,
+          endDate: this.tabletimeend,
+          gategory:this.gategorys
+        });
+      } else if (!this.listVehicle == "" && this.alarmCode !== "") {
+        this.getAlarmStatAll({
+          pageNum: this.listPageNumber,
+          pageSize: 10,
+          companyCode: this.companyCode,
+          vehicleCode: this.listVehicle,
+          startDate: this.tabletimestart,
+          endDate: this.tabletimeend,
+          gategory:this.gategorys,
+          alarmCode: this.alarmCode
+        });
+      } else if (!this.listDirver == "" && this.alarmCode !== "") {
+        this.getAlarmStatAll({
+          pageNum: this.listPageNumber,
+          pageSize: 10,
+          companyCode: this.companyCode,
+          deriverCode: this.listDirver,
+          startDate: this.tabletimestart,
+          endDate: this.tabletimeend,
+          gategory:this.gategorys,
+          alarmCode: this.alarmCode
+        });
+      } else {
+        this.getAlarmStatAll({
+          pageNum: this.listPageNumber,
+          pageSize: 10,
+          companyCode: this.companyCode,
+          startDate: this.tabletimestart,
+          endDate: this.tabletimeend,
+          gategory:this.gategorys
+        });
       }
-    })
     },
-     //地图配置
-    handler({BMap, map}){
+    //预警统计列表，点击驾驶员筛选获取数据
+    listhandleChange(val) {
+      this.dd = false;
+      this.listVehicle = val[0]; //查询车辆
+      this.listDirver = val[1]; //查询驾驶员
+      //如果时间筛选为真
+      if (this.tabletimestart || this.tabletimeend) {
+        this.getAlarmStatAll({
+          pageNum: this.pageNumber,
+          pageSize: 10,
+          companyCode: this.companyCode,
+          deriverCode: val[1],
+          startDate: this.tabletimestart,
+          endDate: this.tabletimeend,
+          gategory:this.gategorys
+        });
+      } else if (this.tabletimestart || this.tabletimeend || this.value7) {
+        this.getAlarmStatAll({
+          pageNum: this.pageNumber,
+          pageSize: 10,
+          companyCode: this.companyCode,
+          deriverCode: val[1],
+          startDate: this.tabletimestart,
+          endDate: this.tabletimeend,
+          gategory:this.gategorys,
+          alarmCode: this.value7
+        });
+      } else {
+        this.getAlarmStatAll({
+          pageNum: this.pageNumber,
+          pageSize: 10,
+          companyCode: this.companyCode,
+          deriverCode: val[1],
+          startDate: this.starData,
+          endDate: this.endData,
+          gategory:this.gategorys
+        });
+      }
+
+    },
+    //预警统计列表，点击车辆获取数据
+    listhandleItemChange(val) {
+      this.dd = true
+      this.listOptionsModel = val;
+      //判断时间筛选是否为真
+      if (this.tabletimestart || this.tabletimeend) {
+        this.getAlarmStatAll({
+          pageNum: this.pageNumber,
+          pageSize: 10,
+          companyCode: this.companyCode,
+          vehicleCode: val[0],
+          startDate: this.tabletimestart,
+          endDate: this.tabletimeend,
+          gategory:this.gategorys
+        });
+      } else {
+        this.getAlarmStatAll({
+          pageNum: this.pageNumber,
+          pageSize: 10,
+          companyCode: this.companyCode,
+          vehicleCode: val[0],
+          startDate: this.starData,
+          endDate: this.endData,
+          gategory:this.gategorys
+        });
+      }
+    },
+    //预计统计列表，点击预警类型获取数据
+    getAlarmCode() {
+      this.alarmCode = this.value7;
+      if(this.listOptionsModel && this.dd){
+        this.getAlarmStatAll({
+          pageNum: this.listPageNumber,
+          pageSize: 10,
+          companyCode: this.companyCode,
+          vehicleCode: this.listOptionsModel,
+          startDate: this.starData,
+          endDate: this.endData,
+          gategory:this.gategorys,
+          alarmCode:this.value7
+        });
+      }else if(!this.dd && this.listOptionsModel){
+        this.getAlarmStatAll({
+          pageNum: this.listPageNumber,
+          pageSize: 10,
+          companyCode: this.companyCode,
+          deriverCode: this.listDirver,
+          startDate: this.starData,
+          endDate: this.endData,
+          gategory:this.gategorys,
+          alarmCode:this.value7
+        });
+      }
       
     },
 
-    //表格车辆选择查询
-    dlisthandleItemChange(){
 
-    },
 
-    //xAxis.data数据
-    xAxisData(){
-      this.polar.xAxis.data = this.xAxisD
-    },
-     //统计列表车辆筛选数据获取
-    listhandleChange(val){   
-      {
-        alarmStat(1,10,this.companyCode,val[1],this.starData,this.endData,'00').then(res=>{
-          if(res){
-            this.tableListData = res
+
+    /** 数据获取方法 */
+    //获取车辆树结构
+    async getTeamTree(params, select = false, vehicle = false) {
+      let res = await teamTree(params);
+      if (res.status === 200) {
+        if (select) {
+          this.dName = res.data[0].teamName;
+        } else if (vehicle) {
+          this.onlineOptions = res.data;
+          this.onlineOptions[0].onlineChr = res.data[0].vehicleList;
+          this.echartsOptions = res.data[0].vehicleList;
+          for (let i = 0; i < this.echartsOptions.length; i++) {
+            this.echartsOptions[i].echartsChr = this.echartsOptions[
+              i
+            ].deriverList;
           }
-        })
+        } else {
+          this.selectNull = true;
+          this.vehicleList = res.data;
+          this.selectNumber = res.data.length;
+        }
+      }
+      res = null;
+    },
+    //获取车辆搜索下拉列表
+    async getSearchByName(params) {
+      let res = await searchByName(params);
+      if (res.status === 200) {
+        this.resL = res.data;
+      }
+      res = null;
+    },
+    //获取驾驶员预警统计echarts
+    async getDeriverAlarmCount(params) {
+      let res = await deriverAlarmCount(params);
+      this.eChartsPostion();
+      if (res.status === 200) {
+        res.data.resultMap.forEach(element => {
+          this.polar.xAxis.data.push(element.alarmName);
+          this.polar.series[1].data.push(element.alarmCount);
+        });
+        // this.sumCount = res.data.sumCount
+        // this.polar.series[1].name = this.vehicleList[0].teamName
+        // this.dirverTimeStart = this.starData
+        // this.dirverTimeEnd = this.endData
+        res = null
+      }
+
+    },
+    async getDeriverVehicleAlarmCount(params) {
+      let res = await deriverVehicleAlarmCount(params);
+      this.eChartsPostion();
+      if (res.status === 200) {
+        res.data.derivers[0].alarms.forEach(element => {
+          this.polar.xAxis.data.push(element.alarmName);
+          for (let i = 0; i < res.data.derivers.length; i++) {
+            for (let c = 0; c < res.data.derivers[0].alarms.length; c++) {
+              this.polar.series[i].data.push(
+                res.data.derivers[i].alarms[c].alarmCount
+              );
+            }
+            this.polar.series[i].name = res.data.derivers[i].deriverName;
+          }
+        });
+        // this.driversD = res.data.derivers;
+        // this.sumCount = res.data.sumCount;
+        res = null
       }
     },
-    listhandleItemChange(val){
-      this.listOptionsModel = val
-      alarmStatTeamCode(1,10,this.companyCode,val,this.starData,this.endData,'00').then(res=>{
-        if(res){
-          console.log(res)
-          this.tableListData = res
+    //获取统计表格数据
+    async getAlarmStatAll(params) {
+      let res = await alarmStatAll(params);
+      if (res.status === 200) {
+        this.tableListData = res.data;
+        res = null
+      }
+    },
+    //获取综合统计表格车辆类型筛选条件
+    async getByGategory(params, i) {
+      let res = await ByGategory(params);
+      if (res.status === 200) {
+        this.options3[0].options = res.data;
+        let respons = await ByGategory(i);
+        if (respons.status === 200) {
+          this.options3[1].options = respons.data;
+          res = null
+          respons = null
         }
-      })
-        
+      }
     },
-    getAlarmCode(){
-      this.alarmCode=this.value7
-        alarmStatAlarmCode(1,10,this.companyCode,this.starData,this.endData,'00',this.alarmCode).then(res=>{
-          if(res){
-            console.log(res)
-            this.tableListData = res
-          }
-        })
-    },
+    //获取点击teamcode
+    getTeamCode: async function(params) {
+      let res = await teamTree(params);
+      this.teamTreeCode = res;
+      res = null
+    }
   },
   computed: {
     skcolors() {
@@ -820,67 +935,65 @@ export default {
       }
     }
   },
+  // beforeDestroy:function(){
+  //   this.handleSelect.destroy()
+  //   this.showFun.destroy()
+  //   this.itemOpened.destroy()
+  //   this.handleChange.destroy()
+  //   this.handleItemChange.destroy()
+  //   this.echartshandleChange.destroy()
+  //   this.dataMothe.destroy()
+  //   this.getLocation.destroy()
+  //   this.pcickValue.destroy()
+  //   this.listhandleChange.destroy()
+  //   this.listhandleItemChange.destroy()
+  //   this.getAlarmCode.destroy()
+  //   this.getByGategory.destroy()
+  // },
   watch: {
     linew: function() {
-      console.log(this.linew);
+      // console.log(this.linew);
     }
   },
-  mounted: function() {
-
+  created: function() {
     //----------getdatafunction-------//
     //图表查询默认时间（按照往后推7天）
-    this.endData = getDay(0) + ' 23:23:59'
-    this.starData = getDay(-6) + ' 00:00:00'
+    this.endData = getDay(0) + " 23:23:59";
+    this.starData = getDay(-6) + " 00:00:00";
 
-    //获取车辆列表 搜索车辆个数
-    teamTree(this.companyCode).then(
-      res =>{
-        this.selectNull = true
-        this.vehicleList = res
-        this.selectNumber = res.length
-      }
-    );
-
-    //默认下拉列表
-    searchByName(this.companyCode).then(
-      res=>{
-        this.resL = res
-      }
-    )
-    //默认图表数据
-    deriverAlarmCount(this.companyCode,this.teamCodeNumber,this.starData,this.endData).then(
-      res=>{
-        res.resultMap.forEach(element => {
-                this.polar.xAxis.data.push(element.alarmName)
-                this.polar.series[1].data.push(element.alarmCount)
-              });
-              this.sumCount = res.sumCount
-              this.polar.series[1].name = this.vehicleList[0].teamName
-              this.dirverTimeStart = this.starData
-              this.dirverTimeEnd = this.endData
-          
-      }
-    )
-
-    //默认综合统计表格数据
-    alarmStatAll(1,10,this.companyCode,this.teamCodeNumber,this.starData,this.endData,'01').then(res=>{
-      if(res){      
-        this.tableListData = res
-      }
-    })
+    Axios.all([
+      //获取车辆列表 搜索车辆个数
+      this.getTeamTree({ companyCode: this.companyCode }),
+      //默认获取下拉列表
+      this.getSearchByName({ companyCode: this.companyCode }),
+      //默认图表数据
+      this.getDeriverAlarmCount({
+        companyCode: this.companyCode,
+        startDate: this.starData,
+        endDate: this.endData
+      }),
+      //默认综合统计表格数据
+      this.getAlarmStatAll({
+        pageNum: this.pageNumber,
+        pageSize: 10,
+        companyCode: this.companyCode,
+        startDate: this.starData,
+        endDate: this.endData,
+        gategory: this.gategorys
+      })
+    ]);
   },
-  updated(){
-      //预统计图表图例位置
-        let legend = this.$refs.legend;
-        let width =
-          legend.style.width ||
-          legend.clientWidth ||
-          legend.offsetWidth ||
-          legend.scrollWidth;
-        this.legendWith = width / 2;
-  },
-  beforeDestroy:function(){
-    this.isshow = false
+  updated() {
+    //预统计图表图例位置
+    let legend = this.$refs.legend;
+    let width =
+      legend.style.width ||
+      legend.clientWidth ||
+      legend.offsetWidth ||
+      legend.scrollWidth;
+    this.legendWith = width / 2;
+    legend = null 
+    width = null
   },
   components: {
     BmlMarkerClusterer,
@@ -942,7 +1055,7 @@ export default {
 }
 .yc-cd-mains {
   height: 100%;
-  margin-left: 260px;
+  margin-left: 20px;
   padding: 20px 20px 20px 0;
   overflow: auto;
 }
@@ -1023,7 +1136,7 @@ export default {
   float: left;
   margin-right: 10px;
 }
-.legend p span{
+.legend p span {
   border-radius: 50%;
 }
 .legend p:nth-child(2) span {
