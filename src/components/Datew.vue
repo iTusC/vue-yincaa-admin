@@ -9,7 +9,8 @@
         style="width:110px;"
         @change="dataMothe"
         :clearable="false"
-         :picker-options="pickerOptions1">
+        :picker-options="pickerOptions1"
+        :editable="false">
         </el-date-picker>
     </div>
 </template>
@@ -34,17 +35,20 @@
         },
         methods:{
             dataMothe(){
+                console.log(this.value3)
                 var now = new Date(this.value3); 
                 var nowTime = now.getTime() ; 
                 var day = now.getDay();
                 var oneDayLong = 24*60*60*1000 ; 
                 var MondayTime = nowTime - (day)*oneDayLong  ; 
-                var SundayTime =  nowTime + (6-day)*oneDayLong ; 
+                var SundayTime =  nowTime + (7-day)*oneDayLong ; 
+                
                 var monday = new Date(MondayTime);
                 var sunday = new Date(SundayTime);
-                var dataMonday = monday.getFullYear() + '-' + (monday.getMonth() + 1<10?'0'+ (monday.getMonth() + 1):monday.getDate()+1) + '-' +(monday.getDate() + 1<10?'0'+(monday.getDate() + 1):monday.getDate()+1)+' 00:00:00'; 
-                var dataSunday = sunday.getFullYear() + '-' + (sunday.getMonth() + 1<10?'0'+ (sunday.getMonth() + 1):sunday.getDate()+1) + '-' +(sunday.getDate() + 1<10?'0'+(sunday.getDate() + 1):sunday.getDate()+1)+ ' 23:59:59'; 
+                var dataMonday = monday.getFullYear() + '-' + (monday.getMonth() + 1<10?'0'+ (monday.getMonth() + 1):monday.getDate()-1) + '-' +(monday.getDate()<10?'0'+(monday.getDate()-1):monday.getDate()-1)+' 00:00:00'; 
+                var dataSunday = sunday.getFullYear() + '-' + (sunday.getMonth() + 1<10?'0'+ (sunday.getMonth() + 1):sunday.getDate()+1) + '-' +(sunday.getDate()<10?'0'+(sunday.getDate()-1):sunday.getDate()-1)+ ' 23:59:59'; 
                 this.$emit('dataMothe',{dataMonday,dataSunday})
+                console.log(now.getDate());
             }
         }
     }

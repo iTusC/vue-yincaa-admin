@@ -11,6 +11,9 @@
             @blur="inputBlur"
             @keyup.enter.native="Subm"
             :stext="stext"
+            :debounce="300"
+            clearable
+            @clear="selectAll"
             >
             </el-autocomplete>
             <div class="yc-list-selectif" v-if="selectShow">
@@ -66,7 +69,7 @@ import storage from 'good-storage'
                     //         path: '/searchlist'
                     //         });
                     this.historyxs=false;
-                    this.searchtxt='';
+                    // this.searchtxt='';
                     this.focused = false;
                 }	 		
             },
@@ -97,6 +100,9 @@ import storage from 'good-storage'
             },
             ckFcus(){
                 this.Recording = true
+            },
+            selectAll(){
+                this.$emit('selectAll');
             }
         },
         mounted(){
@@ -109,7 +115,6 @@ import storage from 'good-storage'
         },
         watch:{
             searchtxt:function() {
-                console.log(this.searchtxt)
                 if(this.searchtxt === '' && this.handleinput().length){
                     return this.restaurants  = this.handleinput()
                 }

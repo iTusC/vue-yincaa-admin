@@ -12,8 +12,8 @@
             :unique-opened="true"
             :collapse="isCollapse">
                 <transition name="bounce" mode="out-in">
-                    <h1 v-if="isNavShow" class="yc-logo" ><i class="byte-ai">B.A</i></h1>
-                    <h1 v-else class="yc-logo"><i class="byte-ai">BYTE.AI</i></h1>
+                    <h1 v-if="isNavShow" class="yc-logo" ><img src="../assets/eye-logo.png" alt=""></h1>
+                    <h1 v-else class="yc-logo"><img src="../assets/logo2.png" alt=""></h1>
                 </transition>
                 <template v-for="(navlist,index) in navList">
                     <template v-if="navlist.children">
@@ -50,104 +50,111 @@
               navWt:'180px',
               navList:[
                   {
-                      name:'预警管理',
+                      name:'预警统计',
                       iconcls:'yc-icon-tubiao',
                       children:[
                           {
-                            name:'综合数据统计',
+                            name:'综合预警统计',
                             path:'/ComprenensiveD',
                           },
                           {
-                            name:'车辆数据统计',
+                            name:'车辆预警统计',
                             path:'/VehicleD',
                           },
                           {
-                            name:'驾驶员数据统计',
+                            name:'驾驶员预警统计',
                             path:'/DirverD',
                           }
                       ]
                   },
                   {
-                      name:'功能管理',
+                      name:'报警统计',
                       iconcls:'yc-icon-tubiao',
                       children:[
                           {
-                            name:'基础数据管理',
+                            name:'综合报警统计',
                             path:'/BasicM',
                           },
                           {
-                            name:'高级功能管理',
+                            name:'车辆报警统计',
                             path:'/SeniorM',
                           },
                           {
-                            name:'道路安全管理',
+                            name:'驾驶员报警统计',
                             path:'/RoadSafetyM',
-                          },
-                          {
-                            name:'安装维修管理',
-                            path:'/InstallatilM',
                           }
                       ]
                   },
                   {
-                      name:'报警管理',
+                      name:'警报数据分析',
                       iconcls:'yc-icon-tubiao',
                       children:[
                           {
-                            name:'报警统计',
+                            name:'一键报表上报',
                             path:'/AlarmS',
                           },
                           {
-                            name:'车辆报警',
+                            name:'车辆报警分析',
                             path:'/VehicleAS',
                           },
                           {
-                            name:'驾驶报警',
+                            name:'驾驶员行为分析',
                             path:'/DriverAS',
-                          },
-                          {
-                            name:'故障报警',
-                            path:'/FarltAS',
                           }
                       ]
                   },
                   {
-                      name:'运营管理',
+                      name:'资料档案库',
                       iconcls:'yc-icon-tubiao',
                       children:[
                           {
-                            name:'状态统计',
+                            name:'车辆资料管理',
                             path:'/StateS',
                           },
                           {
-                            name:'运营类统计',
+                            name:'驾驶员资料管理',
                             path:'/OperationsS',
-                          },
-                          {
-                            name:'用户管理',
-                            path:'/UserS',
-                          },
-                          {
-                            name:'图片类报表',
-                            path:'/ImageS',
                           }
                       ]
                   },
                   {
-                      name:'绿色驾驶',
+                      name:'企业运营分析',
                       path:'/AlarmModule11',
                       iconcls:'yc-icon-tubiao',
                       children:[
                           {
-                            name:'看板',
+                            name:'车辆数据分析',
                             path:'/KanBanS',
                           },
                           {
-                            name:'OBD标定升级',
+                            name:'驾驶员数据分析',
                             path:'/OBDcu',
                           },
                           {
-                            name:'GDS参数配置',
+                            name:'报警数据分析',
+                            path:'/GDSParementerS',
+                          },
+                          {
+                            name:'运营管理分析',
+                            path:'/GDSParementerS',
+                          }
+                      ]
+                  },
+                  {
+                      name:'保险数据采集',
+                      path:'/AlarmModule11',
+                      iconcls:'yc-icon-tubiao',
+                      children:[
+                          {
+                            name:'六轴加速度数据',
+                            path:'/KanBanS',
+                          },
+                          {
+                            name:'现场定损数据',
+                            path:'/OBDcu',
+                          },
+                          {
+                            name:'实施风控救援数据',
                             path:'/GDSParementerS',
                           }
                       ]
@@ -157,10 +164,10 @@
         },
         methods: {
             handleOpen(key, keyPath) {
-                console.log(key, keyPath);
+               
             },
             handleClose(key, keyPath) {
-                console.log(key, keyPath);
+                
             },
             ShowNav(){
                 this.navWt = '180px'
@@ -198,6 +205,9 @@
     text-align: center;
     line-height: 64px;
     color:#fff;
+}
+.yc-logo img{
+    margin-top: 10px;
 }
 .el-submenu .el-menu-item{
     padding: 0px;

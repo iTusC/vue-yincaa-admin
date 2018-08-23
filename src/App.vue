@@ -1,6 +1,6 @@
 <template>
   <div id="app">
-    <el-container class="yc-ctner-h">
+    <!-- <el-container class="yc-ctner-h">
         <div class="yc-menu-heiht">
           <nav-menu></nav-menu>
         </div>
@@ -12,7 +12,8 @@
                     <router-view class="yc-main-height"></router-view>
                 </el-main>
           </el-container>
-       </el-container>
+       </el-container> -->
+       <router-view></router-view>
   </div>
 </template>
 

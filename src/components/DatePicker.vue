@@ -14,6 +14,7 @@
       end-placeholder="结束日期"
       value-format="yyyy-MM-dd"
       :picker-options="pickerOptions1"
+      :editable="false"
       >
     </el-date-picker>
   </div>
@@ -23,18 +24,18 @@
   export default {
     props:{
         size:{
-            type:String,
-            default:'small'
+          type:String,
+          default:'small'
         }
     },
     data() {
       return {
         value6: '',
-         pickerOptions1:{
-                     disabledDate(time) {
-                            return time.getTime() > Date.now();
-                        },
-                }
+        pickerOptions1:{
+          disabledDate(time) {
+            return time.getTime() > Date.now();
+          },
+        }
       }
     },
     methods:{

@@ -1,11 +1,12 @@
 <template>
-    <div style="height:100%">
+    <div style="height:100%;overflow:hidden">
+       <router-view ></router-view>
         <div class="yc-list">
           <div class="yc-velist-main">
             <div class="yc-velist">
-                <div class="yc-velist-title">
-                    <img src="" alt="">
-                    <h3>粤运综合物流有限公司</h3>
+                <div class="yc-velist-title" @click="allData">
+                     <img :src="companyImage" alt="">
+                    <h3>{{ comName }}</h3>
                 </div>
                 <vehicle-list @handleSelect="handleSelect" :resL="resL" :selectNumber="selectNumber" :selectShow="selectShow" @Subm="Subm" :selectNull="selectNull"></vehicle-list>
                 <vehicle-menu @showFun="showFun" @itemOpened="itemOpened" :vehicleList="vehicleList" :ind="ind" :itemEnd="itemEnd" :isListShow="isListShow"></vehicle-menu>
@@ -31,7 +32,8 @@
                             :picker-options="pickerOptions"
                             style="width:150px;"
                             @change="dataMothe"
-                            value-format="yyyy-MM-dd">
+                            value-format="yyyy-MM-dd"
+                            :editable="false">
                           </el-date-picker>
                       </el-col>
                      
@@ -51,11 +53,10 @@
                   </el-col>
                 </div>
                 
-                <div ref="legend" class="legend" :style="{'margin-left':'-'+legendWith+'px'}">
-                    <p><span></span>时间：{{dirverTimeStart}}{{ '  - ' + dirverTimeEnd }} </p>
+                <div ref="legend" class="legend" >
+                    <p><span></span>时间：{{ dataTime }} </p>
                     <p><span></span>预警总次数:{{ sumCount }}次</p>
-                    <p v-if="vehicleNumbner" v-for="items in driversD"><span></span>{{ items.deriverName }}:{{ items.deriverCount }}次</p> 
-                                      
+                    <p v-if="vehicleNumbner" v-for="items in driversD"><span></span>{{ items.deriverName }}:{{ items.deriverCount }}次</p>                  
                 </div>
                 <chart :options="polar" :autoResize="true"></chart>
             </section>
@@ -64,10 +65,14 @@
                 <div class="cd-map-title">
                     <h3>预警统计列表</h3>
                 </div>
-                <baidu-map class="map" center="广州"   :scroll-wheel-zoom="true" :map-click="false"  :center="{lng:lng, lat:lat }"  :zoom="zoom" >
-                    <bml-marker-clusterer :averageCenter="true" v-if="isshow">
-                            <template v-for="(markerlist,index) in tableListData">
-                              <bm-marker :position="{lng:markerlist.longit, lat:markerlist.lat }" @click="coninfo($event,index)" :zoom="zoom" >
+                <baidu-map class="map" center="广州"   :scroll-wheel-zoom="false" :map-click="false"  :center="{lng:lng, lat:lat }" @ready="handler"   :zoom="zoom" >
+                  <bm-geolocation anchor="BMAP_ANCHOR_BOTTOM_RIGHT" :showAddressBar="true" :autoLocation="true"></bm-geolocation>
+                  <bm-navigation anchor="BMAP_ANCHOR_TOP_RIGHT"></bm-navigation>
+                  <bm-map-type :map-types="['BMAP_NORMAL_MAP', 'BMAP_HYBRID_MAP']" anchor="BMAP_ANCHOR_TOP_LEFT"></bm-map-type>
+                  <bm-traffic :predictDate="{weekday: 7, hour: 12}"></bm-traffic>
+                    <bml-marker-clusterer :averageCenter="true" >
+                        <template v-for="marker in tableDataAlarms">
+                              <bm-marker :position="{lng:marker.longitude, lat:marker.latitude }" @click="coninfo($event,index)" :zoom="zoom" >
                               </bm-marker> 
                         </template>
                     </bml-marker-clusterer>   
@@ -110,9 +115,9 @@
                                     :label="group.label">
                                     <el-option
                                       v-for="item in group.options"
-                                      :key="item.ALARM_NAME"
-                                      :label="item.ALARM_NAME"
-                                      :value="item.ALARM_CODE">
+                                      :key="item.atypeName"
+                                      :label="item.atypeName"
+                                      :value="item.atypeId">
                                     </el-option>
                                   </el-option-group>
                                 </el-select>
@@ -121,7 +126,7 @@
                     </el-col>
                 </el-row>
                 <div class="ul-itme">
-                    <cd-table @getLocation="getLocation" :tableListDatas="tableListData" :tableTitle="tableTitle" :tableH="tableH" ></cd-table>
+                    <cd-table @getLocation="getLocation" :tableListDatas="tableListData" :tableTitle="tableTitle" :tableH="tableH" @getDateil="getDateil"></cd-table>
                 </div>
             </section>
             <!-- <template>
@@ -156,7 +161,8 @@ import {
   deriverVehicleAlarmCount,
   alarmStat,
   alarmStatAlarmCode,
-  alarmStatAll
+  alarmStatAll,
+  getCompanyName
 } from "../../api/getData";
 import { getDay, getWeek } from "../../../static/js/data";
 import Axios from "axios";
@@ -293,7 +299,7 @@ export default {
       },
       tableTitle: [
         {
-          vul: "deriverName",
+          vul: "deriveName",
           title: "驾驶员"
         },
         {
@@ -301,11 +307,11 @@ export default {
           title: "车牌号"
         },
         {
-          vul: "alarmName",
+          vul: "atpyeName",
           title: "预警类型"
         },
         {
-          vul: "reportTime",
+          vul: "alarmTime",
           title: "预警时间"
         },
         {
@@ -323,8 +329,8 @@ export default {
       tableListData: [],
       options: [],
       isshow: false,
-      lng: 116.404,
-      lat: 39.915,
+      lng: 113.23,
+      lat: 23.16,
       infoD: "", //驾驶员
       infoNP: "", //车牌号码
       infoTW: "", //报警类型
@@ -348,14 +354,15 @@ export default {
       ind: "", //车辆列表展开
       itemEnd: "", //车辆列表收起
       isListShow: "vehile-item-list-isopened", //车辆列表显示子导航
-      companyCode: "0000000001", //车队查询id
+      companyCode: "", //车队查询id
       driversD: [], //驾驶员列表报警次数
       vehicleNumbner: false, //是否渲染驾驶员图例
       sumCount: "", //预警总次数
       endData: "", //默认结束时间
       starData: "", //默认开始时间
-      dirverTimeStart: "", //图例开始时间
-      dirverTimeEnd: "", //图例结束时间
+      // dirverTimeStart: "", //图例开始时间
+      // dirverTimeEnd: "", //图例结束时间
+      dataTime:"",
       onlineS: false, //查询显示隐藏
       onlineOptions: [
         {
@@ -429,17 +436,17 @@ export default {
       isshows: false,
       //列表报警类型配置
       options3: [
-        {
-          label: "车辆预警类型",
-          options: []
-        },
+        // {
+        //   label: "车辆预警类型",
+        //   options: []
+        // },
         {
           label: "驾驶员预警类型",
           options: []
         }
       ],
-      teamCodeNumber: "0000000001", //..
-      gategorys: "01", //报警类别
+      teamCodeNumber: "1", //..
+      gategorys: "65", //报警类别
       pageNumber: 1, //页码
       teamTreeCode: "", //树结构teamCode
       cd: false,
@@ -450,9 +457,52 @@ export default {
       listPageNumber: 1, //详细翻页
       indexShowList:"",//保存点击的行数
       dd:false,//判断是驾驶员/车辆
+      dataMonday:"",
+      dataSunday:"",
+      tableDatas:[],//保存公司
+      comName:"广州鹰瞰信息科技公司",
+      companyImage:"",
+      usersname:"",
     };
   },
   methods: {
+   
+    //点击公司获取所有数据
+    allData(){
+      //获取车辆列表 搜索车辆个数
+      this.getTeamTree({ companyId:this.companyCode });
+
+      //默认获取下拉列表
+      this.getSearchByName({ companyId:this.companyCode });
+
+      //图表查询默认时间（按照往后推7天）
+      this.endData = getDay(0) + " 23:23:59";
+      this.starData = getDay(-6) + " 00:00:00";
+
+      //默认获取预警统计echarts数据
+      this.getDeriverAlarmCount({
+        companyId:this.companyCode,
+        startDate:this.starData,
+        endDate:this.endData
+      }),
+
+      //默认综合统计表格数据
+      this.getAlarmStatAll({
+        pageNum: this.pageNumber,
+        pageSize: 10,
+        companyId: this.companyCode,
+        startDate: this.starData,
+        endDate: this.endData,
+        atypeParent: this.gategorys
+      })
+    },
+    //初始化Echarts图表数据
+    eChartsPostion() {
+      this.polar.xAxis.data.length = 0;
+      for (let i = 0; i < this.polar.series.length; i++) {
+        this.polar.series[i].data.length = 0;
+      }
+    },
     //初始化Echarts图表数据
     eChartsPostion() {
       this.polar.xAxis.data.length = 0;
@@ -480,23 +530,12 @@ export default {
     close() {
       this.isshow = false;
     },
-    //预警定位
-    getLocation(row) {
-      this.zoom = 34;
-      this.isshow = true;
-      this.lng = row.longit;
-      this.lat = row.lat;
-      this.infoD = row.deriverName;
-      this.infoNP = row.vehicleCode;
-      this.infoTW = row.alarmName;
-      this.infoWT = row.reportTime;
-      this.infoL = row.locationDesc;
-    },
+
     PcickValue(time) {
-      console.log(time);
+
     },
     CBValue(value) {
-      console.log(value);
+
     },
     //---------- get data function------------//
 
@@ -504,17 +543,18 @@ export default {
     handleSelect(item) {
       this.selectShow = true;
       this.getSearchByName({
-        companyCode: this.companyCode,
-        teamName: item.value
+        companyId: this.companyCode,
+        name:item.value
       });
-      this.getTeamTree({ companyCode: this.companyCode, teamName: item.value });
+      this.getTeamTree({ companyId: this.companyCode, name: item.value });
     },
     //车辆列表树，搜索框键盘事件enter搜索
     Subm(item) {
       if (item) {
-        this.getTeamTree({ companyCode: this.companyCode, teamName: item });
+        this.getTeamTree({ companyId: this.companyCode, name: item });
       } else {
-        this.getTeamTree({ companyCode: this.companyCode });
+        // this.getTeamTree({ companyId: this.companyCode });
+        return false
       }
     },
 
@@ -523,19 +563,19 @@ export default {
     showFun(msg) {
       let reg = /[\(（][^\)）]+[\)）]$/;
       let dirverName = msg.e.target.innerText;
-      this.teamCodes = this.vehicleList[msg.i].teamCode;
+      this.teamCodes = msg.tm;
       this.dName = dirverName.replace(reg, "").substring(1);
       if (this.ind === msg.i) {
         this.ind = null;
-        this.showFun.destroy()
+        // this.showFun.destroy()
       } else {
         this.ind = msg.i;
         this.onlineS = true;
       }
       //获取echarts数据
       this.getDeriverAlarmCount({
-        companyCode: this.companyCode,
-        teamCode: this.teamCodes,
+        companyId: this.companyCode,
+        teamId: msg.tm,
         startDate: this.starData,
         endDate: this.endData
       });
@@ -543,35 +583,34 @@ export default {
       this.getAlarmStatAll({
         pageNum: this.pageNumber,
         pageSize: 10,
-        companyCode: this.companyCode,
-        teamCode: this.teamCodes,
+        companyId: this.companyCode,
+        teamId:msg.tm,
         startDate: this.starData,
         endDate: this.endData,
-        gategory: this.gategorys
+        atypeParent: this.gategorys
       });
 
       //获取下拉选择列表的value值
       this.getTeamTree(
         {
-          companyCode: this.vehicleList[msg.i].companyCode,
-          teamName: this.dName
+          companyId: this.vehicleList[msg.i].companyId,
+          name: this.dName
         },
         false,
         true
       );
       //获取预警列表预警类型value
-      this.getByGategory({ gategory: "00" }, { gategory: "01" });
+      this.getByGategory({ gategory: "64" }, { gategory: "65" });
       if (this.vehicleNumbner) {
         this.vehicleNumbner = false;
       }
-
-      reg = null
-      dirverName = null
 
     },
 
     // 选择车辆列表
     itemOpened(msg) {
+      
+      this.vehicleNumbner = true;
       let text = msg.e.target.innerText.substring(7, 0);
       if (this.itemEnd === msg.i) {
         this.itemEnd = null;
@@ -581,9 +620,9 @@ export default {
       }
       //点击车辆获取echarts数据
       this.getDeriverVehicleAlarmCount({
-        companyCode: this.companyCode,
-        teamCode: this.teamCodes,
-        vehicleCode: text,
+        companyId: this.companyCode,
+        teamId:msg.tm,
+        vehicleId: msg.di,
         startDate: this.starData,
         endDate: this.endData
       });
@@ -591,37 +630,37 @@ export default {
       this.getAlarmStatAll({
         pageNum: this.pageNumber,
         pageSize: 10,
-        companyCode: this.companyCode,
-        vehicleCode: text,
+        companyId: this.companyCode,
+        vehicleId: msg.di,
         startDate: this.starData,
         endDate: this.endData,
-        gategory: this.gategorys
+        atypeParent: this.gategorys
       });
-
-      text = null
+      
     },
     //echarts驾驶员选择查询
     echartshandleChange(val) {
       this.cd = true;
-      this.vehicleNumbner = true;
+      this.vehicleNumbner = false;
       this.valueCode = this.echartsOptionsModel[1];
       this.getDeriverAlarmCount({
-        companyCode: this.companyCode,
-        deriverCode: this.valueCode,
+        companyId: this.companyCode,
+        deriverId: this.valueCode,
         startDate: this.starData,
         endDate: this.endData
       })
+      
     },
     //echarts车辆选这查询
     echartshandleItemChange(val) {
       this.cd = false;
       this.vehicleNumbner = true;
       this.valueCode = val[0];
-      this.echartsOptionsModel = val[0];
+      this.echartsOptionsModel = val;
       this.getDeriverVehicleAlarmCount({
-        companyCode: this.companyCode,
-        teamCode: this.teamCodes,
-        vehicleCode: this.valueCode,
+        companyId: this.companyCode,
+        teamId:this.teamCodes,
+        vehicleId: this.valueCode,
         startDate: this.starData,
         endDate: this.endData
       })
@@ -631,102 +670,110 @@ export default {
       if (this.onlineS) {
         if (this.valueCode && this.cd) {
           this.getDeriverAlarmCount({
-            companyCode: this.companyCode,
-            vehicleCode: this.valueCode,
+            companyId: this.companyCode,
+            vehicleId: this.valueCode,
             startDate: this.selectData + " 00:00:00",
             endDate: this.endData
           });
+          this.dataTime =  val + " 00:00:00"+ "-" + this.endData
         } else if (this.valueCode && !this.cd) {
           this.getDeriverAlarmCount({
-            companyCode: this.companyCode,
-            deriverCode: this.valueCode,
+            companyId: this.companyCode,
+            deriverId: this.valueCode,
             startDate: this.selectData + " 00:00:00",
             endDate: this.endData
           });
+
+          this.dataTime =  val + " 00:00:00"+ "-" + this.endData
         }
       } else {
         this.getDeriverAlarmCount({
-          companyCode: this.companyCode,
+          companyId: this.companyCode,
           startDate: this.selectData + " 00:00:00",
           endDate: this.endData
         });
+        this.dataTime =  val + " 00:00:00"+ "-" + this.endData
       }
+ 
     },
     //预警列表，点击地点获取地图预警定位信息
     getLocation(row) {
       this.zoom = 34;
       this.isshow = true;
-      this.lng = row.longit;
-      this.lat = row.lat;
-      this.infoD = row.deriverName;
+      this.lng = row.longitude;
+      this.lat = row.latitude;
+      this.infoD = row.deriveName;
       this.infoNP = row.vehicleCode;
-      this.infoTW = row.alarmName;
-      this.infoWT = row.reportTime;
+      this.infoTW = row.atpyeName;
+      this.infoWT = row.alarmTime;
       this.infoL = row.locationDesc;
     },
     //预警统计列表，点击筛选时间获取数据
     pcickValue(time) {
       this.tabletimestart = time[0] + " 00:00:00";
       this.tabletimeend = time[1] + " 23:59:59";
+      this.dataMonday = time[0] + " 00:00:00";
+      this.dataSunday = time[1] + "23:59:59";
+      console.log(time);
       if (!this.onlineS) {
         this.getAlarmStatAll({
           pageNum: this.listPageNumber,
           pageSize: 10,
-          companyCode: this.companyCode,
+          companyId: this.companyCode,
           startDate: this.tabletimestart,
           endDate: this.tabletimeend,
-          gategory:this.gategorys
+          atypeParent:this.gategorys
         });
       } else if (!this.listVehicle == "" && this.alarmCode == "") {
         this.getAlarmStatAll({
           pageNum: this.listPageNumber,
           pageSize: 10,
-          companyCode: this.companyCode,
-          vehicleCode: this.listVehicle,
+          companyId: this.companyCode,
+          vehicleId: this.listVehicle,
           startDate: this.tabletimestart,
           endDate: this.tabletimeend,
-          gategory:this.gategorys
+          atypeParent:this.gategorys
         });
       } else if (!this.listDirver == "" && this.alarmCode == "") {
         this.getAlarmStatAll({
           pageNum: this.listPageNumber,
           pageSize: 10,
-          companyCode: this.companyCode,
-          deriverCode: this.listDirver,
+          companyId: this.companyCode,
+          deriverId: this.listDirver,
           startDate: this.tabletimestart,
           endDate: this.tabletimeend,
-          gategory:this.gategorys
+          atypeParent:this.gategorys
         });
       } else if (!this.listVehicle == "" && this.alarmCode !== "") {
         this.getAlarmStatAll({
           pageNum: this.listPageNumber,
           pageSize: 10,
-          companyCode: this.companyCode,
-          vehicleCode: this.listVehicle,
+          companyId: this.companyCode,
+          vehicleId: this.listVehicle,
           startDate: this.tabletimestart,
           endDate: this.tabletimeend,
-          gategory:this.gategorys,
-          alarmCode: this.alarmCode
+          atypeParent:this.gategorys,
+          atypeId: this.alarmCode
         });
       } else if (!this.listDirver == "" && this.alarmCode !== "") {
         this.getAlarmStatAll({
           pageNum: this.listPageNumber,
           pageSize: 10,
-          companyCode: this.companyCode,
-          deriverCode: this.listDirver,
+          companyId: this.companyCode,
+          deriverId: this.listDirver,
           startDate: this.tabletimestart,
           endDate: this.tabletimeend,
           gategory:this.gategorys,
-          alarmCode: this.alarmCode
+          atypeId: this.alarmCode
         });
       } else {
         this.getAlarmStatAll({
           pageNum: this.listPageNumber,
           pageSize: 10,
-          companyCode: this.companyCode,
+          companyId: this.companyCode,
           startDate: this.tabletimestart,
           endDate: this.tabletimeend,
-          gategory:this.gategorys
+          atypeParent:this.gategorys
         });
       }
     },
@@ -740,32 +787,32 @@ export default {
         this.getAlarmStatAll({
           pageNum: this.pageNumber,
           pageSize: 10,
-          companyCode: this.companyCode,
-          deriverCode: val[1],
+          companyId: this.companyCode,
+          deriverId: val[1],
           startDate: this.tabletimestart,
           endDate: this.tabletimeend,
-          gategory:this.gategorys
+          atypeParent:this.gategorys
         });
       } else if (this.tabletimestart || this.tabletimeend || this.value7) {
         this.getAlarmStatAll({
           pageNum: this.pageNumber,
           pageSize: 10,
-          companyCode: this.companyCode,
-          deriverCode: val[1],
+          companyId: this.companyCode,
+          deriverId: val[1],
           startDate: this.tabletimestart,
           endDate: this.tabletimeend,
-          gategory:this.gategorys,
-          alarmCode: this.value7
+          atypeParent:this.gategorys,
+          atypeId: this.value7
         });
       } else {
         this.getAlarmStatAll({
           pageNum: this.pageNumber,
           pageSize: 10,
-          companyCode: this.companyCode,
-          deriverCode: val[1],
+          companyId: this.companyCode,
+          deriverId: val[1],
           startDate: this.starData,
           endDate: this.endData,
-          gategory:this.gategorys
+          atypeParent:this.gategorys
         });
       }
 
@@ -779,21 +826,21 @@ export default {
         this.getAlarmStatAll({
           pageNum: this.pageNumber,
           pageSize: 10,
-          companyCode: this.companyCode,
-          vehicleCode: val[0],
+          companyId: this.companyCode,
+          vehicleId: val[0],
           startDate: this.tabletimestart,
           endDate: this.tabletimeend,
-          gategory:this.gategorys
+          atypeParent:this.gategorys
         });
       } else {
         this.getAlarmStatAll({
           pageNum: this.pageNumber,
           pageSize: 10,
-          companyCode: this.companyCode,
-          vehicleCode: val[0],
+          companyId: this.companyCode,
+          vehicleId: val[0],
           startDate: this.starData,
           endDate: this.endData,
-          gategory:this.gategorys
+          atypeParent:this.gategorys
         });
       }
     },
@@ -804,31 +851,39 @@ export default {
         this.getAlarmStatAll({
           pageNum: this.listPageNumber,
           pageSize: 10,
-          companyCode: this.companyCode,
-          vehicleCode: this.listOptionsModel,
+          companyId: this.companyCode,
+          vehicleId: this.listOptionsModel,
           startDate: this.starData,
           endDate: this.endData,
-          gategory:this.gategorys,
-          alarmCode:this.value7
+          atypeParent:this.gategorys,
+          atypeId:this.value7
         });
       }else if(!this.dd && this.listOptionsModel){
         this.getAlarmStatAll({
           pageNum: this.listPageNumber,
           pageSize: 10,
-          companyCode: this.companyCode,
-          deriverCode: this.listDirver,
+          companyId: this.companyCode,
+          deriverId: this.listDirver,
           startDate: this.starData,
           endDate: this.endData,
-          gategory:this.gategorys,
-          alarmCode:this.value7
+          atypeParent:this.gategorys,
+          atypeId:this.value7
         });
       }
       
     },
+     getDateil(id){
 
+      let alarmN = this.tableListData[id.id].alarmNo;
+      let listidArray = {id:alarmN,index:id.id}
+      this.tableDatas = this.tableListData[id.id]
 
-
-
+      if(this.dataMonday != ''){
+        this.$router.push({name:'DDdetail',params:{id:listidArray,dataMonday:this.dataMonday,dataSunday:this.dataSunday,tableDatas:this.tableDatas,companyIds:this.companyCode,atypeParent:65}});
+      }else{
+        this.$router.push({name:'DDdetail',params:{id:listidArray,dataMonday:this.starData,dataSunday:this.endData,tableDatas:this.tableDatas,companyIds:this.companyCode,atypeParent:65}});
+      }
+    },
     /** 数据获取方法 */
     //获取车辆树结构
     async getTeamTree(params, select = false, vehicle = false) {
@@ -861,29 +916,26 @@ export default {
       }
       res = null;
     },
-    //获取驾驶员预警统计echarts
+    //获取驾驶员预警统计echarts"
     async getDeriverAlarmCount(params) {
       let res = await deriverAlarmCount(params);
       this.eChartsPostion();
       if (res.status === 200) {
         res.data.resultMap.forEach(element => {
-          this.polar.xAxis.data.push(element.alarmName);
+          this.polar.xAxis.data.push(element.atpyeName);
           this.polar.series[1].data.push(element.alarmCount);
         });
-        // this.sumCount = res.data.sumCount
-        // this.polar.series[1].name = this.vehicleList[0].teamName
-        // this.dirverTimeStart = this.starData
-        // this.dirverTimeEnd = this.endData
-        res = null
+        this.sumCount = res.data.sumCount
+        this.polar.series[1].name = this.vehicleList[0].teamName
       }
 
     },
-    async getDeriverVehicleAlarmCount(params) {
+    async getDeriverVehicleAlarmCount(params){
       let res = await deriverVehicleAlarmCount(params);
       this.eChartsPostion();
       if (res.status === 200) {
         res.data.derivers[0].alarms.forEach(element => {
-          this.polar.xAxis.data.push(element.alarmName);
+          this.polar.xAxis.data.push(element.atypeName);
           for (let i = 0; i < res.data.derivers.length; i++) {
             for (let c = 0; c < res.data.derivers[0].alarms.length; c++) {
               this.polar.series[i].data.push(
@@ -893,37 +945,63 @@ export default {
             this.polar.series[i].name = res.data.derivers[i].deriverName;
           }
         });
-        // this.driversD = res.data.derivers;
-        // this.sumCount = res.data.sumCount;
-        res = null
+        this.driversD = res.data.derivers;
+        this.sumCount = res.data.sumCount;
       }
     },
+    //读取cookie
+		getCookie:function () {
+			if (document.cookie.length>0) {
+			var arr=document.cookie.split('; ');//这里显示的格式需要切割一下自己可输出看下
+			for(var i=0;i<arr.length;i++){
+				var arr2=arr[i].split('=');//再次切割
+				//判断查找相对应的值
+				 if (arr2[0] == 'userName') {
+            this.usersname = arr2[1]; //保存到保存数据的地方
+          } else if (arr2[0] == 'companyId') {
+            this.companyCode = arr2[1];
+          }
+				}
+			}
+		},
     //获取统计表格数据
     async getAlarmStatAll(params) {
       let res = await alarmStatAll(params);
       if (res.status === 200) {
         this.tableListData = res.data;
-        res = null
       }
     },
     //获取综合统计表格车辆类型筛选条件
     async getByGategory(params, i) {
       let res = await ByGategory(params);
       if (res.status === 200) {
-        this.options3[0].options = res.data;
+        // this.options3[0].options = res.data;
         let respons = await ByGategory(i);
         if (respons.status === 200) {
-          this.options3[1].options = respons.data;
-          res = null
-          respons = null
+          let arr = []
+          for(let i = 0; i<respons.data.length;i++){
+            if(respons.data[i].atypeParent && respons.data[i].atypeParent == "65"){
+                arr.push(respons.data[i]);
+            }
+          }
+
+          this.options3[0].options = arr;
         }
+      }
+    },
+     //获取公司名
+    async getCompos(params) {
+      let res = await getCompanyName(params);
+      if(res.status == 200){
+        this.companyCode = res.data.companyId
+        this.comName = res.data.companyName
+        this.companyImage = "http://47.106.196.228:8888/" + res.data.logoPath
       }
     },
     //获取点击teamcode
     getTeamCode: async function(params) {
       let res = await teamTree(params);
       this.teamTreeCode = res;
-      res = null
     }
   },
   computed: {
@@ -953,22 +1031,29 @@ export default {
   watch: {
     linew: function() {
       // console.log(this.linew);
-    }
+    },
   },
   created: function() {
+    this.getCookie();
+    this.getCompos({
+      username:this.usersname
+    })
     //----------getdatafunction-------//
     //图表查询默认时间（按照往后推7天）
     this.endData = getDay(0) + " 23:23:59";
     this.starData = getDay(-6) + " 00:00:00";
 
+    //图表图例时间
+    this.dataTime = this.starData+ '-' +this.endData
+
     Axios.all([
       //获取车辆列表 搜索车辆个数
-      this.getTeamTree({ companyCode: this.companyCode }),
+      this.getTeamTree({ companyId: this.companyCode }),
       //默认获取下拉列表
-      this.getSearchByName({ companyCode: this.companyCode }),
+      this.getSearchByName({ companyId: this.companyCode }),
       //默认图表数据
       this.getDeriverAlarmCount({
-        companyCode: this.companyCode,
+        companyId: this.companyCode,
         startDate: this.starData,
         endDate: this.endData
       }),
@@ -976,24 +1061,25 @@ export default {
       this.getAlarmStatAll({
         pageNum: this.pageNumber,
         pageSize: 10,
-        companyCode: this.companyCode,
+        companyId: this.companyCode,
         startDate: this.starData,
         endDate: this.endData,
-        gategory: this.gategorys
+        atypeParent: this.gategorys
       })
     ]);
+
   },
   updated() {
     //预统计图表图例位置
-    let legend = this.$refs.legend;
-    let width =
-      legend.style.width ||
-      legend.clientWidth ||
-      legend.offsetWidth ||
-      legend.scrollWidth;
-    this.legendWith = width / 2;
-    legend = null 
-    width = null
+    // let legend = this.$refs.legend;
+    // let width =
+    //   legend.style.width ||
+    //   legend.clientWidth ||
+    //   legend.offsetWidth ||
+    //   legend.scrollWidth;
+    // this.legendWith = width / 2;
+    // legend = null 
+    // width = null
   },
   components: {
     BmlMarkerClusterer,
@@ -1027,6 +1113,7 @@ export default {
   width: 240px;
   height: 64px;
   background-color: #f5f5f5;
+  cursor: pointer;
 }
 .yc-velist-title img {
   width: 32px;
@@ -1034,7 +1121,7 @@ export default {
   border-radius: 16px;
   float: left;
   margin: 16px 0 0 16px;
-  background-color: #112146;
+
 }
 .yc-velist-title h3 {
   font-size: 14px;
@@ -1047,6 +1134,8 @@ export default {
   float: left;
   padding-top: 22px;
   padding-left: 10px;
+   width: 174px;
+  text-align: left
 }
 .yc-list {
   width: 240px;
@@ -1121,7 +1210,8 @@ export default {
 .legend {
   position: absolute;
   left: 50%;
-  margin-left: -15%;
+  transform: translateX(-50%);
+  display: inline-table;
 }
 .legend p {
   float: left;
@@ -1278,5 +1368,7 @@ export default {
   padding: 20px;
   background-color: #fff;
   position: relative;
+  
 }
+
 </style>

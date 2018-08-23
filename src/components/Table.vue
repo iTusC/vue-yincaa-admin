@@ -2,13 +2,14 @@
   <el-table
     :data="tableListDatas"
     stripe
-    style="width: 100%">
+    style="width: 100%"
+    @row-click="showDetail">
     <el-table-column
       type="index"
       width="50"
       label="序号">
     </el-table-column>
-     <template v-for="items in tableTitle">
+     <template v-for="(items,ind) in tableTitle">
        <template v-if="items.scope">
           <el-table-column
             :prop ="items.vul"
@@ -23,9 +24,11 @@
        <template v-if="items.more">
           <el-table-column
             :prop="items.vul"
-            :label="items.title">
+            :label="items.title"
+            :width="items.widths"
+            type="index">
               <template slot-scope="scope">
-                <router-link to="" style="color:#474747">{{ items.title }}</router-link>
+                <a @click="getDateil(scope.$index)" style="color:#474747" class="hovers">{{ items.title }}</a>
               </template>
           </el-table-column>
        </template>
@@ -33,7 +36,8 @@
          <el-table-column
           :prop="items.vul"
           :label="items.title"
-          :width="items.widths">
+          :width="items.widths"
+          >
         </el-table-column>
        </template>
      </template>
@@ -79,7 +83,16 @@ export default {
   methods: {
     showDetail(row) {
       this.$emit("getLocation", row);
+    },
+    getDateil(id){
+      this.$emit("getDateil",{id:id})
     }
   }
 };
 </script>
+<style scoped>
+  .hovers{
+    cursor: pointer;
+  }
+</style>
+

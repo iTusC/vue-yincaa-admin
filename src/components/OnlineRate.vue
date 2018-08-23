@@ -22,7 +22,6 @@ export default {
   props: {
     rate: {
       type: Number,
-      default: 0.6
     },
     skcolor: {
       type: String,
@@ -34,7 +33,6 @@ export default {
     },
     onlineone:{
       type:Number,
-      default:1
     }
   },
   data() {
@@ -52,10 +50,10 @@ export default {
         perimeter * percent + " " + perimeter * (1 - percent));
     },
     oRateN: function() {
-      return this.rate * 100 + "%";
+      return String(this.rate * 100).slice(0,4) + "%";
     },
     xlf(){
-      console.log(1)
+
     }
   }
 };

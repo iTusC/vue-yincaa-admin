@@ -4,7 +4,7 @@
            <ul>
                <template v-for="(vehicleL,i) in vehicleList">
                    <li class="yc-vehicle-list-items" :class="{'yc-active-list-items':i === ind}">
-                       <div class="title" @click.stop="showFun($event,i)" :key="i" :class="{'yc-is-opened':i === ind}">
+                       <div class="title" @click.stop="showFun($event,i,vehicleL.teamId)" :key="i" :class="{'yc-is-opened':i === ind}">
                            <i class="icon-chosen iconfont yc-icon-jiegou"></i>
                            {{ vehicleL.teamName }}({{ vehicleL.onlineSum }}/{{ vehicleL.vehicleSum }})
                            <i class="el-submenu__icon-arrow el-icon-arrow-down"></i>
@@ -12,7 +12,7 @@
                        <ul :class="{'active':i === ind}" class="vehicle-list-items">
                            <template v-for="(chr,ind) in vehicleL.vehicleList">
                                 <li class="vehilce-list-item">
-                                    <div class="vehile-item-title" @click.stop="itemOpened($event,ind)">
+                                    <div class="vehile-item-title" @click.stop="itemOpened($event,ind,chr.vehicleId,vehicleL.teamId)" >
                                         <i :class="chr.isOnline?'online':'offline'"></i>
                                         {{ chr.vehicleCode }}
                                         <i class="icon-user iconfont yc-icon-yonghu">{{ chr.deriverSum }}</i>
@@ -45,21 +45,22 @@
             }
         },
         methods: {
-            showFun(e,i){
+            showFun(e,i,tm){
                 // if(this.ind === i+1+''){
                 //     this.ind = ''
                 // }else{
                 //     this.ind =i+1+'' ;
                 // }  
-                this.$emit('showFun',{i:i,e:e});
+                this.$emit('showFun',{i:i,e:e,tm:tm});
             },
-            itemOpened(e,i){
+            itemOpened(e,i,di,tm){
+                console.log(di)
                 // if(this.itemEnd === i+1+''){
                 //     this.itemEnd = ''
                 // }else{
                 //     this.itemEnd =i+1+'' ;
                 // }  
-                this.$emit('itemOpened',{e:e,i:i})
+                this.$emit('itemOpened',{e:e,i:i,di:di,tm:tm})
             }
         }
     }
@@ -184,7 +185,7 @@
 }
 .vehicle-list ul.active{
     display: block;
-    background-color:#fbfbfb;
+    background-color:#fff;
 }
 .yc-is-opened{
     background-color: #fff;

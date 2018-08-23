@@ -25,7 +25,7 @@ export default {
       let {lng, lat} = this.position
       let pixel = map.pointToOverlayPixel(new BMap.Point(lng, lat))
       el.style.left = pixel.x + 20 + 'px'
-      el.style.top = pixel.y - 20 + 'px'
+      el.style.top = pixel.y - 40 + 'px'
     }
   }
 }

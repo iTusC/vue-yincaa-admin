@@ -1,21 +1,21 @@
 <template>
     <div>
 
-            <li class="vehilce-list-item">
-                <div class="vehile-item-title" @click.stop="itemOpened($event,i)">
-                    <i :class="chr.status?'online':'offline'"></i>
-                    {{ chr.title }}
-                    <i class="icon-user iconfont yc-icon-yonghu">{{ chr.numb }}</i>
-                </div>
-                <ul class="vehile-item-list" :class="{'vehile-item-list-isopened':chr.ind === itemEnd}">
-                    <template v-for="chrls in chr.chrl">
-                        <li>
-                            {{ chrls.name }}
-                            <i class="item-time">{{ chrls.time }}</i>
-                        </li>
-                    </template>
-                </ul>
-            </li>
+        <li class="vehilce-list-item">
+            <div class="vehile-item-title" @click.stop="itemOpened($event,i)">
+                <i :class="chr.status?'online':'offline'"></i>
+                {{ chr.title }}
+                <i class="icon-user iconfont yc-icon-yonghu">{{ chr.numb }}</i>
+            </div>
+            <ul class="vehile-item-list" :class="{'vehile-item-list-isopened':chr.ind === itemEnd}">
+                <template v-for="chrls in chr.chrl">
+                    <li>
+                        {{ chrls.name }}
+                        <i class="item-time">{{ chrls.time }}</i>
+                    </li>
+                </template>
+            </ul>
+        </li>
         
     </div>
 </template>

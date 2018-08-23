@@ -14,17 +14,17 @@
         <tr >
           <td >{{ i + 1 }}</td>
           <td >{{ tableDatas.vehicleCode }}</td>
-          <td >{{ tableDatas.deriverName }}</td>
+          <td >{{ tableDatas.deriveName }}</td>
           <template v-if="tableListShowi === i">
             <td :colspan="ctcspan" style="padding:0;">
               <div class="cm-table-d">
                 <el-scrollbar style="height:100%;" class="yc-scrollbar">
                   <table width="100%" class="cm-table">
-                      <tr v-for="(tablechr,index) in tableDataAlarms">
-                        <td width="31%">{{ tablechr.vehicleName }}</td>
-                        <td width="30%">{{ tablechr.deriverName }}</td>
-                        <td class="hovers" :title="tablechr.locationDesc " @click="getLocation(tableDataAlarms,tableData,index,i)">{{ tablechr.reportTime }} {{ tablechr.locationDesc.slice(0,8)+'...' }}</td>
-                        <td @click="paths(tableDatas)">查看更多</td>
+                      <tr v-for="(tablechr,index) in tableDataAlarms" @click="getLocation(tableDataAlarms,tableData,index,i)">
+                        <td width="31%">{{ tablechr.vehicleAlarmName }}</td>
+                        <td width="30%">{{ tablechr.deriverAlarmName }}</td>
+                        <td class="hovers" :title="tablechr.locationDesc " >{{ tablechr.reportTime }} {{ tablechr.locationDesc.slice(0,8)+'...' }}</td>
+                        <td @click.stop="getDateil(tablechr.alarmNo,index)" class="hovers">查看更多</td>
                       </tr>
                   </table>
                 </el-scrollbar>
@@ -33,10 +33,10 @@
             </template>
             <template v-else>
               <td>{{ tableDatas.vehicleCount }} 次</td>
-              <td>{{ tableDatas.deriverCount }} 次</td>
+              <td>{{ tableDatas.derivCount }} 次</td>
               <td></td>
             </template>
-            <td @click="showList(i)" :tableListShow="tableListShowi" class="show" v-text="tableListShowi === i?'收起本行':'展开本行'"></td>
+            <td  @click="showList(i)" :tableListShow="tableListShowi" class="show" v-text="tableListShowi === i?'收起本行':'展开本行'"></td>
         </tr>
       </template>
     </table>
@@ -52,6 +52,9 @@ export default {
     },
     getLocation(tablechr,tableData,index,i){
       this.$emit("getLocation",{tablechr,tableData,index,i})
+    },
+    getDateil(id,index){
+      this.$emit("getDateil",{id:id,index:index})
     }
   }
 };
