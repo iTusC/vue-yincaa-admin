@@ -15,7 +15,7 @@ const setCookie =(c_name,exdays)=> {
   var exdate=new Date();//获取时间
   exdate.setTime(exdate.getTime() + 24*60*60*1000*exdays);//保存的天数
   //字符串拼接cookie
-  window.document.cookie="authorization"+ "=" +c_name+";path=/;expires="+exdate.toGMTString();
+  window.document.cookie="x-auth-token"+ "=" +c_name+";path=/;expires="+exdate.toGMTString();
 }
 
 //读取cookie
@@ -25,7 +25,7 @@ const getCookie =  ()=> {
   for(var i=0;i<arr.length;i++){
     var arr2=arr[i].split('=');//再次切割
     //判断查找相对应的值
-    if(arr2[0]=='authorization'){
+    if(arr2[0]=='x-auth-token'){
       return arr2[1];//保存到保存数据的地方
     }
     }
@@ -38,7 +38,13 @@ const clearCookie = ()=> {
 
 //请求拦截器
 axios.interceptors.request.use(config => {
-    config.headers.Authorization = getCookie();
+    // axios.create({
+    //   headers:{
+    //     'X-Auth-Token':getCookie()
+    //   }
+    // })
+    // config.headers.authorization = getCookie();
+    config.headers['x-auth-token'] = getCookie();
     //发起请求时，取消掉当前正在进行的相同请求
     if (promiseArr[config.url]) {
         promiseArr[config.url]('操作取消')
@@ -54,11 +60,17 @@ axios.interceptors.request.use(config => {
 
 //响应拦截器即异常处理
 axios.interceptors.response.use(response => {
+  
+    console.log(response.headers['x-auth-token'])
     // debugger
-    if(response.headers.authorization){
-      setCookie(response.headers.authorization,1)
-    }
+    // if(response.headers.authorization){
+    //   setCookie(response.headers.authorization,1)
+    // }
     // handleSetAxiosHeaders({authorization: getCookie()})
+    if(response.headers['x-auth-token']){
+        setCookie(response.headers['x-auth-token'],1)
+      }
+
     return response
 }, error => {
   if (error.response) {
@@ -107,16 +119,16 @@ axios.interceptors.response.use(response => {
           // err.message = `连接错误${err.response.status}`
       }
     } else {
-      err.message = "连接到服务器失败"
+      // err.message = "连接到服务器失败"
     }
     return Promise.reject(error.response.data)   // 返回接口返回的错误信息
 })
- 
 axios.defaults.baseURL = '/api'
 //设置默认请求头
 axios.defaults.headers = {
     'X-Requested-With': 'XMLHttpRequest'
 }
+
 axios.defaults.timeout = 10000
  
 export default {
