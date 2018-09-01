@@ -14,16 +14,20 @@
           </el-container>
        </el-container> -->
        <router-view></router-view>
+      <dialog></dialog>
   </div>
 </template>
 
 <script>
 import Headers from "../src/components/Header";
 import NavMenu from "../src/components/Menu";
+import dialog from "../src/components/dialog"
+
 export default {
   components: {
     Headers,
-    NavMenu
+    NavMenu,
+    dialog
   },
   name: "App"
 };

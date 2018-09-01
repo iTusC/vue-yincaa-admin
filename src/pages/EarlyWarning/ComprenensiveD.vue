@@ -95,8 +95,9 @@
                     </td>
                   </tr>
                 </table>
-                
-                <chart :options="polar" :autoResize="true"></chart>
+                <div v-loading="lods">
+                  <chart :options="polar" :autoResize="true"></chart>
+                </div>
             </section>
             <section class="cd-map">
                 <div class="cd-map-title">
@@ -163,7 +164,7 @@
                     </el-col>
                 </el-row>
                 <div class="ul-itme">
-                    <c-table :ctcspan="ctcspan" :showText="showText" :tableData="tableData" @showList="showList" @getLocation="getLocation" :tableListShowi="tableListShowi" :tableDataAlarms="tableDataAlarms" @paths="paths" @getDateil="getDateil"></c-table>
+                    <c-table :ctcspan="ctcspan" :showText="showText" :tableData="tableData" @showList="showList" @getLocation="getLocation" :tableListShowi="tableListShowi" :tableDataAlarms="tableDataAlarms" @paths="paths" @getDateil="getDateil" :loading="loading" :loadings="loadings"></c-table>
                 </div>
             </section>
            
@@ -205,6 +206,9 @@ export default {
 
   data() {
     return {
+      lods:true,
+      loadings:true,
+      loading:true,
       //列表报警类型配置
       options3: [
         {
@@ -924,6 +928,7 @@ export default {
         });
         //获取保存当前跳转详情页的字段ID
         this.tableDatas = this.tableData[i]
+        this.loadings=false
       }
       // this.tableDataAlarms.length = 0;
       this.addressDetail();
@@ -931,6 +936,7 @@ export default {
     //跳转详情页
     getDateil(id){
       this.showDetail = true;
+      if(this.dataMonday != '' && this.alarmCode !== null &&  this.listOptionsModel !== null ){}
       if(this.dataMonday != ''){
         this.$router.push({name:'CDdetail',params:{id:id,dataMonday:this.dataMonday,dataSunday:this.dataSunday,tableDatas:this.tableDatas,companyIds:this.companyCode}});
       }else{
@@ -955,9 +961,7 @@ export default {
           this.onlineOptions[0].onlineChr = res.data[0].vehicleList;
           this.echartsOptions = res.data[0].vehicleList;
           for (let i = 0; i < this.echartsOptions.length; i++) {
-            this.echartsOptions[i].echartsChr = this.echartsOptions[
-              i
-            ].deriverList;
+            this.echartsOptions[i].echartsChr = this.echartsOptions[i].deriverList;
           }
         } else {
           this.selectNull = true;
@@ -999,25 +1003,6 @@ export default {
       let res = await composAlarmCount(params);
       this.eChartsPostion();
       if (res.status === 200) {
-        // if (vehicle) {
-        //   res.data.vehicleCount.forEach(element => {
-        //     this.polar.xAxis.data.push(
-        //       element.everyDate.slice(5).replace(/-/, "/")
-        //     );
-        //   });
-        //   res.data.vehicleCount.forEach(element => {
-        //     this.polar.series[0].data.push(Object.freeze(element.alarmCount));
-        //   });
-        // } else if (divers) {
-        //   res.data.vehicleCount.forEach(element => {
-        //     this.polar.xAxis.data.push(
-        //       element.everyDate.slice(5).replace(/-/, "/")
-        //     );
-        //   });
-        //   res.data.vehicleCount.forEach(element => {
-        //     this.polar.series[1].data.push(Object.freeze(element.alarmCount));
-        //   });
-        // } else {
           res.data.deriverCount.forEach(element => {
             this.polar.xAxis.data.push(
               element.everyDate.slice(5).replace(/-/, "/")
@@ -1028,7 +1013,9 @@ export default {
           });
           res.data.vehicleCount.forEach(element => {
             this.polar.series[1].data.push(Object.freeze(element.alarmCount));
+
           });
+          this.lods = false;
           res = null;
       }
     },
@@ -1053,6 +1040,7 @@ export default {
       let res = await alarmCompsStat(params);
       if (res.status === 200) {
         this.tableData = Object.freeze(res.data);
+        this.loading = false;
       }
       res = null;
     },
@@ -1062,6 +1050,7 @@ export default {
 
       if (res.status === 200) {
         this.tableDataAlarms = res.data;
+        this.loading = false;
       }
     },
     //获取综合统计表格车辆类型筛选条件

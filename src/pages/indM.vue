@@ -10,7 +10,7 @@
                             <span class="letter">1</span>
                             <span class="emjd">,</span>
                             <span class="letter">5</span>
-                            <span class="letter">0</span>
+                            <span class="letter">0</span
                             <span class="letter">2</span>
                             <span class="emjd">,</span>
                             <span class="letter">3</span>
@@ -19,7 +19,9 @@
                         </div>
                     </div>
                     </div>
-                    <!-- <div id="myCharts" :style="{width: '400px', height: '400px'}" style="margin-top:50px;margin-left:20px;"></div> -->
+                    <div class="mycharts">
+                    <div id="myCharts" :style="{width: '100%', height: '500px'}" style=""></div>
+                    </div>
                 </section>
                
             </article>
@@ -62,17 +64,16 @@
                 <section class="demo-echarts">
                   <h2>预警分类（2018.08）</h2>
                   <span class="more"></span>
-                  <div id="myChart" :style="{width: '400px', height: '400px'}" style="margin-top:50px;margin-left:20px;"></div>
+                  <div id="myChart" class="myChart" :style="stylewh" style="margin-top:50px;margin-left:20px;"></div>
                 </section>
                 <section class="demo-message">
                   <div class="news">
                     <span class="more"></span>
                     <h2>系统消息</h2>
-                    <ul>
-                      <li style="color:rgb(102, 220, 242)">16:58  粤A9328在507创意园发生-车道偏离-车辆预警</li>
-                      <li>16:34  粤A0L248在中山大学南校区发生-抽烟-驾驶员预警</li>
-                      <li>16:22  粤AM491在荔湾文化中心发生-打电话-驾驶员预警</li>
-                      <li>16:01  粤A5Q492在新大新百货发生-左顾右盼-驾驶员预警</li>
+                    <ul class="messageNew">
+                      <li v-for="item in messages">
+                        {{ item.text }}
+                      </li>
                     </ul>
                   </div>
                   <div class="logos" @click="routoIndex">
@@ -88,6 +89,7 @@
     import axios from 'axios'
     import data from '../../static/js/lines-bus'
     import 'echarts/map/js/china.js'
+    import bmap from "vue-baidu-map";
     import echarts from 'echarts'
     import '../assets/mainImages/bgpic.png'
     import '../assets/mainImages/lines.png'
@@ -95,290 +97,359 @@
     import '../assets/mainImages/vdbg.png'
     import '../assets/echarsL.png'
     import '../assets/2.png'
+    import {getDomeVertical} from '../api/getData'
+    import { getDay, getWeek,getLocation,showPosition,getCascaderObj} from "../../static/js/data";
+    import '../../static/js/bmap.min'
     export default {
         data(){
             return {
-               dvecharts:{}
+               dvecharts:{},
+               ddData:[],
+               vdData:[],
+               legendName:[],
+               usersname:"",
+               companyCode:"",
+               day:"",
+               stylewh:{
+                 width:'300px',
+                 height:'300px'
+               },
+               messages:[
+                 {
+                   text:"16:34  粤A0L248在中山大学南校区发生-抽烟-驾驶员预警"
+                 },
+                 {
+                   text:"16:22  粤AM491在荔湾文化中心发生-打电话-驾驶员预警"
+                 },
+                 {
+                   text:"16:22  粤AM491在荔湾文化中心发生-打电话-驾驶员预警"
+                 },
+                 {
+                   text:"16:01  粤A5Q492在新大新百货发生-左顾右盼-驾驶员预警"
+                 }
+               ]
             }
         },
         mounted(){
-          this.drawLine();
+          this.messageNew()
+          this.getData();
+          //图表查询默认时间（按照往后推7天）
+          this.endData = getDay(0) + " 23:23:59";
+          this.starData = getDay(-(this.day - 1)) + " 00:00:00";
+          this.getCookie();
           this.getMapData();
+          this.getDomeVerticals({
+            companyId:this.companyCode,
+            startDate:this.starData,
+            endDate:this.endData
+          })
+          
+          this.drawLine();
         },
         methods:{
+          getData(){
+            let now = new Date();
+            this.day = now.getDate();
+          },
+          //读取cookie
+          getCookie:function () {
+            if (document.cookie.length>0) {
+            var arr=document.cookie.split('; ');//这里显示的格式需要切割一下自己可输出看下
+            for(var i=0;i<arr.length;i++){
+              var arr2=arr[i].split('=');//再次切割
+              //判断查找相对应的值
+              if (arr2[0] == 'userName') {
+                  this.usersname = arr2[1]; //保存到保存数据的地方
+                } else if (arr2[0] == 'companyId') {
+                  this.companyCode = arr2[1];
+                }
+              }
+            }
+          },
           routoIndex(){
             this.$router.push({path:'/ComprenensiveD'})
           },
+          messageNew(){
+            let ul = document.getElementsByClassName("messageNew").childNodes;
+          
+          },
           getMapData(){
-            
+            let myCharts = echarts.init(document.getElementById('myCharts'));
             $.get('../../static/js/lines-bus.json', function(data) {
-                  var hStep = 300 / (data.length - 1);
-                  var busLines = [].concat.apply([], data.map(function (busLine, idx) {
-                      var prevPt;
-                      var points = [];
-                      for (var i = 0; i < busLine.length; i += 2) {
-                          var pt = [busLine[i], busLine[i + 1]];
-                          if (i > 0) {
-                              pt = [
-                                  prevPt[0] + pt[0],
-                                  prevPt[1] + pt[1]
-                              ];
-                          }
-                          prevPt = pt;
+                var hStep = 300 / (data.length - 1);
+                var busLines = [].concat.apply([], data.map(function (busLine, idx) {
+                    var prevPt;
+                    var points = [];
+                    for (var i = 0; i < busLine.length; i += 2) {
+                        var pt = [busLine[i], busLine[i + 1]];
+                        if (i > 0) {
+                            pt = [
+                                prevPt[0] + pt[0],
+                                prevPt[1] + pt[1]
+                            ];
+                        }
+                        prevPt = pt;
 
-                          points.push([pt[0] / 1e4, pt[1] / 1e4]);
-                      }
-                      return {
-                          coords: points,
-                          lineStyle: {
-                              normal: {
-                                  color: echarts.color.modifyHSL('#5A94DF', Math.round(hStep * idx))
+                        points.push([pt[0] / 1e4, pt[1] / 1e4]);
+                    }
+                    return {
+                        coords: points,
+                        lineStyle: {
+                            normal: {
+                                color: echarts.color.modifyHSL('#5A94DF', Math.round(hStep * idx))
+                            }
+                        }
+                    };
+                }));
+                myCharts.setOption({
+                    animation: true,
+                    bmap: {
+                        center: [116.46, 39.92],
+                        zoom: 12,
+                        roam: true,
+                        mapStyle: {
+                          'styleJson': [
+                            {
+                              'featureType': 'water',
+                              'elementType': 'all',
+                              'stylers': {
+                                'color': '#031628'
                               }
-                          }
-                      };
-                  }));
-                  let myCharts = echarts.init(document.getElementById('myCharts'))
-        
-                  myCharts.setOption( {
-                      bmap: {
-                          center: [116.46, 39.92],
-                          zoom: 10,
-                          roam: true,
-                          mapStyle: {
-                            'styleJson': [
-                              {
-                                'featureType': 'water',
-                                'elementType': 'all',
-                                'stylers': {
-                                  'color': '#031628'
-                                }
-                              },
-                              {
-                                'featureType': 'land',
-                                'elementType': 'geometry',
-                                'stylers': {
-                                  'color': '#000102'
-                                }
-                              },
-                              {
-                                'featureType': 'highway',
-                                'elementType': 'all',
-                                'stylers': {
-                                  'visibility': 'off'
-                                }
-                              },
-                              {
-                                'featureType': 'arterial',
-                                'elementType': 'geometry.fill',
-                                'stylers': {
-                                  'color': '#000000'
-                                }
-                              },
-                              {
-                                'featureType': 'arterial',
-                                'elementType': 'geometry.stroke',
-                                'stylers': {
-                                  'color': '#0b3d51'
-                                }
-                              },
-                              {
-                                'featureType': 'local',
-                                'elementType': 'geometry',
-                                'stylers': {
-                                  'color': '#000000'
-                                }
-                              },
-                              {
-                                'featureType': 'railway',
-                                'elementType': 'geometry.fill',
-                                'stylers': {
-                                  'color': '#000000'
-                                }
-                              },
-                              {
-                                'featureType': 'railway',
-                                'elementType': 'geometry.stroke',
-                                'stylers': {
-                                  'color': '#08304b'
-                                }
-                              },
-                              {
-                                'featureType': 'subway',
-                                'elementType': 'geometry',
-                                'stylers': {
-                                  'lightness': -70
-                                }
-                              },
-                              {
-                                'featureType': 'building',
-                                'elementType': 'geometry.fill',
-                                'stylers': {
-                                  'color': '#000000'
-                                }
-                              },
-                              {
-                                'featureType': 'all',
-                                'elementType': 'labels.text.fill',
-                                'stylers': {
-                                  'color': '#857f7f'
-                                }
-                              },
-                              {
-                                'featureType': 'all',
-                                'elementType': 'labels.text.stroke',
-                                'stylers': {
-                                  'color': '#000000'
-                                }
-                              },
-                              {
-                                'featureType': 'building',
-                                'elementType': 'geometry',
-                                'stylers': {
-                                  'color': '#022338'
-                                }
-                              },
-                              {
-                                'featureType': 'green',
-                                'elementType': 'geometry',
-                                'stylers': {
-                                  'color': '#062032'
-                                }
-                              },
-                              {
-                                'featureType': 'boundary',
-                                'elementType': 'all',
-                                'stylers': {
-                                  'color': '#465b6c'
-                                }
-                              },
-                              {
-                                'featureType': 'manmade',
-                                'elementType': 'all',
-                                'stylers': {
-                                  'color': '#022338'
-                                }
-                              },
-                              {
-                                'featureType': 'label',
-                                'elementType': 'all',
-                                'stylers': {
-                                  'visibility': 'off'
-                                }
+                            },
+                            {
+                              'featureType': 'land',
+                              'elementType': 'geometry',
+                              'stylers': {
+                                'color': '#000102'
                               }
-                            ]
-                          }
-                      },
-                      series: [{
-                          type: 'lines',
-                          coordinateSystem: 'bmap',
-                          polyline: true,
-                          data: busLines,
-                          silent: true,
-                          lineStyle: {
-                              normal: {
-                                  // color: '#c23531',
-                                  // color: 'rgb(200, 35, 45)',
-                                  opacity: 0.2,
-                                  width: 1
+                            },
+                            {
+                              'featureType': 'highway',
+                              'elementType': 'all',
+                              'stylers': {
+                                'visibility': 'off'
                               }
-                          },
-                          progressiveThreshold: 500,
-                          progressive: 200
-                      }, {
-                          type: 'lines',
-                          coordinateSystem: 'bmap',
-                          polyline: true,
-                          data: busLines,
-                          lineStyle: {
-                              normal: {
-                                  width: 0
+                            },
+                            {
+                              'featureType': 'arterial',
+                              'elementType': 'geometry.fill',
+                              'stylers': {
+                                'color': '#000000'
                               }
-                          },
-                          effect: {
-                              constantSpeed: 20,
-                              show: true,
-                              trailLength: 0.1,
-                              symbolSize: 1.5
-                          },
-                          zlevel: 1
-                      }]
-                  });
-              });
-            },
-            scroll(){
-              this.animate=true;    // 因为在消息向上滚动的时候需要添加css3过渡动画，所以这里需要设置true
-              setTimeout(()=>{      //  这里直接使用了es6的箭头函数，省去了处理this指向偏移问题，代码也比之前简化了很多
-                      this.items.push(this.items[0]);  // 将数组的第一个元素添加到数组的
-                      this.items.shift();               //删除数组的第一个元素
-                      this.animate=false;  // margin-top 为0 的时候取消过渡动画，实现无缝滚动
-              },500)
-            },
-            drawLine(){
-              // 基于准备好的dom，初始化echarts实例
-              let myChart = this.$echarts.init(document.getElementById('myChart'))
-              // 绘制图表
-              myChart.setOption({
-                    tooltip: {
-                      
-                    },
-                    legend: {
-                        orient: 'vertical',
-                        x: 'left',
-                        itemGap: 20,
-                        data:['车距时距检测','前侧碰撞','车道偏离','驻车滑行','打电话','抽烟','打哈欠','左顾右盼','遮挡/离岗/异常','分神提醒/低头/瞌睡'],
-                        textStyle:{
-                          color:'#fff'
+                            },
+                            {
+                              'featureType': 'arterial',
+                              'elementType': 'geometry.stroke',
+                              'stylers': {
+                                'color': '#0b3d51'
+                              }
+                            },
+                            {
+                              'featureType': 'local',
+                              'elementType': 'geometry',
+                              'stylers': {
+                                'color': '#000000'
+                              }
+                            },
+                            {
+                              'featureType': 'railway',
+                              'elementType': 'geometry.fill',
+                              'stylers': {
+                                'color': '#000000'
+                              }
+                            },
+                            {
+                              'featureType': 'railway',
+                              'elementType': 'geometry.stroke',
+                              'stylers': {
+                                'color': '#08304b'
+                              }
+                            },
+                            {
+                              'featureType': 'subway',
+                              'elementType': 'geometry',
+                              'stylers': {
+                                'lightness': -70
+                              }
+                            },
+                            {
+                              'featureType': 'building',
+                              'elementType': 'geometry.fill',
+                              'stylers': {
+                                'color': '#000000'
+                              }
+                            },
+                            {
+                              'featureType': 'all',
+                              'elementType': 'labels.text.fill',
+                              'stylers': {
+                                'color': '#857f7f'
+                              }
+                            },
+                            {
+                              'featureType': 'all',
+                              'elementType': 'labels.text.stroke',
+                              'stylers': {
+                                'color': '#000000'
+                              }
+                            },
+                            {
+                              'featureType': 'building',
+                              'elementType': 'geometry',
+                              'stylers': {
+                                'color': '#022338'
+                              }
+                            },
+                            {
+                              'featureType': 'green',
+                              'elementType': 'geometry',
+                              'stylers': {
+                                'color': '#062032'
+                              }
+                            },
+                            {
+                              'featureType': 'boundary',
+                              'elementType': 'all',
+                              'stylers': {
+                                'color': '#465b6c'
+                              }
+                            },
+                            {
+                              'featureType': 'manmade',
+                              'elementType': 'all',
+                              'stylers': {
+                                'color': '#022338'
+                              }
+                            },
+                            {
+                              'featureType': 'label',
+                              'elementType': 'all',
+                              'stylers': {
+                                'visibility': 'off'
+                              }
+                            }
+                          ]
                         }
                     },
-                    color:['#6B8FC9', '#2778A6','#DCBB4B','#E43D3D','#BF1F6F','#9A4DAD','#5445BB','#C65455','#18BCC3;','#4BB46C','#D06F33'],
-                    series: [
-                        {
-                            name:'车辆预警',
-                            type:'pie',      
-                            radius: [0, '30%'],
-                            center:['60%','45%'],
-                            label: {
-                                normal: {
-                                    position: 'inner'
-                                }
-                            },
-                            labelLine: {
-                                normal: {
-                                    show: false
-                                }
-                            },
-                            data:[
-                                {value:335, name:'车距时距检测', selected:true},
-                                {value:679, name:'前侧碰撞'},
-                                {value:1548, name:'车道偏离'},
-                                {value:1548, name:'驻车滑行'},
-                            ]
+                    series: [{
+                        type: 'lines',
+                        coordinateSystem: 'bmap',
+                        polyline: true,
+                        data: busLines,
+                        silent: true,
+                        lineStyle: {
+                            normal: {
+                                // color: '#c23531',
+                                // color: 'rgb(200, 35, 45)',
+                                opacity: 0.1,
+                                width: 1
+                            }
                         },
-                        {
-                            name:'驾驶员预警',
-                            type:'pie',
-                            radius: ['40%', '66%'],
-                            center:['60%','45%'],
-                            label: {
-                                normal: {
-                                    show:false
-                                    }
-                      
-                            },
-                            data:[
-                                {value:335, name:'打电话'},
-                                {value:310, name:'抽烟'},
-                                {value:234, name:'打哈欠'},
-                                {value:135, name:'左顾右盼'},
-                                {value:1048, name:'未系安全带'},
-                                {value:251, name:'遮挡/离岗/异常'},
-                                {value:147, name:'分神提醒/低头/瞌睡'}
-                            ]
-                        }
-                    ]
+                        progressiveThreshold: 500,
+                        progressive: 200
+                    }, {
+                        type: 'lines',
+                        coordinateSystem: 'bmap',
+                        polyline: true,
+                        data: busLines,
+                        lineStyle: {
+                            normal: {
+                                width: 0
+                            }
+                        },
+                        effect: {
+                            constantSpeed: 20,
+                            show: true,
+                            trailLength: 0.1,
+                            symbolSize: 1.5
+                        },
+                        zlevel: 1
+                    }]
+                });
+            });
+          },
+          scroll(){
+         
+            this.animate=true;    // 因为在消息向上滚动的时候需要添加css3过渡动画，所以这里需要设置true
+            setTimeout(()=>{      //  这里直接使用了es6的箭头函数，省去了处理this指向偏移问题，代码也比之前简化了很多
+                    this.items.push(this.items[0]);  // 将数组的第一个元素添加到数组的
+                    this.items.shift();               //删除数组的第一个元素
+                    this.animate=false;  // margin-top 为0 的时候取消过渡动画，实现无缝滚动
+            },500)
+          },
+          drawLine(){
+            // 基于准备好的dom，初始化echarts实例
+            let myChart = this.$echarts.init(document.getElementById('myChart'))
+            // 绘制图表
+            myChart.setOption({
+                  tooltip: {
+                    
+                  },
+                  legend: {
+                      orient: 'vertical',
+                      x: 'left',
+                      itemGap: 20,
+                      data:this.legendName,
+                      textStyle:{
+                        color:'#fff'
+                      }
+                  },
+                  color:['#6B8FC9', '#2778A6','#DCBB4B','#E43D3D','#BF1F6F','#9A4DAD','#5445BB','#C65455','#18BCC3;','#4BB46C','#D06F33'],
+                  series: [
+                      {
+                          name:'车辆预警',
+                          type:'pie',      
+                          radius: [0, '30%'],
+                          center:['60%','45%'],
+                          label: {
+                              normal: {
+                                  position: 'inner'
+                              }
+                          },
+                          labelLine: {
+                              normal: {
+                                  show: false
+                              }
+                          },
+                          data:this.ddData
+                      },
+                      {
+                          name:'驾驶员预警',
+                          type:'pie',
+                          radius: ['40%', '66%'],
+                          center:['60%','45%'],
+                          label: {
+                              normal: {
+                                  show:false
+                                  }
+                    
+                          },
+                          data:this.vdData
+                      }
+                  ]
+            });
+          },
+          
+          async getDomeVerticals(param){
+           
+            let res = await getDomeVertical(param);
+            if(res.status == 200){
+              this.legendName = res.data.name;
+              let datas = []
+              res.data.forEach(element => {
+                datas.push(element.value)
               });
+              console.log(datas)
+              for(let i = 0; i < 5; i++){
+                this.ddData.push(datas[i]);
+              }
+              for(let i = 5; i < res.data.length;i++){
+                this.vdData.push(datas[i])
+              }
+              console.log(this.ddData,this.vdData)
             }
-        },
+          }
+        }
     }
 </script>
 
@@ -386,7 +457,6 @@
 .main{
     min-width: 1440px;
     padding:20px;
-    width:calc(100% - 40px);
     height: 1024px;
     background-image:url("../assets/mainImages/bgpic.png");
     background-size: 100% 100%;
@@ -420,6 +490,15 @@
             background-repeat: no-repeat;
             background-size: 100% 100%;
             position: relative;
+            overflow: hidden;
+        }
+        .mycharts{
+          width:calc(100% - 64px);
+          height:444px;
+          margin-left:26px;
+          margin-top:28px;
+          border-radius: 20px;
+          overflow: hidden;
         }
         .number{
             position:absolute;
@@ -429,11 +508,13 @@
             width: 40%;
             height: 127px;
             background-size: 100% 100%;
+            z-index: 2;
         }
         .democontent{
             display: block;
             // min-width: 688px;
-            width:1440px;
+            width:100%;
+            min-width:1406px;
             height: 154px;
             margin-top: 20px;
            margin-right: auto;
@@ -442,6 +523,8 @@
             .demo-early{
                 float: left;
                 min-width:696px;
+                width:49.5%;
+                margin-left:3.05%;
                 .top{
                   min-width: 696px;
                   height: 190px;
@@ -506,30 +589,33 @@
                     float: left;
                     margin-left: 20px;
                     margin-top: 10px;
-                    min-width:calc(100% - 40px)
+                    min-width:645px;
+                    width:100%;
                   }
-                  ul>li:nth-child(1){
-                    width: 6px;
+                  ul>li{
+                    width: 0.93%;
                     height: 100px;
                     background: rgb(38, 86, 102);
                     position: relative;
                     float: left;
-                    margin-right: 16px;
+                    margin-right:2.32%;
                     overflow: hidden;
+                    ul.right{
+                      float: right;
+                    }
+                  }
+                  ul>li:nth-child(1){
                     .listD{
                       position:absolute;
                       display: inline-block;
                       top: 0;
                       left: 0;
-                      width: 6px;
+                      width: 100%;
                       height: 48px;
                       background: #d35841;
-                      animation: logs 3s;
+                      animation: logs1 3s;
                     }
-                    ul.right{
-                      float: right;
-                    }
-                    @keyframes logs{
+                    @keyframes logs1{
                       0%{
                         top: -48px;
                       }
@@ -542,39 +628,29 @@
                       display: inline-block;
                       bottom: 0;
                       left:0;
-                      width:6px;
+                      width: 100%;
                       height: 22px;
                       background-color: rgb(30, 164, 182);
-                      animation: log 3s;
+                      animation: log1 3s;
                     }
-                    @keyframes log{
+                    @keyframes log1{
                       0%{height:0px;}
                       100%{height:22px;}
                     }
 
                   }
                   ul>li:nth-child(2){
-                    width: 6px;
-                    height: 100px;
-                    background: rgb(38, 86, 102);
-                    position: relative;
-                    float: left;
-                    margin-right: 16px;
-                    overflow: hidden;
                     .listD{
                       position:absolute;
                       display: inline-block;
                       top: 0;
                       left: 0;
-                      width: 6px;
+                      width: 100%;
                       height: 30px;
                       background: #d35841;
-                      animation: logs 3s;
+                      animation: logs2 3s;
                     }
-                    ul.right{
-                      float: right;
-                    }
-                    @keyframes logs{
+                    @keyframes logs2{
                       0%{
                         top: -30px;
                       }
@@ -587,39 +663,29 @@
                       display: inline-block;
                       bottom: 0;
                       left:0;
-                      width:6px;
+                      width: 100%;
                       height: 19px;
                       background-color: rgb(30, 164, 182);
-                      animation: log 3s;
+                      animation: log2 3s;
                     }
-                    @keyframes log{
+                    @keyframes log2{
                       0%{height:0px;}
                       100%{height:19px;}
                     }
 
                   }
                   ul>li:nth-child(3){
-                    width: 6px;
-                    height: 100px;
-                    background: rgb(38, 86, 102);
-                    position: relative;
-                    float: left;
-                    margin-right: 16px;
-                    overflow: hidden;
                     .listD{
                       position:absolute;
                       display: inline-block;
                       top: 0;
                       left: 0;
-                      width: 6px;
+                      width: 100%;
                       height: 31px;
                       background: #d35841;
-                      animation: logs 3s;
+                      animation: logs3 3s;
                     }
-                    ul.right{
-                      float: right;
-                    }
-                    @keyframes logs{
+                    @keyframes logs3{
                       0%{
                         top: -31px;
                       }
@@ -632,39 +698,29 @@
                       display: inline-block;
                       bottom: 0;
                       left:0;
-                      width:6px;
+                      width: 100%;
                       height: 41px;
                       background-color: rgb(30, 164, 182);
-                      animation: log 3s;
+                      animation: log3 3s;
                     }
-                    @keyframes log{
+                    @keyframes log3{
                       0%{height:0px;}
                       100%{height:41px;}
                     }
 
                   }
                   ul>li:nth-child(4){
-                    width: 6px;
-                    height: 100px;
-                    background: rgb(38, 86, 102);
-                    position: relative;
-                    float: left;
-                    margin-right: 16px;
-                    overflow: hidden;
                     .listD{
                       position:absolute;
                       display: inline-block;
                       top: 0;
                       left: 0;
-                      width: 6px;
+                      width: 100%;
                       height: 30px;
                       background: #d35841;
-                      animation: logs 3s;
+                      animation: logs4 3s;
                     }
-                    ul.right{
-                      float: right;
-                    }
-                    @keyframes logs{
+                    @keyframes logs4{
                       0%{
                         top: -30px;
                       }
@@ -677,39 +733,29 @@
                       display: inline-block;
                       bottom: 0;
                       left:0;
-                      width:6px;
+                      width: 100%;
                       height: 20px;
                       background-color: rgb(30, 164, 182);
-                      animation: log 3s;
+                      animation: log5 3s;
                     }
-                    @keyframes log{
+                    @keyframes log5{
                       0%{height:0px;}
                       100%{height:20px;}
                     }
 
                   }
                   ul>li:nth-child(5){
-                    width: 6px;
-                    height: 100px;
-                    background: rgb(38, 86, 102);
-                    position: relative;
-                    float: left;
-                    margin-right: 16px;
-                    overflow: hidden;
                     .listD{
                       position:absolute;
                       display: inline-block;
                       top: 0;
                       left: 0;
-                      width: 6px;
+                      width: 100%;
                       height: 35px;
                       background: #d35841;
-                      animation: logs 3s;
+                      animation: logs6 3s;
                     }
-                    ul.right{
-                      float: right;
-                    }
-                    @keyframes logs{
+                    @keyframes logs6{
                       0%{
                         top: -35px;
                       }
@@ -722,39 +768,29 @@
                       display: inline-block;
                       bottom: 0;
                       left:0;
-                      width:6px;
+                      width: 100%;
                       height: 12px;
                       background-color: rgb(30, 164, 182);
-                      animation: log 3s;
+                      animation: log7 3s;
                     }
-                    @keyframes log{
+                    @keyframes log7{
                       0%{height:0px;}
                       100%{height:12px;}
                     }
 
                   }
                   ul>li:nth-child(6){
-                    width: 6px;
-                    height: 100px;
-                    background: rgb(38, 86, 102);
-                    position: relative;
-                    float: left;
-                    margin-right: 16px;
-                    overflow: hidden;
                     .listD{
                       position:absolute;
                       display: inline-block;
                       top: 0;
                       left: 0;
-                      width: 6px;
+                      width: 100%;
                       height: 11px;
                       background: #d35841;
-                      animation: logs 3s;
+                      animation: logs8 3s;
                     }
-                    ul.right{
-                      float: right;
-                    }
-                    @keyframes logs{
+                    @keyframes logs8{
                       0%{
                         top: -11px;
                       }
@@ -767,39 +803,29 @@
                       display: inline-block;
                       bottom: 0;
                       left:0;
-                      width:6px;
+                      width: 100%;
                       height: 32px;
                       background-color: rgb(30, 164, 182);
-                      animation: log 3s;
+                      animation: log9 3s;
                     }
-                    @keyframes log{
+                    @keyframes log9{
                       0%{height:0px;}
                       100%{height:32px;}
                     }
 
                   }
                   ul>li:nth-child(7){
-                    width: 6px;
-                    height: 100px;
-                    background: rgb(38, 86, 102);
-                    position: relative;
-                    float: left;
-                    margin-right: 16px;
-                    overflow: hidden;
                     .listD{
                       position:absolute;
                       display: inline-block;
                       top: 0;
                       left: 0;
-                      width: 6px;
+                      width: 100%;
                       height: 30px;
                       background: #d35841;
-                      animation: logs 3s;
+                      animation: logs10 3s;
                     }
-                    ul.right{
-                      float: right;
-                    }
-                    @keyframes logs{
+                    @keyframes logs10{
                       0%{
                         top: -30px;
                       }
@@ -812,39 +838,29 @@
                       display: inline-block;
                       bottom: 0;
                       left:0;
-                      width:6px;
+                      width: 100%;
                       height: 50px;
                       background-color: rgb(30, 164, 182);
-                      animation: log 3s;
+                      animation: log10 3s;
                     }
-                    @keyframes log{
+                    @keyframes log10{
                       0%{height:0px;}
                       100%{height:50px;}
                     }
 
                   }
                   ul>li:nth-child(8){
-                    width: 6px;
-                    height: 100px;
-                    background: rgb(38, 86, 102);
-                    position: relative;
-                    float: left;
-                    margin-right: 16px;
-                    overflow: hidden;
                     .listD{
                       position:absolute;
                       display: inline-block;
                       top: 0;
                       left: 0;
-                      width: 6px;
+                      width: 100%;
                       height: 15px;
                       background: #d35841;
-                      animation: logs 3s;
+                      animation: logs11 3s;
                     }
-                    ul.right{
-                      float: right;
-                    }
-                    @keyframes logs{
+                    @keyframes logs11{
                       0%{
                         top: -15px;
                       }
@@ -857,39 +873,29 @@
                       display: inline-block;
                       bottom: 0;
                       left:0;
-                      width:6px;
+                      width: 100%;
                       height: 50px;
                       background-color: rgb(30, 164, 182);
-                      animation: log 3s;
+                      animation: log11 3s;
                     }
-                    @keyframes log{
+                    @keyframes log11{
                       0%{height:0px;}
                       100%{height:50px;}
                     }
 
                   }
                   ul>li:nth-child(9){
-                    width: 6px;
-                    height: 100px;
-                    background: rgb(38, 86, 102);
-                    position: relative;
-                    float: left;
-                    margin-right: 16px;
-                    overflow: hidden;
                     .listD{
                       position:absolute;
                       display: inline-block;
                       top: 0;
                       left: 0;
-                      width: 6px;
+                      width: 100%;
                       height: 43px;
                       background: #d35841;
-                      animation: logs 3s;
+                      animation: logs12 3s;
                     }
-                    ul.right{
-                      float: right;
-                    }
-                    @keyframes logs{
+                    @keyframes logs12{
                       0%{
                         top: -43px;
                       }
@@ -902,39 +908,29 @@
                       display: inline-block;
                       bottom: 0;
                       left:0;
-                      width:6px;
+                      width: 100%;
                       height: 19px;
                       background-color: rgb(30, 164, 182);
-                      animation: log 3s;
+                      animation: log12 3s;
                     }
-                    @keyframes log{
+                    @keyframes log12{
                       0%{height:0px;}
                       100%{height:19px;}
                     }
 
                   }
                   ul>li:nth-child(10){
-                    width: 6px;
-                    height: 100px;
-                    background: rgb(38, 86, 102);
-                    position: relative;
-                    float: left;
-                    margin-right: 16px;
-                    overflow: hidden;
                     .listD{
                       position:absolute;
                       display: inline-block;
                       top: 0;
                       left: 0;
-                      width: 6px;
+                      width: 100%;
                       height: 35px;
                       background: #d35841;
-                      animation: logs 3s;
+                      animation: logs13 3s;
                     }
-                    ul.right{
-                      float: right;
-                    }
-                    @keyframes logs{
+                    @keyframes logs13{
                       0%{
                         top: -35px;
                       }
@@ -947,39 +943,29 @@
                       display: inline-block;
                       bottom: 0;
                       left:0;
-                      width:6px;
+                      width: 100%;
                       height: 30px;
                       background-color: rgb(30, 164, 182);
-                      animation: log 3s;
+                      animation: log13 3s;
                     }
-                    @keyframes log{
+                    @keyframes log13{
                       0%{height:0px;}
                       100%{height:30px;}
                     }
 
                   }
                   ul>li:nth-child(11){
-                    width: 6px;
-                    height: 100px;
-                    background: rgb(38, 86, 102);
-                    position: relative;
-                    float: left;
-                    margin-right: 16px;
-                    overflow: hidden;
                     .listD{
                       position:absolute;
                       display: inline-block;
                       top: 0;
                       left: 0;
-                      width: 6px;
+                      width: 100%;
                       height: 38px;
                       background: #d35841;
-                      animation: logs 3s;
+                      animation: logs14 3s;
                     }
-                    ul.right{
-                      float: right;
-                    }
-                    @keyframes logs{
+                    @keyframes logs14{
                       0%{
                         top: -38px;
                       }
@@ -992,39 +978,30 @@
                       display: inline-block;
                       bottom: 0;
                       left:0;
-                      width:6px;
+                      
+                      width: 100%;
                       height: 19px;
                       background-color: rgb(30, 164, 182);
-                      animation: log 3s;
+                      animation: log15 3s;
                     }
-                    @keyframes log{
+                    @keyframes log15{
                       0%{height:0px;}
                       100%{height:19px;}
                     }
 
                   }
                   ul>li:nth-child(12){
-                    width: 6px;
-                    height: 100px;
-                    background: rgb(38, 86, 102);
-                    position: relative;
-                    float: left;
-                    margin-right: 16px;
-                    overflow: hidden;
                     .listD{
                       position:absolute;
                       display: inline-block;
                       top: 0;
                       left: 0;
-                      width: 6px;
+                      width: 100%;
                       height: 20px;
                       background: #d35841;
-                      animation: logs 3s;
+                      animation: logs16 3s;
                     }
-                    ul.right{
-                      float: right;
-                    }
-                    @keyframes logs{
+                    @keyframes logs16{
                       0%{
                         top: -20px;
                       }
@@ -1035,41 +1012,32 @@
                     .listv{
                       position: absolute;
                       display: inline-block;
+                      width: 100%;
                       bottom: 0;
                       left:0;
-                      width:6px;
+                      
                       height: 48px;
                       background-color: rgb(30, 164, 182);
-                      animation: log 3s;
+                      animation: log16 3s;
                     }
-                    @keyframes log{
+                    @keyframes log16{
                       0%{height:0px;}
                       100%{height:48px;}
                     }
 
                   }
                   ul>li:nth-child(13){
-                    width: 6px;
-                    height: 100px;
-                    background: rgb(38, 86, 102);
-                    position: relative;
-                    float: left;
-                    margin-right: 16px;
-                    overflow: hidden;
                     .listD{
                       position:absolute;
                       display: inline-block;
                       top: 0;
                       left: 0;
-                      width: 6px;
+                      width: 100%;
                       height: 30px;
                       background: #d35841;
-                      animation: logs 3s;
+                      animation: logs17 3s;
                     }
-                    ul.right{
-                      float: right;
-                    }
-                    @keyframes logs{
+                    @keyframes logs17{
                       0%{
                         top: -30px;
                       }
@@ -1082,39 +1050,29 @@
                       display: inline-block;
                       bottom: 0;
                       left:0;
-                      width:6px;
+                      width: 100%;
                       height: 36px;
                       background-color: rgb(30, 164, 182);
-                      animation: log 3s;
+                      animation: log18 3s;
                     }
-                    @keyframes log{
+                    @keyframes log18{
                       0%{height:0px;}
                       100%{height:36px;}
                     }
 
                   }
                   ul>li:nth-child(14){
-                    width: 6px;
-                    height: 100px;
-                    background: rgb(38, 86, 102);
-                    position: relative;
-                    float: left;
-                    margin-right: 16px;
-                    overflow: hidden;
                     .listD{
                       position:absolute;
                       display: inline-block;
                       top: 0;
                       left: 0;
-                      width: 6px;
+                      width: 100%;
                       height: 10px;
                       background: #d35841;
-                      animation: logs 3s;
+                      animation: logs19 3s;
                     }
-                    ul.right{
-                      float: right;
-                    }
-                    @keyframes logs{
+                    @keyframes logs19{
                       0%{
                         top: -10px;
                       }
@@ -1127,39 +1085,29 @@
                       display: inline-block;
                       bottom: 0;
                       left:0;
-                      width:6px;
+                      width: 100%;
                       height: 20px;
                       background-color: rgb(30, 164, 182);
-                      animation: log 3s;
+                      animation: log20 3s;
                     }
-                    @keyframes log{
+                    @keyframes log20{
                       0%{height:0px;}
                       100%{height:20px;}
                     }
 
                   }
                   ul>li:nth-child(15){
-                    width: 6px;
-                    height: 100px;
-                    background: rgb(38, 86, 102);
-                    position: relative;
-                    float: left;
-                    margin-right: 16px;
-                    overflow: hidden;
                     .listD{
                       position:absolute;
                       display: inline-block;
                       top: 0;
                       left: 0;
-                      width: 6px;
+                      width: 100%;
                       height: 30px;
                       background: #d35841;
-                      animation: logs 3s;
+                      animation: logs222 3s;
                     }
-                    ul.right{
-                      float: right;
-                    }
-                    @keyframes logs{
+                    @keyframes logs22{
                       0%{
                         top: -30px;
                       }
@@ -1172,39 +1120,29 @@
                       display: inline-block;
                       bottom: 0;
                       left:0;
-                      width:6px;
+                      width: 100%;
                       height: 50px;
                       background-color: rgb(30, 164, 182);
-                      animation: log 3s;
+                      animation: log22 3s;
                     }
-                    @keyframes log{
+                    @keyframes log22{
                       0%{height:0px;}
                       100%{height:50px;}
                     }
 
                   }
                   ul>li:nth-child(16){
-                    width: 6px;
-                    height: 100px;
-                    background: rgb(38, 86, 102);
-                    position: relative;
-                    float: left;
-                    margin-right: 16px;
-                    overflow: hidden;
                     .listD{
                       position:absolute;
                       display: inline-block;
                       top: 0;
                       left: 0;
-                      width: 6px;
+                      width: 100%;
                       height: 42px;
                       background: #d35841;
                       animation: logs 3s;
                     }
-                    ul.right{
-                      float: right;
-                    }
-                    @keyframes logs{
+                    @keyframes logs23{
                       0%{
                         top: -42px;
                       }
@@ -1217,39 +1155,29 @@
                       display: inline-block;
                       bottom: 0;
                       left:0;
-                      width:6px;
+                      width: 100%;
                       height: 10px;
                       background-color: rgb(30, 164, 182);
-                      animation: log 3s;
+                      animation: log23 3s;
                     }
-                    @keyframes log{
+                    @keyframes log23{
                       0%{height:0px;}
                       100%{height:10px;}
                     }
 
                   }
                   ul>li:nth-child(17){
-                    width: 6px;
-                    height: 100px;
-                    background: rgb(38, 86, 102);
-                    position: relative;
-                    float: left;
-                    margin-right: 16px;
-                    overflow: hidden;
                     .listD{
                       position:absolute;
                       display: inline-block;
                       top: 0;
                       left: 0;
-                      width: 6px;
+                      width: 100%;
                       height: 32px;
                       background: #d35841;
-                      animation: logs 3s;
+                      animation: logs24 3s;
                     }
-                    ul.right{
-                      float: right;
-                    }
-                    @keyframes logs{
+                    @keyframes logs24{
                       0%{
                         top: -32px;
                       }
@@ -1262,39 +1190,29 @@
                       display: inline-block;
                       bottom: 0;
                       left:0;
-                      width:6px;
+                      width: 100%;
                       height: 44px;
                       background-color: rgb(30, 164, 182);
                       animation: log 3s;
                     }
-                    @keyframes log{
+                    @keyframes log25{
                       0%{height:0px;}
                       100%{height:44px;}
                     }
 
                   }
                   ul>li:nth-child(18){
-                    width: 6px;
-                    height: 100px;
-                    background: rgb(38, 86, 102);
-                    position: relative;
-                    float: left;
-                    margin-right: 16px;
-                    overflow: hidden;
                     .listD{
                       position:absolute;
                       display: inline-block;
                       top: 0;
                       left: 0;
-                      width: 6px;
+                      width: 100%;
                       height: 30px;
                       background: #d35841;
-                      animation: logs 3s;
+                      animation: logs25 3s;
                     }
-                    ul.right{
-                      float: right;
-                    }
-                    @keyframes logs{
+                    @keyframes logs25{
                       0%{
                         top: -30px;
                       }
@@ -1307,39 +1225,29 @@
                       display: inline-block;
                       bottom: 0;
                       left:0;
-                      width:6px;
+                      width: 100%;
                       height: 50px;
                       background-color: rgb(30, 164, 182);
-                      animation: log 3s;
+                      animation: log25 3s;
                     }
-                    @keyframes log{
+                    @keyframes log25{
                       0%{height:0px;}
                       100%{height:50px;}
                     }
 
                   }
                   ul>li:nth-child(19){
-                    width: 6px;
-                    height: 100px;
-                    background: rgb(38, 86, 102);
-                    position: relative;
-                    float: left;
-                    margin-right: 16px;
-                    overflow: hidden;
                     .listD{
                       position:absolute;
                       display: inline-block;
                       top: 0;
                       left: 0;
-                      width: 6px;
+                      width: 100%;
                       height: 26px;
                       background: #d35841;
-                      animation: logs 3s;
+                      animation: logs26 3s;
                     }
-                    ul.right{
-                      float: right;
-                    }
-                    @keyframes logs{
+                    @keyframes logs26{
                       0%{
                         top: -26px;
                       }
@@ -1352,39 +1260,29 @@
                       display: inline-block;
                       bottom: 0;
                       left:0;
-                      width:6px;
+                      width: 100%;
                       height: 43px;
                       background-color: rgb(30, 164, 182);
-                      animation: log 3s;
+                      animation: log27 3s;
                     }
-                    @keyframes log{
+                    @keyframes log27{
                       0%{height:0px;}
                       100%{height:43px;}
                     }
 
                   }
                   ul>li:nth-child(20){
-                    width: 6px;
-                    height: 100px;
-                    background: rgb(38, 86, 102);
-                    position: relative;
-                    float: left;
-                    margin-right: 16px;
-                    overflow: hidden;
                     .listD{
                       position:absolute;
                       display: inline-block;
                       top: 0;
                       left: 0;
-                      width: 6px;
+                      width: 100%;
                       height: 30px;
                       background: #d35841;
-                      animation: logs 3s;
+                      animation: logs28 3s;
                     }
-                    ul.right{
-                      float: right;
-                    }
-                    @keyframes logs{
+                    @keyframes logs28{
                       0%{
                         top: -30px;
                       }
@@ -1397,39 +1295,29 @@
                       display: inline-block;
                       bottom: 0;
                       left:0;
-                      width:6px;
+                      width: 100%;
                       height: 31px;
                       background-color: rgb(30, 164, 182);
-                      animation: log 3s;
+                      animation: log29 3s;
                     }
-                    @keyframes log{
+                    @keyframes log29{
                       0%{height:0px;}
                       100%{height:31px;}
                     }
 
                   }
                   ul>li:nth-child(21){
-                    width: 6px;
-                    height: 100px;
-                    background: rgb(38, 86, 102);
-                    position: relative;
-                    float: left;
-                    margin-right: 16px;
-                    overflow: hidden;
                     .listD{
                       position:absolute;
                       display: inline-block;
                       top: 0;
                       left: 0;
-                      width: 6px;
+                      width: 100%;
                       height: 39px;
                       background: #d35841;
-                      animation: logs 3s;
+                      animation: logs30 3s;
                     }
-                    ul.right{
-                      float: right;
-                    }
-                    @keyframes logs{
+                    @keyframes logs30{
                       0%{
                         top: -39px;
                       }
@@ -1442,39 +1330,63 @@
                       display: inline-block;
                       bottom: 0;
                       left:0;
-                      width:6px;
+                      width: 100%;
                       height: 29px;
                       background-color: rgb(30, 164, 182);
-                      animation: log 3s;
+                      animation: log30 3s;
                     }
-                    @keyframes log{
+                    @keyframes log30{
                       0%{height:0px;}
                       100%{height:29px;}
                     }
 
-                  }
-                  ul>li:nth-child(23){
-                    width: 6px;
-                    height: 100px;
-                    background: rgb(38, 86, 102);
-                    position: relative;
-                    float: left;
-                    margin-right: 16px;
-                    overflow: hidden;
+                  } ul>li:nth-child(22){
                     .listD{
                       position:absolute;
                       display: inline-block;
                       top: 0;
                       left: 0;
-                      width: 6px;
+                      width: 100%;
+                      height: 20px;
+                      background: #d35841;
+                      animation: logs30 3s;
+                    }
+                    @keyframes logs30{
+                      0%{
+                        top: -20px;
+                      }
+                      100%{
+                        top: 0px;
+                      }
+                    }
+                    .listv{
+                      position: absolute;
+                      display: inline-block;
+                      bottom: 0;
+                      left:0;
+                      width: 100%;
+                      height: 39px;
+                      background-color: rgb(30, 164, 182);
+                      animation: log40 3s;
+                    }
+                    @keyframes log40{
+                      0%{height:0px;}
+                      100%{height:39px;}
+                    }
+
+                  }
+                  ul>li:nth-child(23){
+                    .listD{
+                      position:absolute;
+                      display: inline-block;
+                      top: 0;
+                      left: 0;
+                      width: 100%;
                       height: 18px;
                       background: #d35841;
-                      animation: logs 3s;
+                      animation: logs31 3s;
                     }
-                    ul.right{
-                      float: right;
-                    }
-                    @keyframes logs{
+                    @keyframes logs31{
                       0%{
                         top: -18px;
                       }
@@ -1487,39 +1399,29 @@
                       display: inline-block;
                       bottom: 0;
                       left:0;
-                      width:6px;
+                      width: 100%;
                       height: 22px;
                       background-color: rgb(30, 164, 182);
-                      animation: log 3s;
+                      animation: log31 3s;
                     }
-                    @keyframes log{
+                    @keyframes log31{
                       0%{height:0px;}
                       100%{height:22px;}
                     }
 
                   }
                   ul>li:nth-child(24){
-                    width: 6px;
-                    height: 100px;
-                    background: rgb(38, 86, 102);
-                    position: relative;
-                    float: left;
-                    margin-right: 16px;
-                    overflow: hidden;
                     .listD{
                       position:absolute;
                       display: inline-block;
                       top: 0;
                       left: 0;
-                      width: 6px;
+                      width: 100%;
                       height: 20px;
                       background: #d35841;
-                      animation: logs 3s;
+                      animation: logs32 3s;
                     }
-                    ul.right{
-                      float: right;
-                    }
-                    @keyframes logs{
+                    @keyframes logs32{
                       0%{
                         top: -20px;
                       }
@@ -1532,39 +1434,29 @@
                       display: inline-block;
                       bottom: 0;
                       left:0;
-                      width:6px;
+                      width: 100%;
                       height: 40px;
                       background-color: rgb(30, 164, 182);
-                      animation: log 3s;
+                      animation: log33 3s;
                     }
-                    @keyframes log{
+                    @keyframes log33{
                       0%{height:0px;}
                       100%{height:40px;}
                     }
 
                   }
                   ul>li:nth-child(25){
-                    width: 6px;
-                    height: 100px;
-                    background: rgb(38, 86, 102);
-                    position: relative;
-                    float: left;
-                    margin-right: 16px;
-                    overflow: hidden;
                     .listD{
                       position:absolute;
                       display: inline-block;
                       top: 0;
                       left: 0;
-                      width: 6px;
+                      width: 100%;
                       height: 20px;
                       background: #d35841;
-                      animation: logs 3s;
+                      animation: logs34 3s;
                     }
-                    ul.right{
-                      float: right;
-                    }
-                    @keyframes logs{
+                    @keyframes logs34{
                       0%{
                         top: -20px;
                       }
@@ -1577,39 +1469,29 @@
                       display: inline-block;
                       bottom: 0;
                       left:0;
-                      width:6px;
+                      width: 100%;
                       height: 10px;
                       background-color: rgb(30, 164, 182);
-                      animation: log 3s;
+                      animation: log34 3s;
                     }
-                    @keyframes log{
+                    @keyframes log34{
                       0%{height:0px;}
                       100%{height:10px;}
                     }
 
                   }
                   ul>li:nth-child(26){
-                    width: 6px;
-                    height: 100px;
-                    background: rgb(38, 86, 102);
-                    position: relative;
-                    float: left;
-                    margin-right: 16px;
-                    overflow: hidden;
                     .listD{
                       position:absolute;
                       display: inline-block;
                       top: 0;
                       left: 0;
-                      width: 6px;
+                      width: 100%;
                       height: 24px;
                       background: #d35841;
-                      animation: logs 3s;
+                      animation: logs35 3s;
                     }
-                    ul.right{
-                      float: right;
-                    }
-                    @keyframes logs{
+                    @keyframes logs35{
                       0%{
                         top: -24px;
                       }
@@ -1622,39 +1504,29 @@
                       display: inline-block;
                       bottom: 0;
                       left:0;
-                      width:6px;
+                      width: 100%;
                       height: 17px;
                       background-color: rgb(30, 164, 182);
-                      animation: log 3s;
+                      animation: log36 3s;
                     }
-                    @keyframes log{
+                    @keyframes log36{
                       0%{height:0px;}
                       100%{height:17px;}
                     }
 
                   }
                   ul>li:nth-child(27){
-                    width: 6px;
-                    height: 100px;
-                    background: rgb(38, 86, 102);
-                    position: relative;
-                    float: left;
-                    margin-right: 16px;
-                    overflow: hidden;
                     .listD{
                       position:absolute;
                       display: inline-block;
                       top: 0;
                       left: 0;
-                      width: 6px;
+                      width: 100%;
                       height: 37px;
                       background: #d35841;
-                      animation: logs 3s;
+                      animation: logs37 3s;
                     }
-                    ul.right{
-                      float: right;
-                    }
-                    @keyframes logs{
+                    @keyframes logs37{
                       0%{
                         top: -37px;
                       }
@@ -1667,39 +1539,29 @@
                       display: inline-block;
                       bottom: 0;
                       left:0;
-                      width:6px;
+                      width: 100%;
                       height: 17px;
                       background-color: rgb(30, 164, 182);
-                      animation: log 3s;
+                      animation: log37 3s;
                     }
-                    @keyframes log{
+                    @keyframes log37{
                       0%{height:0px;}
                       100%{height:17px;}
                     }
 
                   }
                   ul>li:nth-child(28){
-                    width: 6px;
-                    height: 100px;
-                    background: rgb(38, 86, 102);
-                    position: relative;
-                    float: left;
-                    margin-right: 16px;
-                    overflow: hidden;
                     .listD{
                       position:absolute;
                       display: inline-block;
                       top: 0;
                       left: 0;
-                      width: 6px;
+                      width: 100%;
                       height: 43px;
                       background: #d35841;
-                      animation: logs 3s;
+                      animation: logs38 3s;
                     }
-                    ul.right{
-                      float: right;
-                    }
-                    @keyframes logs{
+                    @keyframes logs38{
                       0%{
                         top: -43px;
                       }
@@ -1712,39 +1574,29 @@
                       display: inline-block;
                       bottom: 0;
                       left:0;
-                      width:6px;
+                      width: 100%;
                       height: 50px;
                       background-color: rgb(30, 164, 182);
-                      animation: log 3s;
+                      animation: log39 3s;
                     }
-                    @keyframes log{
+                    @keyframes log39{
                       0%{height:0px;}
                       100%{height:50px;}
                     }
 
                   }
                   ul>li:nth-child(29){
-                    width: 6px;
-                    height: 100px;
-                    background: rgb(38, 86, 102);
-                    position: relative;
-                    float: left;
-                    margin-right: 16px;
-                    overflow: hidden;
                     .listD{
                       position:absolute;
                       display: inline-block;
                       top: 0;
                       left: 0;
-                      width: 6px;
+                      width: 100%;
                       height: 23px;
                       background: #d35841;
-                      animation: logs 3s;
+                      animation: logs40 3s;
                     }
-                    ul.right{
-                      float: right;
-                    }
-                    @keyframes logs{
+                    @keyframes logs40{
                       0%{
                         top: -23px;
                       }
@@ -1757,39 +1609,29 @@
                       display: inline-block;
                       bottom: 0;
                       left:0;
-                      width:6px;
+                      width: 100%;
                       height: 36px;
                       background-color: rgb(30, 164, 182);
-                      animation: log 3s;
+                      animation: log40 3s;
                     }
-                    @keyframes log{
+                    @keyframes log40{
                       0%{height:0px;}
                       100%{height:36px;}
                     }
 
                   }
                   ul>li:nth-child(30){
-                    width: 6px;
-                    height: 100px;
-                    background: rgb(38, 86, 102);
-                    position: relative;
-                    float: left;
-                    margin-right: 16px;
-                    overflow: hidden;
                     .listD{
                       position:absolute;
                       display: inline-block;
                       top: 0;
                       left: 0;
-                      width: 6px;
+                      width: 100%;
                       height: 20px;
                       background: #d35841;
-                      animation: logs 3s;
+                      animation: logs41 3s;
                     }
-                    ul.right{
-                      float: right;
-                    }
-                    @keyframes logs{
+                    @keyframes logs41{
                       0%{
                         top: -20px;
                       }
@@ -1802,12 +1644,12 @@
                       display: inline-block;
                       bottom: 0;
                       left:0;
-                      width:6px;
+                      width: 100%;
                       height: 40px;
                       background-color: rgb(30, 164, 182);
-                      animation: log 3s;
+                      animation: log41 3s;
                     }
-                    @keyframes log{
+                    @keyframes log41{
                       0%{height:0px;}
                       100%{height:40px;}
                     }
@@ -1821,6 +1663,7 @@
                   height: 216px; 
                   margin-top: 15px;
                   background: url("../assets/score.png") no-repeat;
+                  background-size: 100% 100%;
                   .more1{
                     position: absolute;
                     display: inline-block;
@@ -1917,10 +1760,12 @@
                   .numbers{
                     width: 152px;
                     height: 152px;
-                    position: relative;
+                    position: absolute;
                     float: left;
-                     margin-top: 20px;
-                      margin-left: 20px;
+                    margin-top: -57px;
+                    margin-left: -76px;
+                    left: 50%;
+                    top: 50%;
                     span{
                       display: inline-block;
                       width: 152px;
@@ -1965,11 +1810,12 @@
             }
             .demo-echarts{
               background: url("../assets/ev.png") no-repeat;
-              width: 441px;
+              // width: 441px;
+              width:31.3%;
               height: 421px;
               float: left;
               margin-top: 0px;
-              margin-left: 20px;
+              margin-left: 0.71%;
               background-size: 100% 100%;
               position: relative;
                 h2{
@@ -1994,6 +1840,10 @@
                     -webkit-animation-iteration-count: infinite;  /*动画播放的次数*/
                     -webkit-animation-duration: 5s; /*动画所花费的时间*/  
                   }
+                  .myCharts{
+                    width: calc(100% - 20px);
+                    height: calc(100% - 50px);
+                  }
                 @keyframes scaleDraw {  /*定义关键帧、scaleDrew是需要绑定到选择器的关键帧名称*/
                     0%{
                         transform: scale(1);  /*开始为原始大小*/
@@ -2013,8 +1863,10 @@
         }
         .demo-message{
           float:left;
-          margin-left: 20px;
+          margin-left: 0.71%;
+          width:14.2%;
           .news{
+            width:100%;
             min-width:220px;
             height: 300px;
             background: url("../assets/message.png") no-repeat;
@@ -2023,6 +1875,8 @@
             ul{
               clear: both;
               padding-top: 4px;
+              padding-left: 12px;
+              width: calc(100% - 20px);
             }
             ul>li{
               clear: both;
@@ -2036,6 +1890,9 @@
               color: #288B9F;
               line-height: 24px;
               margin-bottom: 10px;
+            }
+            ul>li:first-child{
+              color:rgb(102, 220, 242);
             }
             h2{
               float: left;
@@ -2075,6 +1932,7 @@
           }
           .logos{
             cursor: pointer;
+            width:100%;
             min-width: 220px;
             height: 100px;
             margin-top: 18px;
@@ -2416,6 +2274,7 @@ content: "0295176384";
     width: 30px;
     font-size: 24px;
     color: #288B9F;
+    z-index: 2;
 }
 
 </style>

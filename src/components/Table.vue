@@ -3,6 +3,7 @@
     :data="tableListDatas"
     stripe
     style="width: 100%"
+    v-loading="lod"
     @row-click="showDetail">
     <el-table-column
       type="index"
@@ -76,7 +77,7 @@
 <script>
 export default {
   // tableListDatas:列表详情，tableTitle：列表表头，tableH：表格高度
-  props: ["tableListDatas", "tableTitle"],
+  props: ["tableListDatas", "tableTitle","lod"],
   data() {
     return {};
   },

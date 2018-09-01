@@ -1,7 +1,6 @@
 <template>
 <el-scrollbar style="height:100%;" class="yc-scrollbar">
-    <div class="detail-main">
-        
+    <div class="detail-main" v-loading="lodi">
         <div class="detail-m">
             <baidu-map class="map" center="广州"   :scroll-wheel-zoom="true" :map-click="false"  :center="{lng:lng, lat:lat }"  :zoom="zoom" >
                 <bm-geolocation anchor="BMAP_ANCHOR_BOTTOM_RIGHT" :showAddressBar="true" :autoLocation="true"></bm-geolocation>
@@ -42,15 +41,15 @@
                                     <p class="detail-warnig-text">{{ atpyeName }}</p>
                                 </li>
                                 <li>
-                                    <span class="detail-warning-title">预警上报时间</span>
+                                    <span class="detail-warning-title">预警时间</span>
                                     <p class="detail-warnig-text">{{ startDate }}</p>
                                 </li>
                                 <li>
-                                    <span class="detail-warning-title">预警结束时间</span>
+                                    <span class="detail-warning-title">平台接收时间</span>
                                     <p class="detail-warnig-text">{{ endDate }}</p>
                                 </li>
                                 <li>
-                                    <span class="detail-warning-title">终端机编号</span>
+                                    <span class="detail-warning-title">终端机手机号</span>
                                     <p class="detail-warnig-text">{{ terminalNo }}</p>
                                 </li>
                                 <li>
@@ -114,22 +113,24 @@
                                     <span class="detail-warning-title">车牌号</span>
                                     <p class="detail-warnig-text">{{ vehicleCode }}</p>
                                 </li>
+                                
+                                 <li>
+                                    <span class="detail-warning-title">车牌种类</span>
+                                    <p class="detail-warnig-text">{{ licensePlateType }}</p>
+                                </li>
                                 <li>
                                     <span class="detail-warning-title">发证机关</span>
                                     <p class="detail-warnig-text">{{ issuingAuthority }}</p>
                                 </li>
                                 <li>
-                                    <span class="detail-warning-title">车牌种类</span>
-                                    <p class="detail-warnig-text">{{ licensePlateType }}</p>
-                                </li>
-                                <li>
-                                    <span class="detail-warning-title">车辆型号</span>
-                                    <p class="detail-warnig-text">{{ VehicleModel}}</p>
-                                </li>
-                                <li>
                                     <span class="detail-warning-title">车辆颜色</span>
                                     <p class="detail-warnig-text">{{ color }}</p>
                                 </li>
+                                <li>
+                                    <span class="detail-warning-title">车辆类型</span>
+                                    <p class="detail-warnig-text">{{ VehicleModel}}</p>
+                                </li>
+                               
                                 <li>
                                     <span class="detail-warning-title">车属行业</span>
                                     <p class="detail-warnig-text">{{ carIndustry }}</p>
@@ -217,6 +218,7 @@ import {teamTree,alarmDetail} from "../api/getData";
 export default {
     data(){
         return {
+            lodi:true,
             isshow:true,
             lng: null,
             lat: null,
@@ -241,25 +243,25 @@ export default {
             longitude:"-",//经度
             latitude:"-",//纬度
             deriverName:"-",//驾驶员
-            vehicleCode:"-",//车牌号
+            vehicleCode:"黄色",//车牌号
             teamName:"-",//所属车队
-            locationDesc:"-",//预警地点
-            vehicleId:"-",//车辆ID
-            color:"-",//车辆颜色
+            locationDesc:"广东省广州市荔湾区员村街道三元里抗英斗争纪念公园",//预警地点
+            vehicleId:"YY-CM-7694",//车辆ID
+            color:"红色",//车辆颜色
             sex:"-",//性别
             birthday:"-",//生日
             vehicleType:"-",//驾驶证类型
-            terminalNo:"-",//终端编号
-            speed:"-",//车速
-            altitude:"-",//海拔
-            subordinate:"-",//从属公司
-            issuingAuthority:"-",//发证机关
-            licensePlateType:"-",//车牌种类
-            VehicleModel:"-",//车辆型号
-            carIndustry:"-",//车属行业
-            creationTime:"-",//创建时间
-            licenseNumber:"-",//驾驶证编号
-            validPeriod:"-",//有效期止
+            terminalNo:"018038863254",//终端编号
+            speed:"70KM/h",//车速
+            altitude:"209m",//海拔
+            subordinate:"粤运综合物流有限公司",//从属公司
+            issuingAuthority:"广东省公安厅交通管理局",//发证机关
+            licensePlateType:"黄色",//车牌种类
+            VehicleModel:"普通",//车辆类型
+            carIndustry:"道路货物运输",//车属行业
+            creationTime:"2018-4-5",//创建时间
+            licenseNumber:"01803883977522",//驾驶证编号
+            validPeriod:"2019-3-18",//有效期止
             listId:"-",
             dataMonday:"-",
             dataSunday:"-",
@@ -327,7 +329,7 @@ export default {
         },
         onNext(){
             if(this.downAlarmNo!=="" && this.currentN < 10){
-                this.onSearch();
+                this.lodi = true;
                 this.getDetailPageData({
                     alarmNo:this.downAlarmNo,
                     companyId:this.companyId,
@@ -347,7 +349,7 @@ export default {
         },
         onPrevious(){
             if(this.upAlarmNo!=="" && this.currentN > 0){
-                this.onSearch();
+                this.lodi = true;
                 this.getDetailPageData({
                     alarmNo:this.upAlarmNo,
                     companyId:this.companyId,
@@ -371,8 +373,10 @@ export default {
         async getDetailPageData(params) {
         let res = await alarmDetail(params);
         let img = [];
+        
         if (res.status === 200) {
-            this.alarm = res.data
+            console.log(res.data)
+                this.alarm = res.data
                 this.atpyeName = res.data.detailMap.atpyeName;
                 this.pid = res.data.detailMap.pid;
                 this.longitude = res.data.detailMap.longitude;
@@ -430,8 +434,9 @@ export default {
                 this.alarmNo = res.data.params.alarmNo;
                 this.downAlarmNo = res.data.params.downAlarmNo;
             }
-
+            
         }
+        this.lodi =false
         res = null;
         }
         

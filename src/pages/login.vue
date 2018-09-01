@@ -18,7 +18,7 @@
                     <span class="us_uer"></span>
                     <input name="logpass" class="text" style="color: #FFFFFF !important; position:absolute; z-index:100;" v-model="ruleForm.password" autocomplete="off" type="password" placeholder="请输入密码">
                   </div>
-                  <div class="mb2"><a class="act-but submit" href="javascript:;" style="color: #FFFFFF" @click="submit">登录</a></div>
+                  <div class="mb2"><a class="act-but submit" href="javascript:;" style="color: #FFFFFF" @click.prevent="submit">登录</a></div>
                 </form>
               </div>
             </div>
@@ -62,7 +62,7 @@
 			this.logins({
 				username:user,
 				password:pass
-			})
+			},{username:user})
 			// if(this.userName == "yincaa" && this.password == "123456"){
 			// 	this.$router.push({path:'/indM'})
 			// }else{
@@ -101,13 +101,13 @@
 			let res = await login(params);
 			if(res.status == 200){
 				this.$router.push({path:'/indM'})
-				// let response = await getCompanyName(ps);
-				// if(response.status == 200){
-				// 	console.log(response.data.companyId)
-					this.setCookie(params.username,1);
+				let response = await getCompanyName(ps);
+				if(response.status == 200){
+					console.log(response.data.companyId)
+					this.setCookie(params.username,response.data.companyId,1);
 					this.getCookie();
 				}
-				
+			}
 			
 		}
 	}

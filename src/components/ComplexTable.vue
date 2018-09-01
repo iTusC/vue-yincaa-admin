@@ -1,6 +1,6 @@
 <template>
   <div class="el-table">
-    <table  class="el-table yc-table">
+    <table  class="el-table yc-table" v-loading="loading"> 
       <tr width="100%">
         <th width="5%">序号</th>
         <th width="10%">车牌号</th>
@@ -19,7 +19,7 @@
             <td :colspan="ctcspan" style="padding:0;">
               <div class="cm-table-d">
                 <el-scrollbar style="height:100%;" class="yc-scrollbar">
-                  <table width="100%" class="cm-table">
+                  <table width="100%" class="el-table cm-table" v-loading="loadings">
                       <tr v-for="(tablechr,index) in tableDataAlarms" @click="getLocation(tableDataAlarms,tableData,index,i)">
                         <td width="31%">{{ tablechr.vehicleAlarmName }}</td>
                         <td width="30%">{{ tablechr.deriverAlarmName }}</td>
@@ -45,7 +45,7 @@
 
 <script>
 export default {
-  props: ["ctcspan", "showText", "tableData", "tableListShowi","tableDataAlarms","paths"],
+  props: ["ctcspan", "showText", "tableData", "tableListShowi","tableDataAlarms","paths","loading","loadings"],
   methods: {
     showList(i) {
       this.$emit("showList", i);

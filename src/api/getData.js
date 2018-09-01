@@ -72,3 +72,9 @@ export const login = param =>{
 export const getCompanyName = param =>{
     return fetch.get('/gateway/user/searchInfo',param)
 }
+
+
+//demo页饼图详情数据
+export const getDomeVertical = param =>{
+    return fetch.get('/gateway/alarm/atypeCount',param)
+}

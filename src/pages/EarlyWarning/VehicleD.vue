@@ -166,7 +166,7 @@
                     </el-col>
                 </el-row>
                 <div class="ul-itme">
-                    <cd-table @getLocation="getLocation" :tableListDatas="tableListData" :tableTitle="tableTitle" :tableH="tableH" @getDateil="getDateil"></cd-table>
+                    <cd-table @getLocation="getLocation" :tableListDatas="tableListData" :tableTitle="tableTitle" :tableH="tableH" @getDateil="getDateil" :lod="lod"></cd-table>
                 </div>
             </section>
         </div>
@@ -489,6 +489,7 @@ export default {
       comName:"广州鹰瞰信息科技公司",
       companyImage:"",
       usersname:"",
+      lod:true
     };
   },
   methods: {
@@ -1019,6 +1020,7 @@ export default {
       let res = await alarmStatAll(params);
       if (res.status === 200) {
         this.tableListData = res.data;
+        this.lod = false
       }
     },
     //获取综合统计表格车辆类型筛选条件

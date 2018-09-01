@@ -126,7 +126,7 @@
                     </el-col>
                 </el-row>
                 <div class="ul-itme">
-                    <cd-table @getLocation="getLocation" :tableListDatas="tableListData" :tableTitle="tableTitle" :tableH="tableH" @getDateil="getDateil"></cd-table>
+                    <cd-table @getLocation="getLocation" :tableListDatas="tableListData" :tableTitle="tableTitle" :tableH="tableH" @getDateil="getDateil" :lod="lod"></cd-table>
                 </div>
             </section>
             <!-- <template>
@@ -170,6 +170,7 @@ import _ from "lodash";
 export default {
   data() {
     return {
+      lod:true,
       polar: {
         title: {
           text: "粤运化工",
@@ -966,9 +967,13 @@ export default {
 		},
     //获取统计表格数据
     async getAlarmStatAll(params) {
+     
       let res = await alarmStatAll(params);
+       console.log(res.data)
+       
       if (res.status === 200) {
         this.tableListData = res.data;
+        this.lod = false
       }
     },
     //获取综合统计表格车辆类型筛选条件
