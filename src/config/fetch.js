@@ -60,7 +60,7 @@ axios.interceptors.request.use(config => {
 
 //响应拦截器即异常处理
 axios.interceptors.response.use(response => {
-  
+
     // console.log(response.headers['x-auth-token'])
     // debugger
     // if(response.headers.authorization){
@@ -80,9 +80,19 @@ axios.interceptors.response.use(response => {
           break;
         case 401:
           // err.message = '未授权，请重新登录'
-          
+
           router.replace({path: '/login'})
-          clearCookie()
+
+          try{
+            if(window.$VUE){
+              window.$VUE.$message({ message: '登录验证失败，请正确登录', type: 'warning'})
+              window.$VUE.$emit('handleTokenFailure')
+            }
+            clearCookie()
+          }catch(e){
+            console.log(e)
+          }
+
 
           break;
         case 403:
@@ -123,14 +133,17 @@ axios.interceptors.response.use(response => {
     }
     return Promise.reject(error.response.data)   // 返回接口返回的错误信息
 })
-axios.defaults.baseURL = '/api'
+
+// axios.defaults.baseURL = '/api'
+axios.defaults.baseURL = 'http://39.108.152.102:8083'
+
 //设置默认请求头
 axios.defaults.headers = {
     'X-Requested-With': 'XMLHttpRequest'
 }
 
 axios.defaults.timeout = 10000
- 
+
 export default {
   //get请求
     get (url,param) {
@@ -163,4 +176,4 @@ export default {
       })
      }
   }
- 
+

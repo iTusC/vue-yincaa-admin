@@ -50,7 +50,7 @@ Vue.prototype.$ajax = Axios
 // Vue.prototype.$put=put;
 
 /* eslint-disable no-new */
-new Vue({
+window.$VUE = new Vue({
   el: '#app',
   router,
   components: { App },

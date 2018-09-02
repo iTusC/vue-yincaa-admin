@@ -1,7 +1,7 @@
 <template>
     <div class="main" style="height:100%">
         <div class="container demo-1" style="height:100%">
-					
+
           <div class="content" style="height:100%">
             <div id="large-header" class="large-header" style="height:100%">
 							<div class="bg"></div>
@@ -18,7 +18,15 @@
                     <span class="us_uer"></span>
                     <input name="logpass" class="text" style="color: #FFFFFF !important; position:absolute; z-index:100;" v-model="ruleForm.password" autocomplete="off" type="password" placeholder="请输入密码">
                   </div>
-                  <div class="mb2"><a class="act-but submit" href="javascript:;" style="color: #FFFFFF" @click.prevent="submit">登录</a></div>
+                  <!-- <div class="mb2"
+                       @click.prevent="submit"
+                       v-loading="submitLoading"
+                       element-loading-spinner="el-icon-loading"
+                       element-loading-background="rgba(255, 255, 255, 0.5)"
+                  ><a class="act-but submit" href="javascript:;" style="color: #FFFFFF">登录</a></div> -->
+                  <div @click.prevent="submit">
+                    <el-button class="act-but submit" type="primary" round :loading="submitLoading">登录</el-button>
+                  </div>
                 </form>
               </div>
             </div>
@@ -33,85 +41,98 @@
         </el-dialog>
     </div>
 </template>
-       
+
 <script>
-	import "../assets/bgs.jpg"
-	import "../assets/login_ico.png"
-	import {login,getCompanyName} from "../api/getData"
-    export default {
-        data(){
-            return {
-				dvecharts:{},
-				ruleForm:{
-					userName:"",
-					password:""
-				},
-				
-				dialogText:"",
-				centerDialogVisible:false,
+  import "../assets/bgs.jpg"
+  import "../assets/login_ico.png"
+  import {login, getCompanyName} from "../api/getData"
+
+  export default {
+    data() {
+      return {
+        dvecharts: {},
+        ruleForm: {
+          userName: "",
+          password: ""
+        },
+        dialogText: "",
+        centerDialogVisible: false,
+        submitLoading: false
+      }
+    },
+    mounted() {
+      if(window.$VUE) window.$VUE.$on('handleTokenFailure', () => {
+        this.submitLoading = false
+      }) 
+    },
+    methods: {
+      submit() {
+        let user = this.ruleForm.userName;
+        let pass = this.ruleForm.password;
+
+        this.logins({
+          username: user,
+          password: pass
+        }, {username: user})
+        // if(this.userName == "yincaa" && this.password == "123456"){
+        // 	this.$router.push({path:'/indM'})
+        // }else{
+        // 	this.dialogText = "账户或密码错误，请重新输入！"
+        // 	this.centerDialogVisible = true;
+        // 	}
+        // }
+      },
+      //设置cookie
+      setCookie(c_name, c_id, exdays) {
+        var exdate = new Date();//获取时间
+        exdate.setTime(exdate.getTime() + 24 * 60 * 60 * 1000 * exdays);//保存的天数
+        //字符串拼接cookie
+        window.document.cookie = "userName" + "=" + c_name + ";path=/;expires=" + exdate.toGMTString();
+        window.document.cookie = "companyId" + "=" + c_id + ";path=/;expires=" + exdate.toGMTString();
+      },
+      //读取cookie
+      getCookie: function () {
+        if (document.cookie.length > 0) {
+          var arr = document.cookie.split('; ');//这里显示的格式需要切割一下自己可输出看下
+          for (var i = 0; i < arr.length; i++) {
+            var arr2 = arr[i].split('=');//再次切割
+            //判断查找相对应的值
+            if (arr2[0] == 'userName') {
+              this.ruleForm.userName = arr2[1];//保存到保存数据的地方
             }
-        },
-        mounted(){
-        
-        },
-        methods:{
-          submit(){
-			let user = this.ruleForm.userName;
-			let pass = this.ruleForm.password;
+          }
+        }
+      },
+      //清除cookie
+      clearCookie: function () {
+        this.setCookie("", "", -1);//修改2值都为空，天数为负1天就好了
+      },
 
-			this.logins({
-				username:user,
-				password:pass
-			},{username:user})
-			// if(this.userName == "yincaa" && this.password == "123456"){
-			// 	this.$router.push({path:'/indM'})
-			// }else{
-			// 	this.dialogText = "账户或密码错误，请重新输入！"
-			// 	this.centerDialogVisible = true;
-			// 	}
-			// }
-		},
-		//设置cookie
-		setCookie(c_name,c_id,exdays) {
-			var exdate=new Date();//获取时间
-			exdate.setTime(exdate.getTime() + 24*60*60*1000*exdays);//保存的天数
-			//字符串拼接cookie
-			window.document.cookie="userName"+ "=" +c_name+";path=/;expires="+exdate.toGMTString();
-			window.document.cookie = "companyId" + "=" + c_id + ";path=/;expires=" + exdate.toGMTString();
-		},
-		//读取cookie
-		getCookie:function () {
-			if (document.cookie.length>0) {
-			var arr=document.cookie.split('; ');//这里显示的格式需要切割一下自己可输出看下
-			for(var i=0;i<arr.length;i++){
-				var arr2=arr[i].split('=');//再次切割
-				//判断查找相对应的值
-				if(arr2[0]=='userName'){
-				this.ruleForm.userName=arr2[1];//保存到保存数据的地方
-				}
-				}
-			}
-		},
-		//清除cookie
-		clearCookie:function () {
-			this.setCookie("","",-1);//修改2值都为空，天数为负1天就好了
-		},
+      async logins(params, ps) {
 
-		async logins(params,ps){
-			let res = await login(params);
-			if(res.status == 200){
-				this.$router.push({path:'/indM'})
-				let response = await getCompanyName(ps);
-				if(response.status == 200){
-					console.log(response.data.companyId)
-					this.setCookie(params.username,response.data.companyId,1);
-					this.getCookie();
-				}
-			}
-			
-		}
-	}
+        this.submitLoading = true
+        let res = await login(params).catch(e => {
+          this.submitLoading = false
+        })
+        this.submitLoading = false
+
+        if (res.status == 200) {
+          this.$router.push({path: '/indM'})
+          this.$message({
+            message: '登录成功',
+            type: 'success'
+          })
+          let response = await getCompanyName(ps);
+          if (response.status == 200) {
+            console.log(response.data.companyId)
+            this.setCookie(params.username, response.data.companyId, 1);
+            this.getCookie();
+          }
+        }
+
+      }
     }
+  }
 </script>
 
 <style lang="less" scoped>
@@ -163,7 +184,7 @@ article,aside,details,figcaption,figure,footer,header,hgroup,main,nav,section,su
 	color: #FFFFFF;
 	height: 20px;
 	line-height: 20px;
-	padding:0 0 100px 0; 
+	padding:0 0 100px 0;
 }
 .forms{
 	width: 280px;
@@ -174,7 +195,7 @@ article,aside,details,figcaption,figure,footer,header,hgroup,main,nav,section,su
 	min-height: 450px;
 	padding-top: 35px;
 	position: relative;
-}		
+}
 .input_outer{
 	height: 46px;
 	padding: 0 5px;
@@ -237,7 +258,8 @@ article,aside,details,figcaption,figure,footer,header,hgroup,main,nav,section,su
 	text-align: center;
 	font-size: 20px;
 	border-radius: 50px;
-	background: #10b1c7;
+  background: #10b1c7;
+  width: 100%;
 }
 .bg{
 	position: absolute;
