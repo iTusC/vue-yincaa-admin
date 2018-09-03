@@ -3,9 +3,10 @@
         <main class="mainbg">
             <article class="demmap">
                 <section class="demo-map">
-                    <div class="demo-map-onlien">在线</div>
-                    <div class="number">
-                    <div class="wrapper">
+                    <!-- <div class="demo-map-onlien">在线</div> -->
+                    <div class="number" >
+                      {{ comName }}
+                    <!-- <div class="wrapper">
                         <div class="letters">
                             <span class="letter">1</span>
                             <span class="emjd">,</span>
@@ -17,7 +18,7 @@
                             <span class="letter">9</span>
                             <span class="letter">7</span>
                         </div>
-                    </div>
+                    </div> -->
                     </div>
                     <div class="mycharts">
                     <div id="myCharts" :style="{width: '100%', height: '500px'}" style=""></div>
@@ -64,7 +65,7 @@
                 <section class="demo-echarts">
                   <h2>预警分类（2018.08）</h2>
                   <span class="more"></span>
-                  <div id="myChart" class="myChart" :style="stylewh" style="margin-top:50px;margin-left:20px;"></div>
+                  <div id="myChart" class="myChart"  :style="stylewh" style="margin-top:50px;margin-left:20px;"></div>
                 </section>
                 <section class="demo-message">
                   <div class="news">
@@ -97,12 +98,13 @@
     import '../assets/mainImages/vdbg.png'
     import '../assets/echarsL.png'
     import '../assets/2.png'
-    import {getDomeVertical} from '../api/getData'
+    import {getDomeVertical,getCompanyName} from '../api/getData'
     import { getDay, getWeek,getLocation,showPosition,getCascaderObj} from "../../static/js/data";
     import '../../static/js/bmap.min'
     export default {
         data(){
             return {
+               comName:"",
                dvecharts:{},
                ddData:[],
                vdData:[],
@@ -111,8 +113,8 @@
                companyCode:"",
                day:"",
                stylewh:{
-                 width:'300px',
-                 height:'300px'
+                 width:'calc(100% - 20px)',
+                 height:'400px'
                },
                messages:[
                  {
@@ -130,22 +132,31 @@
                ]
             }
         },
+        created(){
+
+        },
         mounted(){
           this.messageNew()
           this.getData();
+          this.getCookie();
+          this.getCompos({username:this.usersname});
+          this.getMapData();
+
           //图表查询默认时间（按照往后推7天）
           this.endData = getDay(0) + " 23:23:59";
           this.starData = getDay(-(this.day - 1)) + " 00:00:00";
-          this.getCookie();
-          this.getMapData();
-          this.getDomeVerticals({
-            companyId:this.companyCode,
-            startDate:this.starData,
-            endDate:this.endData
-          })
+          // this.getCookie();
+          // this.getMapData();
+          // this.getCompos({username:this.usersname});
+          // this.getDomeVerticals({
+          //   companyId:this.companyCode,
+          //   startDate:this.starData,
+          //   endDate:this.endData
+          // })
           
           this.drawLine();
         },
+        
         methods:{
           getData(){
             let now = new Date();
@@ -370,12 +381,13 @@
           },
           scroll(){
          
-            this.animate=true;    // 因为在消息向上滚动的时候需要添加css3过渡动画，所以这里需要设置true
-            setTimeout(()=>{      //  这里直接使用了es6的箭头函数，省去了处理this指向偏移问题，代码也比之前简化了很多
-                    this.items.push(this.items[0]);  // 将数组的第一个元素添加到数组的
-                    this.items.shift();               //删除数组的第一个元素
-                    this.animate=false;  // margin-top 为0 的时候取消过渡动画，实现无缝滚动
-            },500)
+            // this.animate=true;    // 因为在消息向上滚动的时候需要添加css3过渡动画，所以这里需要设置true
+            // setTimeout(()=>{      //  这里直接使用了es6的箭头函数，省去了处理this指向偏移问题，代码也比之前简化了很多
+            //         this.items.push(this.items[0]);  // 将数组的第一个元素添加到数组的
+            //         this.items.shift();               //删除数组的第一个元素
+            //         this.animate=false;  // margin-top 为0 的时候取消过渡动画，实现无缝滚动
+            // },500)
+
           },
           drawLine(){
             // 基于准备好的dom，初始化echarts实例
@@ -389,12 +401,13 @@
                       orient: 'vertical',
                       x: 'left',
                       itemGap: 20,
-                      data:this.legendName,
+                      // data:this.legendName,
+                      data:["前车碰撞报警","车道偏离报警","车距过近报警","驻车滑行","疲劳驾驶报警","接打电话报警","抽烟报警","分神驾驶报警","驾驶员异常报警","左顾右盼","未系安全带"],
                       textStyle:{
                         color:'#fff'
                       }
                   },
-                  color:['#6B8FC9', '#2778A6','#DCBB4B','#E43D3D','#BF1F6F','#9A4DAD','#5445BB','#C65455','#18BCC3;','#4BB46C','#D06F33'],
+                  // color:['#6B8FC9', '#2778A6','#DCBB4B','#E43D3D','#BF1F6F','#9A4DAD','#5445BB','#C65455','#18BCC3;','#4BB46C','#D06F33','#bf1f6f','#5445bb','#2778a6'],
                   series: [
                       {
                           name:'车辆预警',
@@ -411,7 +424,13 @@
                                   show: false
                               }
                           },
-                          data:this.ddData
+                          // data:this.ddData
+                          data:[
+                            {value:335, name:'前车碰撞报警',itemStyle:{color:'#4bb46c'}},
+                            {value:679, name:'车道偏离报警',itemStyle:{color:'#d06f33'}},
+                            {value:1548, name:'车距过近报警',itemStyle:{color:'#18bcc3'}},
+                            {value:1548, name:'驻车滑行',itemStyle:{color:'#c65455'}}
+                          ]
                       },
                       {
                           name:'驾驶员预警',
@@ -424,14 +443,21 @@
                                   }
                     
                           },
-                          data:this.vdData
+                          // data:this.vdData
+                          data:[
+                            {value:335, name:'疲劳驾驶报警',itemStyle:{color:'#dcbb4b'}},
+                            {value:310, name:'接打电话报警',itemStyle:{color:'#6b8fc9'}},
+                            {value:234, name:'抽烟报警',itemStyle:{color:'#2778a6'}},
+                            {value:135, name:'分神驾驶报警',itemStyle:{color:'#5445bb'}},
+                            {value:1048, name:'驾驶员异常报警',itemStyle:{color:'#9a4dad'}},
+                            {value:251, name:'左顾右盼',itemStyle:{color:'#e43d3d'}},
+                            {value:147, name:'未系安全带',itemStyle:{color:'#bf1f6f'}}
+                        ]
                       }
                   ]
             });
           },
-          
           async getDomeVerticals(param){
-           
             let res = await getDomeVertical(param);
             if(res.status == 200){
               this.legendName = res.data.name;
@@ -439,16 +465,22 @@
               res.data.forEach(element => {
                 datas.push(element.value)
               });
-              console.log(datas)
               for(let i = 0; i < 5; i++){
                 this.ddData.push(datas[i]);
               }
               for(let i = 5; i < res.data.length;i++){
                 this.vdData.push(datas[i])
               }
-              console.log(this.ddData,this.vdData)
             }
-          }
+          }, 
+          //获取公司名
+          async getCompos(params) {
+            let res = await getCompanyName(params);
+            if(res.status == 200){
+              this.comName = res.data.companyName;
+            }
+            
+          },
         }
     }
 </script>
@@ -509,6 +541,10 @@
             height: 127px;
             background-size: 100% 100%;
             z-index: 2;
+            font-size: 36px;
+            color: #1d798c;
+            text-align: center;
+            line-height: 127px;
         }
         .democontent{
             display: block;

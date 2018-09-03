@@ -39,7 +39,7 @@
 
                     <el-dropdown class="yc-layout-mt">
                         <span class="el-dropdown-link">
-                            YINCAA<i class="el-icon-arrow-down el-icon--right"></i>
+                            {{ usersname }}<i class="el-icon-arrow-down el-icon--right"></i>
                         </span>
                         <el-dropdown-menu slot="dropdown">
                             <el-dropdown-item><router-link to="/login">退出</router-link></el-dropdown-item>
@@ -53,6 +53,7 @@
 
 <script>
     import Breadcrumb from '../components/Breadcrumb'
+
     export default {
         components:{
             Breadcrumb
@@ -60,8 +61,13 @@
         data(){
             return {
                 selectShow:false,
-                input:''
+                input:'',
+                usersname:"",
+                companyCode:""
             }
+        },
+        created(){
+            this.getCookie()
         },
         methods:{
             showSelect(){
@@ -69,7 +75,22 @@
             },
             blur(){
                 this.selectShow = false
+            },
+            //读取cookie
+            getCookie:function () {
+                if (document.cookie.length>0) {
+                var arr=document.cookie.split('; ');//这里显示的格式需要切割一下自己可输出看下
+                for(var i=0;i<arr.length;i++){
+                    var arr2=arr[i].split('=');//再次切割
+                    //判断查找相对应的值
+                    if (arr2[0] == 'userName') {
+                this.usersname = arr2[1]; //保存到保存数据的地方
+            } else if (arr2[0] == 'companyId') {
+                this.companyCode = arr2[1];
             }
+                    }
+                }
+            },
         }
     }
 </script>

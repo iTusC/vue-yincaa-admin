@@ -149,7 +149,7 @@
                             <ul>
                                 <li>
                                     <span class="detail-warning-title">驾驶员ID</span>
-                                    <p class="detail-warnig-text">{{ deriverId }}</p>
+                                    <p class="detail-warnig-text">YINC-DR-{{ deriverId }}</p>
                                 </li>
                                 <li>
                                     <span class="detail-warning-title">驾驶员姓名</span>
@@ -373,9 +373,7 @@ export default {
         async getDetailPageData(params) {
         let res = await alarmDetail(params);
         let img = [];
-        
         if (res.status === 200) {
-            console.log(res.data)
                 this.alarm = res.data
                 this.atpyeName = res.data.detailMap.atpyeName;
                 this.pid = res.data.detailMap.pid;
@@ -397,8 +395,6 @@ export default {
                 this.infoTW = res.data.detailMap.atpyeName; //报警类型
                 this.infoWT = res.data.detailMap.alarmTime; //时间
                 this.infoL = res.data.detailMap.locationDesc; //地点,
-
-                console.log(res.data.multimMap)
                 res.data.multimMap.forEach(element => {
                     if(element.fileType == 0){
                         img.push('http://47.106.196.228:8888/'+element.filePath) 
@@ -413,14 +409,11 @@ export default {
             //     else if(res.data.multimMap.filetype == 2){
             //         this.videos ='http://47.106.196.228:8888'+res.data.detailMap[i].filePath;
             //     }
-            console.log(img)
             this.imagesList = img
-            
             this.videoShow = true;
-            this.startDate = this.dataMonday;
-            this.endDate = this.dataSunday;
+            this.startDate = res.data.detailMap.alarmTime;
+            this.endDate = res.data.detailMap.alarmTime
             this.deriverId = res.data.params.deriverId
-
             if(res.data.params.upAlarmNo){
                 this.upAlarmNo = res.data.params.upAlarmNo;
                 this.alarmNo = res.data.params.alarmNo;
@@ -434,17 +427,12 @@ export default {
                 this.alarmNo = res.data.params.alarmNo;
                 this.downAlarmNo = res.data.params.downAlarmNo;
             }
-            
         }
         this.lodi =false
         res = null;
         }
-        
     },
     mounted(){
-        
-
-        
     },
     created:function(){
         this.listId = this.$route.params.id;

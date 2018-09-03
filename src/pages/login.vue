@@ -18,17 +18,20 @@
                     <span class="us_uer"></span>
                     <input name="logpass" class="text" style="color: #FFFFFF !important; position:absolute; z-index:100;" v-model="ruleForm.password" autocomplete="off" type="password" placeholder="请输入密码">
                   </div>
-                  <div class="mb2"><a class="act-but submit" href="javascript:;" style="color: #FFFFFF" @click.prevent="submit">登录</a></div>
+                  <div class="mb2">
+					  <el-button type="primary" class="act-but submit" :plain="true" @click="submit" style="width:400px;color: #FFFFFF" :loading="log">登录</el-button>
+					  <!-- <a class="act-but submit" href="javascript:;" style="color: #FFFFFF" @click.prevent="submit">登录</a></div> -->
+					  </div>
                 </form>
               </div>
             </div>
           </div>
         </div><!-- /container -->
-				<el-dialog class="dialog"
-       title="提示"
-        :visible.sync="centerDialogVisible"
-        width="20%"
-        center>
+		<el-dialog class="dialog"
+       		title="提示"
+        	:visible.sync="centerDialogVisible"
+        	width="20%"
+        	center>
         <span  style="display:inline-block;width:100%;text-align:center;font-size:14px;color:#666">{{ dialogText }}</span>
         </el-dialog>
     </div>
@@ -38,6 +41,7 @@
 	import "../assets/bgs.jpg"
 	import "../assets/login_ico.png"
 	import {login,getCompanyName} from "../api/getData"
+	import to from '../../static/js/to'
     export default {
         data(){
             return {
@@ -46,19 +50,19 @@
 					userName:"",
 					password:""
 				},
-				
+				log:false,
 				dialogText:"",
 				centerDialogVisible:false,
             }
         },
         mounted(){
-        
+			
         },
         methods:{
           submit(){
 			let user = this.ruleForm.userName;
 			let pass = this.ruleForm.password;
-
+			
 			this.logins({
 				username:user,
 				password:pass
@@ -70,6 +74,7 @@
 			// 	this.centerDialogVisible = true;
 			// 	}
 			// }
+		
 		},
 		//设置cookie
 		setCookie(c_name,c_id,exdays) {
@@ -99,16 +104,22 @@
 
 		async logins(params,ps){
 			let res = await login(params);
+			this.log = true;
 			if(res.status == 200){
-				this.$router.push({path:'/indM'})
+				
 				let response = await getCompanyName(ps);
 				if(response.status == 200){
-					console.log(response.data.companyId)
-					this.setCookie(params.username,response.data.companyId,1);
+					this.$options.methods.setCookie(params.username,response.data.companyId,1);
 					this.getCookie();
 				}
+				
+				this.$message({
+					message: '登录成功',
+					type: 'success'
+				});
+				this.$router.push({path:'/indM'})
+				this.log = false
 			}
-			
 		}
 	}
     }
@@ -237,7 +248,7 @@ article,aside,details,figcaption,figure,footer,header,hgroup,main,nav,section,su
 	text-align: center;
 	font-size: 20px;
 	border-radius: 50px;
-	background: #10b1c7;
+	background-color: #409eff;
 }
 .bg{
 	position: absolute;

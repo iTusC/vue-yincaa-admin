@@ -1,6 +1,8 @@
 <template>
     <div style="height:100%;overflow:hidden">
-       <router-view ></router-view>
+       <keep-alive>
+        <router-view ></router-view>
+      </keep-alive>
         <div class="yc-list">
           <div class="yc-velist-main">
             <div class="yc-velist">
@@ -715,7 +717,6 @@ export default {
       this.tabletimeend = time[1] + " 23:59:59";
       this.dataMonday = time[0] + " 00:00:00";
       this.dataSunday = time[1] + "23:59:59";
-      console.log(time);
       if (!this.onlineS) {
         this.getAlarmStatAll({
           pageNum: this.listPageNumber,
@@ -966,11 +967,8 @@ export default {
 			}
 		},
     //获取统计表格数据
-    async getAlarmStatAll(params) {
-     
+    async getAlarmStatAll(params) {  
       let res = await alarmStatAll(params);
-       console.log(res.data)
-       
       if (res.status === 200) {
         this.tableListData = res.data;
         this.lod = false
