@@ -1,9 +1,7 @@
 <template>
 
     <div style="height:100%;overflow:hidden;">
-      <keep-alive>
         <router-view ></router-view>
-      </keep-alive>
         <div class="yc-list">
           <div class="yc-velist-main">
             <div class="yc-velist">

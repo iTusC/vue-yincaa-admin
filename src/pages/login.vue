@@ -19,8 +19,7 @@
                     <input name="logpass" class="text" style="color: #FFFFFF !important; position:absolute; z-index:100;" v-model="ruleForm.password" autocomplete="off" type="password" placeholder="请输入密码">
                   </div>
                   <div class="mb2">
-					  <el-button type="primary" class="act-but submit" :plain="true" @click="submit" style="width:400px;color: #FFFFFF" :loading="log">登录</el-button>
-					  <!-- <a class="act-but submit" href="javascript:;" style="color: #FFFFFF" @click.prevent="submit">登录</a></div> -->
+					  <el-button type="primary" @click="submit" style="width:400px;height:50px;color: #FFFFFF;border-radius:30px;" :loading="log">登录</el-button>
 					  </div>
                 </form>
               </div>
@@ -63,17 +62,16 @@
 			let user = this.ruleForm.userName;
 			let pass = this.ruleForm.password;
 			
-			this.logins({
+			
+			if(!user || !pass){
+				this.dialogText = "账号或密码不能为空"
+				this.centerDialogVisible = true;
+			}else{
+				this.logins({
 				username:user,
 				password:pass
-			},{username:user})
-			// if(this.userName == "yincaa" && this.password == "123456"){
-			// 	this.$router.push({path:'/indM'})
-			// }else{
-			// 	this.dialogText = "账户或密码错误，请重新输入！"
-			// 	this.centerDialogVisible = true;
-			// 	}
-			// }
+				},{username:user})
+			}
 		
 		},
 		//设置cookie

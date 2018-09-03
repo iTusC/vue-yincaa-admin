@@ -30,7 +30,7 @@
                     
                     <section  class="detail-page-main border-bottom">
                         <article class="detail-main-warning">
-                            <h3>预警信息(编号38992994910400)</h3>
+                            <h3>预警信息(编号{{ alarmNo }})</h3>
                             <ul class="detail-warning-del">
                                 <li>
                                     <span class="detail-warning-title">预警类别</span>
@@ -38,7 +38,7 @@
                                 </li>
                                 <li>
                                     <span class="detail-warning-title">预警子类型</span>
-                                    <p class="detail-warnig-text">{{ atpyeName }}</p>
+                                    <p class="detail-warnig-text">{{ atpyePName }}</p>
                                 </li>
                                 <li>
                                     <span class="detail-warning-title">预警时间</span>
@@ -236,7 +236,7 @@ export default {
             messagesrc:"",
             messagesrctitle:"",
             imagesList:[],
-            atpyeName:"-",//预警类型
+            atpyePName:"-",//预警类型
             pid:"-",//预警子类型
             startDate:"-",//预警上报时间
             endDate:"-",//预警结束时间
@@ -375,7 +375,7 @@ export default {
         let img = [];
         if (res.status === 200) {
                 this.alarm = res.data
-                this.atpyeName = res.data.detailMap.atpyeName;
+                this.atpyePName = res.data.detailMap.atpyePName;
                 this.pid = res.data.detailMap.pid;
                 this.longitude = res.data.detailMap.longitude;
                 this.latitude = res.data.detailMap.latitude;
