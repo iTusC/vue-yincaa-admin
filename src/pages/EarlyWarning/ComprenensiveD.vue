@@ -164,7 +164,18 @@
                     </el-col>
                 </el-row>
                 <div class="ul-itme">
-                    <c-table :ctcspan="ctcspan" :showText="showText" :tableData="tableData" @showList="showList" @getLocation="getLocation" :tableListShowi="tableListShowi" :tableDataAlarms="tableDataAlarms" @paths="paths" @getDateil="getDateil" :loading="loading" :loadings="loadings"></c-table>
+                    <c-table :ctcspan="ctcspan" :showText="showText" :tableData="tableData" @showList="showList" @getLocation="getLocation" :tableListShowi="tableListShowi" :tableDataAlarms="tableDataAlarms" @paths="paths" @getDateil="getDateil" :loading="loading" :loadings="loadings" @getPushApply="getPushApply"></c-table>
+                    <el-pagination
+                    style="float:right;margin-top:20px;margin-bottom:20px;"
+                    background
+                      @size-change="handleSizeChange"
+                      @current-change="handleCurrentChange"
+                      :current-page.sync="currentPage3"
+                      :page-sizes="[10,30,40,50]"
+                      :page-size="10"
+                      layout="sizes,prev, pager, next, jumper"
+                      :total="600">
+                    </el-pagination>
                 </div>
             </section>
            
@@ -199,6 +210,7 @@ import {
   onlineRateAll,
   ByGategory,
   getCompanyName,
+login,
 } from "../../api/getData";
 import { getDay, getWeek,getLocation,showPosition,getCascaderObj} from "../../../static/js/data";
 
@@ -459,9 +471,49 @@ export default {
       comName:"广州鹰瞰信息科技公司",
       companyImage:"",
       usersname:"",
+      numbers:10
     };
   },
   methods: {
+    //翻页
+    handleSizeChange(val) {
+      this.numbers = val;
+       //默认综合统计表格数据
+      this.loading = true
+      this.getAlarmCompsStat({
+        pageNum: this.pageNumber,
+        pageSize: this.numbers,
+        companyId: this.companyCode,
+        startDate: this.starData,
+        endDate: this.endData
+      });
+    },
+    handleCurrentChange(val) {
+        this.pageNumber = val;
+        //默认综合统计表格数据
+        this.loading = true
+        this.getAlarmCompsStat({
+          pageNum: this.pageNumber,
+          pageSize: this.numbers,
+          companyId: this.companyCode,
+          startDate: this.starData,
+          endDate: this.endData
+        });
+    },
+    getPushApply(){
+      
+    },
+    //刷新在线车辆
+    carNew(){
+      //获取车辆列表 搜索车辆个数
+      this.getTeamTree({ companyId: this.companyCode });
+
+      //默认获取下拉列表
+      this.getSearchByName({ companyId: this.companyCode });
+
+      //默认获取车辆在线数
+      this.getOnlineRateAll({ companyId: this.companyCode });
+    },
     //点击公司获取所有数据
     allData(){
       //获取车辆列表 搜索车辆个数
@@ -773,7 +825,7 @@ export default {
       if (!this.onlineS) {
         this.getAlarmCompsStat({
           pageNum: this.listPageNumber,
-          pageSize: 10,
+          pageSize: this.numbers,
           companyId: this.companyCode,
           startDate: this.tabletimestart,
           endDate: this.tabletimeend
@@ -781,7 +833,7 @@ export default {
       } else if (!this.listVehicle == "" && this.alarmCode == "") {
         this.getAlarmCompsStat({
           pageNum: this.listPageNumber,
-          pageSize: 10,
+          pageSize: this.numbers,
           companyId: this.companyCode,
           vehicleId: this.listVehicle,
           startDate: this.tabletimestart,
@@ -790,7 +842,7 @@ export default {
       } else if (!this.listDirver == "" && this.alarmCode == "") {
         this.getAlarmCompsStat({
           pageNum: this.listPageNumber,
-          pageSize: 10,
+          pageSize: this.numbers,
           companyId: this.companyCode,
           deriverId: this.listDirver,
           startDate: this.tabletimestart,
@@ -799,7 +851,7 @@ export default {
       } else if (!this.listVehicle == "" && this.alarmCode !== "") {
         this.getAlarmCompsStat({
           pageNum: this.listPageNumber,
-          pageSize: 10,
+          pageSize: this.numbers,
           companyId: this.companyCode,
           vehicleId: this.listVehicle,
           startDate: this.tabletimestart,
@@ -809,7 +861,7 @@ export default {
       } else if (!this.listDirver == "" && this.alarmCode !== "") {
         this.getAlarmCompsStat({
           pageNum: this.listPageNumber,
-          pageSize: 10,
+          pageSize: this.numbers,
           companyId: this.companyCode,
           deriverId: this.listDirver,
           startDate: this.tabletimestart,
@@ -819,7 +871,7 @@ export default {
       } else {
         this.getAlarmCompsStat({
           pageNum: this.listPageNumber,
-          pageSize: 10,
+          pageSize: this.numbers,
           companyId: this.companyCode,
           startDate: this.tabletimestart,
           endDate: this.tabletimeend
@@ -835,7 +887,7 @@ export default {
       
         this.getAlarmCompsStat({
           pageNum: this.pageNumber,
-          pageSize: 10,
+          pageSize: this.numbers,
           companyId: this.companyCode,
           deriverId: val[1],
           startDate: this.tabletimestart,
@@ -844,7 +896,7 @@ export default {
       } else if (this.tabletimestart || this.tabletimeend || this.value7) {
         this.getAlarmCompsStat({
           pageNum: this.pageNumber,
-          pageSize: 10,
+          pageSize: this.numbers,
           companyId: this.companyCode,
           deriverId: val[1],
           startDate: this.tabletimestart,
@@ -854,7 +906,7 @@ export default {
       } else {
         this.getAlarmCompsStat({
           pageNum: this.pageNumber,
-          pageSize: 10,
+          pageSize: this.numbers,
           companyId: this.companyCode,
           deriverId: val[1],
           startDate: this.starData,
@@ -870,7 +922,7 @@ export default {
       if (this.tabletimestart || this.tabletimeend) {
         this.getAlarmCompsStat({
           pageNum: this.pageNumber,
-          pageSize: 10,
+          pageSize: this.numbers,
           companyId: this.companyCode,
           vehicleId: val[0],
           startDate: this.tabletimestart,
@@ -879,7 +931,7 @@ export default {
       } else {
         this.getAlarmCompsStat({
           pageNum: this.pageNumber,
-          pageSize: 10,
+          pageSize: this.numbers,
           companyId: this.companyCode,
           vehicleId: val[0],
           startDate: this.starData,
@@ -893,7 +945,7 @@ export default {
       if(this.ctcspan === 3){
         this.getAlarmCompsDetail({
           pageNum: this.listPageNumber,
-          pageSize:10,
+          pageSize:this.numbers,
           companyId: this.companyCode,
           teamId:1,
           vehicleId: this.tableData[this.indexShowList].vehicleId,
@@ -918,7 +970,7 @@ export default {
 
         this.getAlarmCompsDetail({
           pageNum: this.listPageNumber,
-          pageSize: 10,
+          pageSize: 20,
           companyId: this.companyCode,
           teamId: this.tableData[i].teamId,
           vehicleId: this.tableData[i].vehicleId,
@@ -1037,6 +1089,7 @@ export default {
 		},
     //综合统计表格综合数据
     async getAlarmCompsStat(params) {
+      
       let res = await alarmCompsStat(params);
       if (res.status === 200) {
         this.tableData = Object.freeze(res.data);
@@ -1046,6 +1099,8 @@ export default {
     },
     //综合统计表格详情数据
     async getAlarmCompsDetail(param) {
+      this.loading = true;
+       this.tableDataAlarms = []; 
       let res = await alarmCompsDetails(param);
 
       if (res.status === 200) {
@@ -1055,6 +1110,7 @@ export default {
     },
     //获取综合统计表格车辆类型筛选条件
     async getByGategory(params, i) {
+      this.loading = true;
       let res = await ByGategory(params);
       if (res.status === 200) {
         let arr = []
@@ -1075,6 +1131,7 @@ export default {
           }
           this.options3[1].options = arrT;
         }
+        this.loading = false;
       }
     },
      //获取公司名
@@ -1116,14 +1173,21 @@ export default {
     //默认综合统计表格数据
     this.getAlarmCompsStat({
       pageNum: this.pageNumber,
-      pageSize: 10,
+      pageSize: this.numbers,
       companyId: this.companyCode,
       startDate: this.starData,
       endDate: this.endData
     });
 
-    this.addressDetail();
-    
+    // this.addressDetail();
+    // this.carNew = setInterval(()=>{
+    //   this.carNew();
+    // },3000)
+
+  },
+  beforeDestroy () {
+      clearInterval(this.intervalid1)
+      clearInterval(this.intervalid2)
   },
   computed: {
     skcolors() {

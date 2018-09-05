@@ -18,7 +18,7 @@
           <template v-if="tableListShowi === i">
             <td :colspan="ctcspan" style="padding:0;">
               <div class="cm-table-d">
-                <el-scrollbar style="height:100%;" class="yc-scrollbar">
+                <el-scrollbar style="height:100%;" class="yc-scrollbar" @scroll="getPushApply">
                   <table width="100%" class="el-table cm-table" v-loading="loadings">
                       <tr v-for="(tablechr,index) in tableDataAlarms" @click="getLocation(tableDataAlarms,tableData,index,i)">
                         <td width="31%">{{ tablechr.vehicleAlarmName }}</td>
@@ -55,9 +55,18 @@ export default {
     },
     getDateil(id,index){
       this.$emit("getDateil",{id:id,index:index})
+    },
+    getPushApply(){
+      this.$emit("getPushApply")
     }
+  },
+  created(){
+      let self = this;
+        $(".div-table").scroll(function(){
+          self.loadMore();
+      })
   }
-};
+}
 </script>
 
 <style scoped>

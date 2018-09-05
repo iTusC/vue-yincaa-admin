@@ -374,6 +374,16 @@ export default {
         let res = await alarmDetail(params);
         let img = [];
         if (res.status === 200) {
+                let _self = this
+                let map = new BMap.Geocoder();
+                let lat = res.data.detailMap.latitude
+                console.log(lat);
+                let locationDescs = map.getLocation(new BMap.Point(res.data.detailMap.longitude,res.data.detailMap.latitude),function(result){
+                    if(result){
+                        _self.locationDesc = result.address;
+                        _self.infoL = result.address;
+                    }
+                })
                 this.alarm = res.data
                 this.atpyePName = res.data.detailMap.atpyePName;
                 this.pid = res.data.detailMap.pid;
@@ -382,7 +392,7 @@ export default {
                 this.deriverName = res.data.detailMap.deriverName;
                 this.vehicleCode = res.data.detailMap.vehicleCode;
                 this.teamName = res.data.detailMap.teamName;
-                this.locationDesc = res.data.detailMap.locationDesc;
+                // this.locationDesc = res.data.detailMap.locationDesc;
                 this.vehicleId = res.data.detailMap.vehicleId;
                 this.color = res.data.detailMap.color;
                 this.sex = res.data.detailMap.sex;
@@ -394,7 +404,7 @@ export default {
                 this.infoNP = res.data.detailMap.vehicleCode;  //车牌号码
                 this.infoTW = res.data.detailMap.atpyeName; //报警类型
                 this.infoWT = res.data.detailMap.alarmTime; //时间
-                this.infoL = res.data.detailMap.locationDesc; //地点,
+                // this.infoL = res.data.detailMap.locationDesc; //地点,
                 res.data.multimMap.forEach(element => {
                     if(element.fileType == 0){
                         img.push('http://47.106.196.228:8888/'+element.filePath) 

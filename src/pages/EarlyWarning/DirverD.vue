@@ -129,6 +129,17 @@
                 </el-row>
                 <div class="ul-itme">
                     <cd-table @getLocation="getLocation" :tableListDatas="tableListData" :tableTitle="tableTitle" :tableH="tableH" @getDateil="getDateil" :lod="lod"></cd-table>
+                    <el-pagination
+                    style="float:right;margin-top:20px;margin-bottom:20px;"
+                    background
+                      @size-change="handleSizeChange"
+                      @current-change="handleCurrentChange"
+                      :current-page.sync="currentPage3"
+                      :page-sizes="[10,30,40,50]"
+                      :page-size="10"
+                      layout="sizes,prev, pager, next, jumper"
+                      :total="600">
+                    </el-pagination>
                 </div>
             </section>
             <!-- <template>
@@ -466,10 +477,35 @@ export default {
       comName:"广州鹰瞰信息科技公司",
       companyImage:"",
       usersname:"",
+      numbers:10,//每页显示条数
     };
   },
   methods: {
-   
+   //翻页
+    handleSizeChange(val) {
+        this.numbers = val;
+        //默认综合统计表格数据
+        //默认综合统计表格数据
+      this.getAlarmStatAll({
+        pageNum: this.pageNumber,
+        pageSize: this.numbers,
+        companyId: this.companyCode,
+        startDate: this.starData,
+        endDate: this.endData,
+        atypeParent: this.gategorys
+      })
+    },
+    handleCurrentChange(val) {
+        this.pageNumber = val;
+         this.getAlarmStatAll({
+          pageNum: this.pageNumber,
+          pageSize: this.numbers,
+          companyId: this.companyCode,
+          startDate: this.starData,
+          endDate: this.endData,
+          atypeParent: this.gategorys
+        })
+    },
     //点击公司获取所有数据
     allData(){
       //获取车辆列表 搜索车辆个数
@@ -492,7 +528,7 @@ export default {
       //默认综合统计表格数据
       this.getAlarmStatAll({
         pageNum: this.pageNumber,
-        pageSize: 10,
+        pageSize: this.numbers,
         companyId: this.companyCode,
         startDate: this.starData,
         endDate: this.endData,
@@ -585,7 +621,7 @@ export default {
       //获取预警统计列表数据
       this.getAlarmStatAll({
         pageNum: this.pageNumber,
-        pageSize: 10,
+        pageSize: this.numbers,
         companyId: this.companyCode,
         teamId:msg.tm,
         startDate: this.starData,
@@ -632,7 +668,7 @@ export default {
       //点击获取表格数据
       this.getAlarmStatAll({
         pageNum: this.pageNumber,
-        pageSize: 10,
+        pageSize: this.numbers,
         companyId: this.companyCode,
         vehicleId: msg.di,
         startDate: this.starData,
@@ -720,7 +756,7 @@ export default {
       if (!this.onlineS) {
         this.getAlarmStatAll({
           pageNum: this.listPageNumber,
-          pageSize: 10,
+          pageSize: this.numbers,
           companyId: this.companyCode,
           startDate: this.tabletimestart,
           endDate: this.tabletimeend,
@@ -729,7 +765,7 @@ export default {
       } else if (!this.listVehicle == "" && this.alarmCode == "") {
         this.getAlarmStatAll({
           pageNum: this.listPageNumber,
-          pageSize: 10,
+          pageSize: this.numbers,
           companyId: this.companyCode,
           vehicleId: this.listVehicle,
           startDate: this.tabletimestart,
@@ -739,7 +775,7 @@ export default {
       } else if (!this.listDirver == "" && this.alarmCode == "") {
         this.getAlarmStatAll({
           pageNum: this.listPageNumber,
-          pageSize: 10,
+          pageSize: this.numbers,
           companyId: this.companyCode,
           deriverId: this.listDirver,
           startDate: this.tabletimestart,
@@ -749,7 +785,7 @@ export default {
       } else if (!this.listVehicle == "" && this.alarmCode !== "") {
         this.getAlarmStatAll({
           pageNum: this.listPageNumber,
-          pageSize: 10,
+          pageSize: this.numbers,
           companyId: this.companyCode,
           vehicleId: this.listVehicle,
           startDate: this.tabletimestart,
@@ -760,7 +796,7 @@ export default {
       } else if (!this.listDirver == "" && this.alarmCode !== "") {
         this.getAlarmStatAll({
           pageNum: this.listPageNumber,
-          pageSize: 10,
+          pageSize: this.numbers,
           companyId: this.companyCode,
           deriverId: this.listDirver,
           startDate: this.tabletimestart,
@@ -771,7 +807,7 @@ export default {
       } else {
         this.getAlarmStatAll({
           pageNum: this.listPageNumber,
-          pageSize: 10,
+          pageSize: this.numbers,
           companyId: this.companyCode,
           startDate: this.tabletimestart,
           endDate: this.tabletimeend,
@@ -788,7 +824,7 @@ export default {
       if (this.tabletimestart || this.tabletimeend) {
         this.getAlarmStatAll({
           pageNum: this.pageNumber,
-          pageSize: 10,
+          pageSize: this.numbers,
           companyId: this.companyCode,
           deriverId: val[1],
           startDate: this.tabletimestart,
@@ -798,7 +834,7 @@ export default {
       } else if (this.tabletimestart || this.tabletimeend || this.value7) {
         this.getAlarmStatAll({
           pageNum: this.pageNumber,
-          pageSize: 10,
+          pageSize: this.numbers,
           companyId: this.companyCode,
           deriverId: val[1],
           startDate: this.tabletimestart,
@@ -809,7 +845,7 @@ export default {
       } else {
         this.getAlarmStatAll({
           pageNum: this.pageNumber,
-          pageSize: 10,
+          pageSize: this.numbers,
           companyId: this.companyCode,
           deriverId: val[1],
           startDate: this.starData,
@@ -827,7 +863,7 @@ export default {
       if (this.tabletimestart || this.tabletimeend) {
         this.getAlarmStatAll({
           pageNum: this.pageNumber,
-          pageSize: 10,
+          pageSize: this.numbers,
           companyId: this.companyCode,
           vehicleId: val[0],
           startDate: this.tabletimestart,
@@ -837,7 +873,7 @@ export default {
       } else {
         this.getAlarmStatAll({
           pageNum: this.pageNumber,
-          pageSize: 10,
+          pageSize: this.numbers,
           companyId: this.companyCode,
           vehicleId: val[0],
           startDate: this.starData,
@@ -852,7 +888,7 @@ export default {
       if(this.listOptionsModel && this.dd){
         this.getAlarmStatAll({
           pageNum: this.listPageNumber,
-          pageSize: 10,
+          pageSize: this.numbers,
           companyId: this.companyCode,
           vehicleId: this.listOptionsModel,
           startDate: this.starData,
@@ -863,7 +899,7 @@ export default {
       }else if(!this.dd && this.listOptionsModel){
         this.getAlarmStatAll({
           pageNum: this.listPageNumber,
-          pageSize: 10,
+          pageSize: this.numbers,
           companyId: this.companyCode,
           deriverId: this.listDirver,
           startDate: this.starData,
@@ -968,6 +1004,7 @@ export default {
 		},
     //获取统计表格数据
     async getAlarmStatAll(params) {  
+      this.lod = true
       let res = await alarmStatAll(params);
       if (res.status === 200) {
         this.tableListData = res.data;
@@ -1063,7 +1100,7 @@ export default {
       //默认综合统计表格数据
       this.getAlarmStatAll({
         pageNum: this.pageNumber,
-        pageSize: 10,
+        pageSize: this.numbers,
         companyId: this.companyCode,
         startDate: this.starData,
         endDate: this.endData,
