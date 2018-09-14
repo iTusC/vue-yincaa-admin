@@ -98,7 +98,7 @@
           </el-row>
           <div class="ul-itme">
             <cd-table @getLocation="getLocation" :tableListDatas="tableListData" :tableTitle="tableTitle" :tableH="tableH" @getDateil="getDateil" :lod="lod"></cd-table>
-            <el-pagination style="float:right;margin-top:20px;margin-bottom:20px;" background @size-change="handleSizeChange" @current-change="handleCurrentChange" :current-page.sync="currentPage3" :page-sizes="[10,30,40,50]" :page-size="10" layout="sizes,prev, pager, next, jumper" :total="600">
+            <el-pagination style="float:right;margin-top:20px;margin-bottom:20px;" background @size-change="handleSizeChange" @current-change="handleCurrentChange" :current-page.sync="currentPage3" :page-sizes="[10,30,40,50]" :page-size="10" layout="sizes,prev, pager, next, jumper" :total="200">
             </el-pagination>
           </div>
         </section>
@@ -879,33 +879,12 @@ export default {
         getDateil(id) {
             let alarmN = this.tableListData[id.id].alarmNo;
             let listidArray = {id: alarmN, index: id.id};
-            this.tableDatas = this.tableListData[id.id];
-
-            if (this.dataMonday != '') {
-                this.$router.push({
-                    name: 'DDdetail',
-                    params: {
-                        id: listidArray,
-                        dataMonday: this.dataMonday,
-                        dataSunday: this.dataSunday,
-                        tableDatas: this.tableDatas,
-                        companyIds: this.companyCode,
-                        atypeParent: 65,
-                    },
-                });
-            } else {
-                this.$router.push({
-                    name: 'DDdetail',
-                    params: {
-                        id: listidArray,
-                        dataMonday: this.starData,
-                        dataSunday: this.endData,
-                        tableDatas: this.tableDatas,
-                        companyIds: this.companyCode,
-                        atypeParent: 65,
-                    },
-                });
-            }
+            let tableData = this.tableListData;
+            
+            this.$router.push({
+                name: 'VDdetail',
+                params: {id: listidArray, tableData: tableData},
+            });
         },
         /** 数据获取方法 */
         //获取车辆树结构

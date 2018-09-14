@@ -161,7 +161,7 @@
           </el-row>
           <div class="ul-itme">
             <c-table :ctcspan="ctcspan" :showText="showText" :tableData="tableData" @showList="showList" @getLocation="getLocation" :tableListShowi="tableListShowi" :tableDataAlarms="tableDataAlarms" @paths="paths" @getDateil="getDateil" :loading="loading" :loadings="loadings" @getPushApply="getPushApply"></c-table>
-            <el-pagination style="float:right;margin-top:20px;margin-bottom:20px;" background @size-change="handleSizeChange" @current-change="handleCurrentChange" :current-page.sync="currentPage3" :page-sizes="[10,30,40,50]" :page-size="10" layout="sizes,prev, pager, next, jumper" :total="600">
+            <el-pagination style="float:right;margin-top:20px;margin-bottom:20px;" background @size-change="handleSizeChange" @current-change="handleCurrentChange" :current-page.sync="currentPage3" :page-sizes="[10,30,40,50]" :page-size="10" layout="sizes,prev, pager, next, jumper" :total="200">
             </el-pagination>
           </div>
         </section>
@@ -998,35 +998,14 @@ export default {
         //跳转详情页
         getDateil(id) {
             this.showDetail = true;
-            if (
-                this.dataMonday != '' &&
-                this.alarmCode !== null &&
-                this.listOptionsModel !== null
-            ) {
-            }
-            if (this.dataMonday != '') {
-                this.$router.push({
-                    name: 'CDdetail',
-                    params: {
-                        id: id,
-                        dataMonday: this.dataMonday,
-                        dataSunday: this.dataSunday,
-                        tableDatas: this.tableDatas,
-                        companyIds: this.companyCode,
-                    },
-                });
-            } else {
-                this.$router.push({
-                    name: 'CDdetail',
-                    params: {
-                        id: id,
-                        dataMonday: this.starData,
-                        dataSunday: this.endData,
-                        tableDatas: this.tableDatas,
-                        companyIds: this.companyCode,
-                    },
-                });
-            }
+            this.$router.push({
+              name: 'CDdetail',
+              params: {
+                  id: id,
+                  tableDatas: this.tableDataAlarms,
+              },
+            })
+    
         },
         //获取当前位置经纬度
         addressDetail() {},

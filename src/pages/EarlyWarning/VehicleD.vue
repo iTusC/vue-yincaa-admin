@@ -155,6 +155,8 @@
           </el-row>
           <div class="ul-itme">
             <cd-table @getLocation="getLocation" :tableListDatas="tableListData" :tableTitle="tableTitle" :tableH="tableH" @getDateil="getDateil" :lod="lod" :loadMore="loadMore"></cd-table>
+              <el-pagination style="float:right;margin-top:20px;margin-bottom:20px;" background @size-change="handleSizeChange" @current-change="handleCurrentChange" :current-page.sync="currentPage3" :page-sizes="[10,30,40,50]" :page-size="10" layout="sizes,prev, pager, next, jumper" :total="200">
+            </el-pagination>
           </div>
         </section>
       </div>
@@ -496,29 +498,6 @@ export default {
     },
     methods: {
         // //翻页
-        // prevPage () {
-        //   if (this.page == 1) return
-        //   --this.page
-        //   console.log(1)
-        // },
-        // nextPage () {
-
-        //   setTimeout(() => {
-        //     for (var i = 0, j = 10; i < j; i++) {
-        //       this.data.push({ name: count++ });
-        //     }
-        //     this.busy = false;
-        //   }, 1000);
-        //    ++this.page
-        //    this.getAlarmStatAll({
-        //       pageNum: this.pageNumber,
-        //       pageSize: this.page,
-        //       companyId: this.companyCode,
-        //       startDate: this.starData,
-        //       endDate: this.endData,
-        //       pId: this.gategorys
-        //   },true)
-        // },
         handleSizeChange(val) {
             this.numbers = val;
             //默认综合统计表格数据
@@ -544,6 +523,7 @@ export default {
         },
         //点击公司获取所有数据
         allData() {
+            this.pageNumber = 1
             //获取车辆列表 搜索车辆个数
             this.getTeamTree({companyId: this.companyCode});
 
@@ -748,6 +728,7 @@ export default {
             this.ishowDLegend = true;
             this.teamCode = this.vehicleList[msg.i].teamId;
             this.dName = dirverName.replace(reg, '').substring(1);
+            this.pageNumber = 1
             if (this.ind === msg.i) {
                 this.ind = null;
             } else {
@@ -787,6 +768,7 @@ export default {
             let text = msg.e.target.innerText.substring(7, 0);
             this.ishowVLegend = false;
             this.ishowDLegend = true;
+            this.pageNumber = 1
             if (this.itemEnd === msg.i) {
                 this.itemEnd = null;
             } else {
@@ -828,6 +810,7 @@ export default {
 
         //预警统计列表，点击筛选时间获取数据
         pcickValue(time) {
+            this.pageNumber = 1
             this.tabletimestart = time[0] + ' 00:00:00';
             this.tabletimeend = time[1] + ' 23:59:59';
             this.dataMonday = time[0] + ' 00:00:00';
@@ -899,6 +882,7 @@ export default {
             this.dd = false;
             this.listVehicle = val[0]; //查询车辆
             this.listDirver = val[1]; //查询驾驶员
+            this.pageNumber = 1
             //如果时间筛选为真
             if (this.tabletimestart || this.tabletimeend) {
                 this.getAlarmStatAll({
@@ -946,6 +930,7 @@ export default {
         //预警统计列表，点击车辆获取数据
         listhandleItemChange(val) {
             this.dd = true;
+            this.pageNumber = 1
             this.listOptionsModel = val;
             //判断时间筛选是否为真
             if (this.tabletimestart || this.tabletimeend) {
@@ -975,6 +960,7 @@ export default {
         //预计统计列表，点击预警类型获取数据
         getAlarmCode() {
             this.alarmCode = this.value7;
+            this.pageNumber = 1
             if (this.listOptionsModel && this.dd) {
                 this.getAlarmStatAll({
                     pageNum: this.listPageNumber,
@@ -1005,12 +991,7 @@ export default {
             let alarmN = this.tableListData[id.id].alarmNo;
             let listidArray = {id: alarmN, index: id.id};
             let tableData = this.tableListData;
-            console.log(tableData);
-            // if(this.dataMonday != ''){
-            //   this.$router.push({name:'VDdetail',params:{id:listidArray,dataMonday:this.dataMonday,dataSunday:this.dataSunday,tableDatas:this.tableDatas,companyIds:this.companyCode,atypeParent:64}});
-            // }else{
-            //   this.$router.push({name:'VDdetail',params:{id:listidArray,dataMonday:this.starData,dataSunday:this.endData,tableDatas:this.tableDatas,companyIds:this.companyCode,atypeParent:64}});
-            // }
+
             this.$router.push({
                 name: 'VDdetail',
                 params: {id: listidArray, tableData: tableData},
@@ -1149,6 +1130,7 @@ export default {
 
     created: function() {
         this.getCookie();
+        this.pageNumber = 1
         // this.getCompos({
         //   username:this.usersname
         // })

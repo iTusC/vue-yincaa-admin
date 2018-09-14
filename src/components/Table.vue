@@ -3,7 +3,6 @@
     :data="tableListDatas"
     stripe
     style="width: 100%"
-    height="500"
     v-loading="lod"
     @row-click="showDetail"
     v-loadmore="loadMore">

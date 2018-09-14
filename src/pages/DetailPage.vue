@@ -39,7 +39,7 @@
 
                     <section class="detail-page-main border-bottom">
                         <article class="detail-main-warning">
-                            <h3>预警信息(编号{{ alarmNo }})</h3>
+                            <h3>预警信息(编号{{ alarmnNmber }})</h3>
                             <ul class="detail-warning-del">
                                 <li>
                                     <span class="detail-warning-title">预警类别</span>
@@ -277,6 +277,7 @@ export default {
             videoShow: false,
             upAlarmNo: '',
             alarmNo: '',
+            alarmnNmber:'',
             downAlarmNo: '',
             alarm: '',
             col: false,
@@ -332,74 +333,53 @@ export default {
                 loading.close();
             }, 2000);
         },
+        setCookie(alarmNo,currentNo,tableDatas,exdays){
+            var exdate = new Date(); //获取时间
+            exdate.setTime(exdate.getTime() + 24 * 60 * 60 * 1000 * exdays); //保存的天数
+            //字符串拼接cookie
+            window.document.cookie = 'alarmNo' + '=' + alarmNo + ';path=/;expires=' + exdate.toGMTString();
+            window.document.cookie = 'currentNo' + '=' + currentNo + ';path=/;expires=' + exdate.toGMTString();
+            window.document.cookie = 'tableDatas' + '=' + tableDatas + ';path=/;expires=' + exdate.toGMTString();
+        },
+        //读取cookie
+        getCookie: function() {
+            if (document.cookie.length > 0) {
+                var arr = document.cookie.split('; '); //这里显示的格式需要切割一下自己可输出看下
+                for (var i = 0; i < arr.length; i++) {
+                    var arr2 = arr[i].split('='); //再次切割
+                    if (arr2[0] == 'alarmNo') {
+                        this.alarmNo = Number(arr2[1]); //保存到保存数据的地方
+                    } else if (arr2[0] == 'currentNo') {
+                        this.currentNo = arr2[1];
+                    } else if (arr2[0] == 'tableDatas') {
+                        this.tableDatas = arr2[1];
+                    }
+                }
+            }
+        },
         onNext() {
-            console.log(this.tableDatas, this.currentN);
-            // if(this.downAlarmNo!=="" && this.currentN < 10){
             if (this.currentN < this.tableDatas.length - 1) {
                 this.lodi = true;
-                let newAlarmNo = this.tableDatas[this.currentN + 1].alarmNo;
+                this.alarmNo = this.tableDatas[this.currentN + 1].alarmNo;
                 this.getDetailPageData({
-                    alarmNo: this.downAlarmNo,
-                    // companyId:this.companyId,
-                    // teamId:this.tableDatas.teamId,
-                    // vehicleId:this.tableDatas.vehicleId,
-                    // deriverId:this.tableDatas.deriveId,
-                    // startDate:this.dataMonday,
-                    // endDate:this.dataSunday,
-                    // atypeParent:this.atypeParent,
+                    alarmNo: this.alarmNo,
                     currentNo: this.currentN++,
-                    // upAlarmNo:this.alarmNo
                 });
+                this.$options.methods.setCookie(this.alarmNo,this.currentN,1);
             } else {
                 this.dialogText = '最后一页了！';
                 this.centerDialogVisible = true;
             }
         },
-        setCookie(
-            listId,
-            dataMonday,
-            dataSunday,
-            tableDatas,
-            companyId,
-            atypeId
-        ) {
-            var exdate = new Date(); //获取时间
-            exdate.setTime(exdate.getTime() + 24 * 60 * 60 * 1000 * exdays); //保存的天数
-            //字符串拼接cookie
-            window.document.cookie =
-                'companyName' +
-                '=' +
-                c_name +
-                ';path=/;expires=' +
-                exdate.toGMTString();
-            window.document.cookie =
-                'companyId' +
-                '=' +
-                c_id +
-                ';path=/;expires=' +
-                exdate.toGMTString();
-            window.document.cookie =
-                'imgPath' +
-                '=' +
-                c_path +
-                ';path=/;expires=' +
-                exdate.toGMTString();
-        },
         onPrevious() {
-            // if(this.upAlarmNo!=="" && this.currentN > 0){
             if (this.currentN > 0) {
                 this.lodi = true;
-                let newAlarmNo = this.tableDatas[this.currentNo - 1].alarmNo;
+                let newAlarmNo = this.tableDatas[this.currentN - 1].alarmNo;
                 this.getDetailPageData({
                     alarmNo: newAlarmNo,
-                    // companyId:this.companyId,
-                    // vehicleId:this.tableDatas.vehicleId,
-                    // driverId:this.tableDatas.deriveId,
-                    // startDate:this.dataMonday,
-                    // endDate:this.dataSunday,
                     currentNo: this.currentN--,
-                    // downAlarmNo:this.downAlarmNo
                 });
+                this.$options.methods.setCookie(this.alarmNo,this.currentN,1);
             } else {
                 this.dialogText = '第一页了！';
                 this.centerDialogVisible = true;
@@ -416,8 +396,7 @@ export default {
             if (res.code == 0) {
                 let _self = this;
                 let map = new BMap.Geocoder();
-                let locationDescs = map.getLocation(
-                    new BMap.Point(
+                let locationDescs = map.getLocation(new BMap.Point(
                         res.data.alarmInfoDto.longitude,
                         res.data.alarmInfoDto.latitude
                     ),
@@ -466,7 +445,7 @@ export default {
                 this.lat = res.data.alarmInfoDto.latitude;
                 this.infoD = res.data.driverInfoDto.driverName;
                 this.infoNP = res.data.vehicleInfoDto.vehicleCode; //车牌号码
-                this.infoTW = res.data.alarmInfoDto.atypeParentName; //报警类型
+                this.infoTW = res.data.alarmInfoDto.atypeChildname; //报警类型
                 this.infoWT = res.data.alarmInfoDto.alarmTime; //时间
                 // this.infoL = res.data.detailMap.locationDesc; //地点,
                 res.data.multimediaFiles.forEach(element => {
@@ -479,29 +458,9 @@ export default {
                             'http://47.106.196.228:8888/' + element.filePath;
                     }
                 });
-                // for(let i = 0;i<res.data.multimMap.length;i++){
-                //     if(res.data.multimMap.filetype == 0){
-                //         img.push('http://47.106.196.228:8888'+res.data.detailMap[i].filePath)
-                //     }
-                //     else if(res.data.multimMap.filetype == 2){
-                //         this.videos ='http://47.106.196.228:8888'+res.data.detailMap[i].filePath;
-                //     }
                 this.imagesList = img;
                 this.videoShow = true;
-
-                // if(res.data.upAlarmNo){
-                //     this.upAlarmNo = res.data.upAlarmNo;
-                //     this.alarmNo = res.data.currentNo;
-                //     this.downAlarmNo = res.data.downAlarmNo;
-                // }
-                // else if(!res.data.downAlarmNo){
-                //     this.upAlarmNo = res.data.upAlarmNo;
-                //     this.alarmNo = res.data.currentNo;
-                // }
-                // else{
-                //     this.alarmNo = res.data.currentNo;
-                //     this.downAlarmNo = res.data.downAlarmNo;
-                // }
+                this.alarmnNmber = this.alarmNo; 
             }
             this.lodi = false;
             res = null;
@@ -509,20 +468,9 @@ export default {
     },
     mounted() {},
     created: function() {
-        // console.log(this.$route.params.tableDatas);
-        // this.listId = this.$route.params.id;
-        // this.currentN = this.listId.index;
-        // this.dataMonday=this.$route.params.dataMonday;
-        // this.dataSunday=this.$route.params.dataSunday;
-        // this.tableDatas = this.$route.params.tableDatas;
-        // this.companyId = this.$route.params.companyIds;
-        // this.atypeParent = this.$route.params.atypeParent;
-
         this.alarmNo = this.$route.params.id.id;
         this.tableDatas = this.$route.params.tableData;
         this.currentN = this.$route.params.id.index;
-
-        console.log(this.alarmNo, this.tableDatas, this.currentN);
 
         this.getDetailPageData({
             alarmNo: this.alarmNo,
