@@ -131,7 +131,7 @@ axios.interceptors.response.use(response => {
     }
     return Promise.reject(error.response.data)   // 返回接口返回的错误信息
 })
-axios.defaults.baseURL = '/api'
+axios.defaults.baseURL = 'http://39.108.152.102/admin/'
 //设置默认请求头
 axios.defaults.headers = {
     'X-Requested-With': 'XMLHttpRequest'
