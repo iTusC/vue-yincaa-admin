@@ -14,16 +14,25 @@
         <tr >
           <td >{{ i + 1 }}</td>
           <td >{{ tableDatas.vehicleCode }}</td>
-          <td >{{ tableDatas.deriveName }}</td>
+          <td >{{ tableDatas.driverName }}</td>
           <template v-if="tableListShowi === i">
             <td :colspan="ctcspan" style="padding:0;">
               <div class="cm-table-d">
                 <el-scrollbar style="height:100%;" class="yc-scrollbar" @scroll="getPushApply">
                   <table width="100%" class="el-table cm-table" v-loading="loadings">
                       <tr v-for="(tablechr,index) in tableDataAlarms" @click="getLocation(tableDataAlarms,tableData,index,i)">
-                        <td width="31%">{{ tablechr.vehicleAlarmName }}</td>
-                        <td width="30%">{{ tablechr.deriverAlarmName }}</td>
-                        <td class="hovers" :title="tablechr.locationDesc " >{{ tablechr.reportTime }} {{ tablechr.locationDesc.slice(0,8)+'...' }}</td>
+                        <template v-if="tablechr.atypeParent === 64">
+                          <td width="31%">{{ tablechr.atypeName }}</td>
+                          <!-- <td width="30%">{{ tablechr.deriverAlarmName }}</td> -->
+                          <td width="30%">-</td>
+                        </template>
+                        <template v-else>
+                          <td width="31%">-</td>
+                          <td width="30%">{{ tablechr.atypeName }}</td>
+                        </template>
+                        <!-- <td width="31%">{{ tablechr.atypeName }}</td>
+                        <td width="30%">{{ tablechr.deriverAlarmName }}</td> -->
+                        <td class="hovers" :title="tablechr.locationDesc " >{{ tablechr.alarmTime }} {{ tablechr.locationDesc.slice(0,8)+'...' }}</td>
                         <td @click.stop="getDateil(tablechr.alarmNo,index)" class="hovers">查看更多</td>
                       </tr>
                   </table>

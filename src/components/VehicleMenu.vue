@@ -6,22 +6,22 @@
                    <li class="yc-vehicle-list-items" :class="{'yc-active-list-items':i === ind}">
                        <div class="title" @click.stop="showFun($event,i,vehicleL.teamId)" :key="i" :class="{'yc-is-opened':i === ind}">
                            <i class="icon-chosen iconfont yc-icon-jiegou"></i>
-                           {{ vehicleL.teamName }}({{ vehicleL.onlineSum }}/{{ vehicleL.vehicleSum }})
+                           {{ vehicleL.teamName }}({{ vehicleL.onLineCount }}/{{ vehicleL.vehicleCount }})
                            <i class="el-submenu__icon-arrow el-icon-arrow-down"></i>
                         </div>
                        <ul :class="{'active':i === ind}" class="vehicle-list-items">
                            <template v-for="(chr,ind) in vehicleL.vehicleList">
-                                <li class="vehilce-list-item">
+                                <li class="vehilce-list-item" :class="{'activeli':inlist === ind}">
                                     <div class="vehile-item-title" @click.stop="itemOpened($event,ind,chr.vehicleId,vehicleL.teamId)" >
                                         <i :class="chr.isOnline?'online':'offline'"></i>
                                         {{ chr.vehicleCode }}
                                         <i class="icon-user iconfont yc-icon-yonghu">{{ chr.deriverSum }}</i>
                                     </div>
                                     <ul class="vehile-item-list" :class="{'vehile-item-list-isopened':ind === itemEnd}">
-                                        <template v-for="chrls in chr.deriverList">
+                                        <template v-for="chrls in chr.driverList">
                                             <li>
-                                                {{ chrls.deriverName }}
-                                                <i class="item-time">{{ chrls.workerDate }}</i>
+                                                {{ chrls.driverName }}
+                                                <i class="item-time">{{ chrls.workDate }}</i>
                                             </li>
                                         </template>
                                     </ul>
@@ -54,12 +54,12 @@
                 this.$emit('showFun',{i:i,e:e,tm:tm});
             },
             itemOpened(e,i,di,tm){
-                console.log(di)
                 // if(this.itemEnd === i+1+''){
                 //     this.itemEnd = ''
                 // }else{
                 //     this.itemEnd =i+1+'' ;
                 // }  
+                this.inlist = i;
                 this.$emit('itemOpened',{e:e,i:i,di:di,tm:tm})
             }
         }
@@ -95,6 +95,9 @@
     color: #333;
     font-weight: 700;
     background-color: #fff;
+}
+.activeli{
+    background-color:#f5f5f5; 
 }
 .online{
   position: absolute;

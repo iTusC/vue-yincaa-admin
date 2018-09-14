@@ -1,40 +1,49 @@
 <template>
-<el-scrollbar style="height:100%;" class="yc-scrollbar">
-    <div class="detail-main" v-loading="lodi">
-        <div class="detail-m">
-            <baidu-map class="map" center="广州"   :scroll-wheel-zoom="true" :map-click="false"  :center="{lng:lng, lat:lat }"  :zoom="zoom" >
-                <bm-geolocation anchor="BMAP_ANCHOR_BOTTOM_RIGHT" :showAddressBar="true" :autoLocation="true"></bm-geolocation>
-                <bm-navigation anchor="BMAP_ANCHOR_TOP_RIGHT"></bm-navigation>
-                <bm-map-type :map-types="['BMAP_NORMAL_MAP', 'BMAP_HYBRID_MAP']" anchor="BMAP_ANCHOR_TOP_LEFT"></bm-map-type>
-                <bm-traffic :predictDate="{weekday: 7, hour: 12}"></bm-traffic>
-                <bml-marker-clusterer :averageCenter="true" >
-                    <bm-marker :position="{lng:lng, lat:lat }"  :zoom="zoom" >
-                    </bm-marker> 
-                </bml-marker-clusterer>   
-                <map-box :position="{lng:lng, lat:lat}">
-                    <!-- <i @click="close">x</i> -->
-                    <p class="info"  >驾驶员：{{ infoD }}</p>
-                    <p class="info"  >车牌号：{{ infoNP }}</p>
-                    <p class="info"  >报警时间：{{ infoWT }}</p>
-                    <p class="info"  >报警类型：{{ infoTW }}</p>
-                    <p class="info"  >报警地点：{{ infoL }}</p>
-                </map-box>
-            </baidu-map>
-            <aside class="page-turning">
-                    <div class="pages-next" @click="back"><i class="el-icon-back"></i><span > 返回列表</span></div>
-                    <div class="pages-next" @click="onNext"><span >下一条预警</span><i class="el-icon-arrow-right"></i></div>
-                    <div class="pages-prea" @click="onPrevious"><i class="el-icon-arrow-left" :style="col?color='#fff':color='#333'" ></i><span >上一条预警</span></div>
-            </aside>
-            
+    <el-scrollbar style="height:100%;" class="yc-scrollbar">
+        <div class="detail-main" v-loading="lodi">
+            <div class="detail-m">
+                <baidu-map class="map" center="广州" :scroll-wheel-zoom="true" :map-click="false" :center="{lng:lng, lat:lat }" :zoom="zoom">
+                    <bm-geolocation anchor="BMAP_ANCHOR_BOTTOM_RIGHT" :showAddressBar="true" :autoLocation="true"></bm-geolocation>
+                    <bm-navigation anchor="BMAP_ANCHOR_TOP_RIGHT"></bm-navigation>
+                    <bm-map-type :map-types="['BMAP_NORMAL_MAP', 'BMAP_HYBRID_MAP']" anchor="BMAP_ANCHOR_TOP_LEFT"></bm-map-type>
+                    <bm-traffic :predictDate="{weekday: 7, hour: 12}"></bm-traffic>
+                    <bml-marker-clusterer :averageCenter="true">
+                        <bm-marker :position="{lng:lng, lat:lat }" :zoom="zoom">
+                        </bm-marker>
+                    </bml-marker-clusterer>
+                    <map-box :position="{lng:lng, lat:lat}">
+                        <!-- <i @click="close">x</i> -->
+                        <p class="info">驾驶员：{{ infoD }}</p>
+                        <p class="info">车牌号：{{ infoNP }}</p>
+                        <p class="info">报警时间：{{ infoWT }}</p>
+                        <p class="info">报警类型：{{ infoTW }}</p>
+                        <p class="info">报警地点：{{ infoL }}</p>
+                    </map-box>
+                </baidu-map>
+                <aside class="page-turning">
+                    <div class="pages-next" @click="back">
+                        <i class="el-icon-back"></i>
+                        <span> 返回列表</span>
+                    </div>
+                    <div class="pages-next" @click="onNext">
+                        <span>下一条预警</span>
+                        <i class="el-icon-arrow-right"></i>
+                    </div>
+                    <div class="pages-prea" @click="onPrevious">
+                        <i class="el-icon-arrow-left" :style="col?color='#fff':color='#333'"></i>
+                        <span>上一条预警</span>
+                    </div>
+                </aside>
+
                 <div class="detail-main-info">
-                    
-                    <section  class="detail-page-main border-bottom">
+
+                    <section class="detail-page-main border-bottom">
                         <article class="detail-main-warning">
                             <h3>预警信息(编号{{ alarmNo }})</h3>
                             <ul class="detail-warning-del">
                                 <li>
                                     <span class="detail-warning-title">预警类别</span>
-                                    <p class="detail-warnig-text">{{ pid === 64 ? '车辆预警':'驾驶员预警' }}</p>
+                                    <p class="detail-warnig-text">{{ atpyeName }}</p>
                                 </li>
                                 <li>
                                     <span class="detail-warning-title">预警子类型</span>
@@ -89,7 +98,7 @@
                                 <h4 class="detail-warning-title">预警照片</h4>
                                 <ul>
                                     <li v-for="(item,i) in imagesList" :key="i">
-                                        <img :src="item"  class="detail-main-images" @click.self="zommImages($event)">
+                                        <img :src="item" class="detail-main-images" @click.self="zommImages($event)">
                                     </li>
                                 </ul>
                             </article>
@@ -100,8 +109,8 @@
                                 </video>
                             </article>
                         </article>
-                    </section>      
-                    <section  class="detail-page-main border-bottom">
+                    </section>
+                    <section class="detail-page-main border-bottom">
                         <article class="detail-main-warning">
                             <h3>车辆信息</h3>
                             <ul>
@@ -113,8 +122,8 @@
                                     <span class="detail-warning-title">车牌号</span>
                                     <p class="detail-warnig-text">{{ vehicleCode }}</p>
                                 </li>
-                                
-                                 <li>
+
+                                <li>
                                     <span class="detail-warning-title">车牌种类</span>
                                     <p class="detail-warnig-text">{{ licensePlateType }}</p>
                                 </li>
@@ -130,7 +139,7 @@
                                     <span class="detail-warning-title">车辆类型</span>
                                     <p class="detail-warnig-text">{{ VehicleModel}}</p>
                                 </li>
-                               
+
                                 <li>
                                     <span class="detail-warning-title">车属行业</span>
                                     <p class="detail-warnig-text">{{ carIndustry }}</p>
@@ -139,17 +148,17 @@
                                     <span class="detail-warning-title">车辆创建时间</span>
                                     <p class="detail-warnig-text">{{ creationTime }}</p>
                                 </li>
-                                
+
                             </ul>
                         </article>
                     </section>
-                     <section  class="detail-page-main">
+                    <section class="detail-page-main">
                         <article class="detail-main-warning">
                             <h3>驾驶员信息</h3>
                             <ul>
                                 <li>
                                     <span class="detail-warning-title">驾驶员ID</span>
-                                    <p class="detail-warnig-text">YINC-DR-{{ deriverId }}</p>
+                                    <p class="detail-warnig-text">{{ deriverId }}</p>
                                 </li>
                                 <li>
                                     <span class="detail-warning-title">驾驶员姓名</span>
@@ -182,106 +191,101 @@
                             </ul>
                         </article>
                     </section>
-            </div>
-        </div>
-       
-       <div class="message-box" v-if="messageisshow">
-           <div class="message-box-bg" @click.self="closeMessageBox"></div>
-           
-           <div class="message-main">
-                <span class="message-close el-icon-close" @click.self="closeMessageBox"></span>
-                <div class="block">
-                    <el-carousel trigger="click" height="576px" :autoplay="false">
-                    <el-carousel-item v-for="item in imagesList" :key="item">
-                        <img v-if="imagesisshow" :src="item" :alt="messagesrctitle" class="mes-images">
-                    </el-carousel-item>
-                    </el-carousel>
                 </div>
-           </div>
-       </div>
-       <el-dialog class="dialog"
-       title="提示"
-        :visible.sync="centerDialogVisible"
-        width="20%"
-        center>
-        <span  style="display:inline-block;width:100%;text-align:center;font-size:14px;color:#666">{{ dialogText }}</span>
-        </el-dialog>
-    </div>
-     </el-scrollbar>
+            </div>
+
+            <div class="message-box" v-if="messageisshow">
+                <div class="message-box-bg" @click.self="closeMessageBox"></div>
+                <div class="message-main">
+                    <span class="message-close el-icon-close" @click.self="closeMessageBox"></span>
+                    <div class="block">
+                        <el-carousel trigger="click" height="576px" :autoplay="false">
+                            <el-carousel-item v-for="item in imagesList" :key="item">
+                                <img v-if="imagesisshow" :src="item" :alt="messagesrctitle" class="mes-images">
+                            </el-carousel-item>
+                        </el-carousel>
+                    </div>
+                </div>
+            </div>
+            <el-dialog class="dialog" title="提示" :visible.sync="centerDialogVisible" width="20%" center>
+                <span style="display:inline-block;width:100%;text-align:center;font-size:14px;color:#666">{{ dialogText }}</span>
+            </el-dialog>
+        </div>
+    </el-scrollbar>
 </template>
 
 <script>
-import { BmlMarkerClusterer } from "vue-baidu-map";
-import MapBox from "../components/MapBox";
-import {teamTree,alarmDetail} from "../api/getData";
+import {BmlMarkerClusterer} from 'vue-baidu-map';
+import MapBox from '../components/MapBox';
+import {teamTree, alarmDetail} from '../api/getData';
 
 export default {
-    data(){
+    data() {
         return {
-            lodi:true,
-            isshow:true,
+            lodi: true,
+            isshow: true,
             lng: null,
             lat: null,
-            infoD: "", //驾驶员
-            infoNP: "", //车牌号码
-            infoTW: "", //报警类型
-            infoWT: "", //时间
-            infoL: "", //地点,
-            zoom:14,//地图放大倍数
+            infoD: '', //驾驶员
+            infoNP: '', //车牌号码
+            infoTW: '', //报警类型
+            infoWT: '', //时间
+            infoL: '', //地点,
+            zoom: 14, //地图放大倍数
             tableDataAlarms: [], //综合统计列表
-            infotext:"",
-            imgSrc:"",//图片路径
-            messageisshow:false,//显示弹窗
-            imagesisshow:false,//显示弹框图片
-            messagesrc:"",
-            messagesrctitle:"",
-            imagesList:[],
-            atpyePName:"-",//预警类型
-            pid:"-",//预警子类型
-            startDate:"-",//预警上报时间
-            endDate:"-",//预警结束时间
-            longitude:"-",//经度
-            latitude:"-",//纬度
-            deriverName:"-",//驾驶员
-            vehicleCode:"黄色",//车牌号
-            teamName:"-",//所属车队
-            locationDesc:"广东省广州市荔湾区员村街道三元里抗英斗争纪念公园",//预警地点
-            vehicleId:"YY-CM-7694",//车辆ID
-            color:"红色",//车辆颜色
-            sex:"-",//性别
-            birthday:"-",//生日
-            vehicleType:"-",//驾驶证类型
-            terminalNo:"018038863254",//终端编号
-            speed:"70KM/h",//车速
-            altitude:"209m",//海拔
-            subordinate:"粤运综合物流有限公司",//从属公司
-            issuingAuthority:"广东省公安厅交通管理局",//发证机关
-            licensePlateType:"黄色",//车牌种类
-            VehicleModel:"普通",//车辆类型
-            carIndustry:"道路货物运输",//车属行业
-            creationTime:"2018-4-5",//创建时间
-            licenseNumber:"01803883977522",//驾驶证编号
-            validPeriod:"2019-3-18",//有效期止
-            listId:"-",
-            dataMonday:"-",
-            dataSunday:"-",
-            tableDatas:[],
-            currentN:0,
-            listData:[],//保存列表值
-            companyId:"",//公司ID
-            videos:"",
-            videoShow:false,
-            upAlarmNo:"",
-            alarmNo:"",
-            downAlarmNo:"",
-            alarm:"",
-            col:false,
-            centerDialogVisible:false,
-            dialogText:"",
-            atypeParent:"",
-        }
+            infotext: '',
+            imgSrc: '', //图片路径
+            messageisshow: false, //显示弹窗
+            imagesisshow: false, //显示弹框图片
+            messagesrc: '',
+            messagesrctitle: '',
+            imagesList: [],
+            atpyePName: '-', //预警类型
+            atpyeName: '-', //预警子类型
+            startDate: '-', //预警上报时间
+            endDate: '-', //预警结束时间
+            longitude: '-', //经度
+            latitude: '-', //纬度
+            deriverName: '-', //驾驶员
+            vehicleCode: '黄色', //车牌号
+            teamName: '-', //所属车队
+            locationDesc: '广东省广州市荔湾区员村街道三元里抗英斗争纪念公园', //预警地点
+            vehicleId: 'YY-CM-7694', //车辆ID
+            color: '红色', //车辆颜色
+            sex: '-', //性别
+            birthday: '-', //生日
+            vehicleType: '-', //驾驶证类型
+            terminalNo: '018038863254', //终端编号
+            speed: '70KM/h', //车速
+            altitude: '209m', //海拔
+            subordinate: '粤运综合物流有限公司', //从属公司
+            issuingAuthority: '广东省公安厅交通管理局', //发证机关
+            licensePlateType: '黄色', //车牌种类
+            VehicleModel: '普通', //车辆类型
+            carIndustry: '道路货物运输', //车属行业
+            creationTime: '2018-4-5', //创建时间
+            licenseNumber: '01803883977522', //驾驶证编号
+            validPeriod: '2019-3-18', //有效期止
+            listId: '-',
+            dataMonday: '-',
+            dataSunday: '-',
+            tableDatas: [],
+            currentN: 0,
+            listData: [], //保存列表值
+            companyId: '', //公司ID
+            videos: '',
+            videoShow: false,
+            upAlarmNo: '',
+            alarmNo: '',
+            downAlarmNo: '',
+            alarm: '',
+            col: false,
+            centerDialogVisible: false,
+            dialogText: '',
+            atypeParent: '',
+        };
     },
-    methods:{
+    methods: {
         coninfo(e, i) {
             this.isshow = true;
             // this.lng = e.point.lng;
@@ -289,343 +293,404 @@ export default {
             // this.infotext = this.markers[i].text;
             this.lng = this.listData.detailMap.longitude;
             this.lat = this.listData.detailMap.latitude;
-            this.infotext = "this.markers[i].text";
+            this.infotext = 'this.markers[i].text';
         },
         //地图配置
-        handler({ BMap, map }) {},
+        handler({BMap, map}) {},
         //地图信息框显示位置
-        draw({ el, BMap, map }) {
-            let pixel = map.pointToOverlayPixel(new BMap.Point(this.lng, this.lat));
-            el.style.left = pixel.x - 60 + "px";
-            el.style.top = pixel.y - 20 + "px";
+        draw({el, BMap, map}) {
+            let pixel = map.pointToOverlayPixel(
+                new BMap.Point(this.lng, this.lat)
+            );
+            el.style.left = pixel.x - 60 + 'px';
+            el.style.top = pixel.y - 20 + 'px';
         },
         isinfo(i) {},
         //地图关闭弹窗
         close() {
             this.isshow = false;
-            
         },
-        zommImages(el){
+        zommImages(el) {
             this.messageisshow = true;
             this.imagesisshow = true;
             this.messagesrc = el.srcElement.currentSrc;
-            this.messagesrctitle = el.srcElement.alt
+            this.messagesrctitle = el.srcElement.alt;
         },
-        closeMessageBox(){
+        closeMessageBox() {
             this.imagesisshow = false;
             this.messageisshow = false;
         },
         onSearch() {
             const loading = this.$loading({
-            lock: true,
-            text: '加载中',
-            spinner: 'el-icon-loading',
-            background: 'rgba(0, 0, 0, 0.7)',
-            target: document.querySelector('.detail-main')
+                lock: true,
+                text: '加载中',
+                spinner: 'el-icon-loading',
+                background: 'rgba(0, 0, 0, 0.7)',
+                target: document.querySelector('.detail-main'),
             });
             setTimeout(() => {
-            loading.close();
+                loading.close();
             }, 2000);
         },
-        onNext(){
-            if(this.downAlarmNo!=="" && this.currentN < 10){
+        onNext() {
+            console.log(this.tableDatas, this.currentN);
+            // if(this.downAlarmNo!=="" && this.currentN < 10){
+            if (this.currentN < this.tableDatas.length - 1) {
                 this.lodi = true;
+                let newAlarmNo = this.tableDatas[this.currentN + 1].alarmNo;
                 this.getDetailPageData({
-                    alarmNo:this.downAlarmNo,
-                    companyId:this.companyId,
+                    alarmNo: this.downAlarmNo,
+                    // companyId:this.companyId,
                     // teamId:this.tableDatas.teamId,
                     // vehicleId:this.tableDatas.vehicleId,
                     // deriverId:this.tableDatas.deriveId,
-                    startDate:this.dataMonday,
-                    endDate:this.dataSunday,
-                    atypeParent:this.atypeParent,
-                    currentNo:this.currentN++,
-                    upAlarmNo:this.alarmNo
-                })
-            }else{
-                this.dialogText = "最后一页了！"
+                    // startDate:this.dataMonday,
+                    // endDate:this.dataSunday,
+                    // atypeParent:this.atypeParent,
+                    currentNo: this.currentN++,
+                    // upAlarmNo:this.alarmNo
+                });
+            } else {
+                this.dialogText = '最后一页了！';
                 this.centerDialogVisible = true;
             }
         },
-        onPrevious(){
-            if(this.upAlarmNo!=="" && this.currentN > 0){
+        setCookie(
+            listId,
+            dataMonday,
+            dataSunday,
+            tableDatas,
+            companyId,
+            atypeId
+        ) {
+            var exdate = new Date(); //获取时间
+            exdate.setTime(exdate.getTime() + 24 * 60 * 60 * 1000 * exdays); //保存的天数
+            //字符串拼接cookie
+            window.document.cookie =
+                'companyName' +
+                '=' +
+                c_name +
+                ';path=/;expires=' +
+                exdate.toGMTString();
+            window.document.cookie =
+                'companyId' +
+                '=' +
+                c_id +
+                ';path=/;expires=' +
+                exdate.toGMTString();
+            window.document.cookie =
+                'imgPath' +
+                '=' +
+                c_path +
+                ';path=/;expires=' +
+                exdate.toGMTString();
+        },
+        onPrevious() {
+            // if(this.upAlarmNo!=="" && this.currentN > 0){
+            if (this.currentN > 0) {
                 this.lodi = true;
+                let newAlarmNo = this.tableDatas[this.currentNo - 1].alarmNo;
                 this.getDetailPageData({
-                    alarmNo:this.upAlarmNo,
-                    companyId:this.companyId,
-                    vehicleId:this.tableDatas.vehicleId,
-                    deriverId:this.tableDatas.deriveId,
-                    startDate:this.dataMonday,
-                    endDate:this.dataSunday,
-                    currentNo:this.currentN--,
-                    downAlarmNo:this.downAlarmNo
-                })
-            }
-            else{
-                this.dialogText = "第一页了！"
+                    alarmNo: newAlarmNo,
+                    // companyId:this.companyId,
+                    // vehicleId:this.tableDatas.vehicleId,
+                    // driverId:this.tableDatas.deriveId,
+                    // startDate:this.dataMonday,
+                    // endDate:this.dataSunday,
+                    currentNo: this.currentN--,
+                    // downAlarmNo:this.downAlarmNo
+                });
+            } else {
+                this.dialogText = '第一页了！';
                 this.centerDialogVisible = true;
             }
         },
-        back(){
+        back() {
             this.$router.go(-1);
         },
         //获取车辆搜索下拉列表
         async getDetailPageData(params) {
-        let res = await alarmDetail(params);
-        let img = [];
-        if (res.status === 200) {
-                let _self = this
+            let response = await alarmDetail(params);
+            let res = response.data;
+            let img = [];
+            if (res.code == 0) {
+                let _self = this;
                 let map = new BMap.Geocoder();
-                let lat = res.data.detailMap.latitude
-                console.log(lat);
-                let locationDescs = map.getLocation(new BMap.Point(res.data.detailMap.longitude,res.data.detailMap.latitude),function(result){
-                    if(result){
-                        _self.locationDesc = result.address;
-                        _self.infoL = result.address;
+                let locationDescs = map.getLocation(
+                    new BMap.Point(
+                        res.data.alarmInfoDto.longitude,
+                        res.data.alarmInfoDto.latitude
+                    ),
+                    function(result) {
+                        if (result) {
+                            _self.locationDesc = result.address;
+                            _self.infoL = result.address;
+                        }
                     }
-                })
-                this.alarm = res.data
-                this.atpyePName = res.data.detailMap.atpyePName;
-                this.pid = res.data.detailMap.pid;
-                this.longitude = res.data.detailMap.longitude;
-                this.latitude = res.data.detailMap.latitude;
-                this.deriverName = res.data.detailMap.deriverName;
-                this.vehicleCode = res.data.detailMap.vehicleCode;
-                this.teamName = res.data.detailMap.teamName;
-                // this.locationDesc = res.data.detailMap.locationDesc;
-                this.vehicleId = res.data.detailMap.vehicleId;
-                this.color = res.data.detailMap.color;
-                this.sex = res.data.detailMap.sex;
-                this.birthday = res.data.detailMap.birthday;
-                this.vehicleType = res.data.detailMap.vehicleType;
-                this.lng = res.data.detailMap.longitude;
-                this.lat = res.data.detailMap.latitude;
-                this.infoD = res.data.detailMap.deriverName;
-                this.infoNP = res.data.detailMap.vehicleCode;  //车牌号码
-                this.infoTW = res.data.detailMap.atpyeName; //报警类型
-                this.infoWT = res.data.detailMap.alarmTime; //时间
+                );
+                //报警信息
+                this.alarm = res.data;
+                this.atpyePName = res.data.alarmInfoDto.atypeChildname;
+                this.atpyeName = res.data.alarmInfoDto.atypeParentName;
+                this.longitude = res.data.alarmInfoDto.longitude;
+                this.latitude = res.data.alarmInfoDto.latitude;
+                this.startDate = res.data.alarmInfoDto.alarmTime;
+                this.endDate = res.data.alarmInfoDto.receiptTime;
+                this.terminalNo = res.data.alarmInfoDto.commNo;
+                this.altitude = res.data.alarmInfoDto.elevetion;
+                this.speed = res.data.alarmInfoDto.speed;
+
+                //驾驶员信息
+                this.birthday = res.data.driverInfoDto.birthday;
+                this.issuingAuthority = res.data.driverInfoDto.certOrg;
+                this.vehicleType = res.data.driverInfoDto.ctfType;
+                this.licenseNumber = res.data.driverInfoDto.driverLicense;
+                this.deriverName = res.data.driverInfoDto.driverName;
+                this.deriverId = res.data.driverInfoDto.driverNo;
+                this.sex = res.data.driverInfoDto.sex;
+                this.validPeriod = res.data.driverInfoDto.validEndTime;
+
+                //车辆信息
+                this.issuingAuthority = res.data.vehicleInfoDto.certOrgName;
+                this.subordinate = res.data.vehicleInfoDto.companyName;
+                this.carIndustry = res.data.vehicleInfoDto.industryName;
+                this.licensePlateType = res.data.vehicleInfoDto.numberKindName;
+                this.teamName = res.data.vehicleInfoDto.teamName;
+                this.vehicleId = res.data.vehicleInfoDto.vehicleId;
+                this.vehicleCode = res.data.vehicleInfoDto.vehicleCode;
+                this.creationTime = res.data.vehicleInfoDto.vehicleCreateTime;
+                this.color = res.data.vehicleInfoDto.vehiclePlateColor;
+
+                //地图显示
+                this.lng = res.data.alarmInfoDto.longitude;
+                this.lat = res.data.alarmInfoDto.latitude;
+                this.infoD = res.data.driverInfoDto.driverName;
+                this.infoNP = res.data.vehicleInfoDto.vehicleCode; //车牌号码
+                this.infoTW = res.data.alarmInfoDto.atypeParentName; //报警类型
+                this.infoWT = res.data.alarmInfoDto.alarmTime; //时间
                 // this.infoL = res.data.detailMap.locationDesc; //地点,
-                res.data.multimMap.forEach(element => {
-                    if(element.fileType == 0){
-                        img.push('http://47.106.196.228:8888/'+element.filePath) 
-                }else if(element.fileType == 2){
-                    this.videos ='http://47.106.196.228:8888/'+element.filePath;
-                }
+                res.data.multimediaFiles.forEach(element => {
+                    if (element.fileType == 0) {
+                        img.push(
+                            'http://47.106.196.228:8888/' + element.filePath
+                        );
+                    } else if (element.fileType == 2) {
+                        this.videos =
+                            'http://47.106.196.228:8888/' + element.filePath;
+                    }
                 });
-            // for(let i = 0;i<res.data.multimMap.length;i++){
-            //     if(res.data.multimMap.filetype == 0){
-            //         img.push('http://47.106.196.228:8888'+res.data.detailMap[i].filePath) 
-            //     }
-            //     else if(res.data.multimMap.filetype == 2){
-            //         this.videos ='http://47.106.196.228:8888'+res.data.detailMap[i].filePath;
-            //     }
-            this.imagesList = img
-            this.videoShow = true;
-            this.startDate = res.data.detailMap.alarmTime;
-            this.endDate = res.data.detailMap.alarmTime
-            this.deriverId = res.data.params.deriverId
-            if(res.data.params.upAlarmNo){
-                this.upAlarmNo = res.data.params.upAlarmNo;
-                this.alarmNo = res.data.params.alarmNo;
-                this.downAlarmNo = res.data.params.downAlarmNo;
+                // for(let i = 0;i<res.data.multimMap.length;i++){
+                //     if(res.data.multimMap.filetype == 0){
+                //         img.push('http://47.106.196.228:8888'+res.data.detailMap[i].filePath)
+                //     }
+                //     else if(res.data.multimMap.filetype == 2){
+                //         this.videos ='http://47.106.196.228:8888'+res.data.detailMap[i].filePath;
+                //     }
+                this.imagesList = img;
+                this.videoShow = true;
+
+                // if(res.data.upAlarmNo){
+                //     this.upAlarmNo = res.data.upAlarmNo;
+                //     this.alarmNo = res.data.currentNo;
+                //     this.downAlarmNo = res.data.downAlarmNo;
+                // }
+                // else if(!res.data.downAlarmNo){
+                //     this.upAlarmNo = res.data.upAlarmNo;
+                //     this.alarmNo = res.data.currentNo;
+                // }
+                // else{
+                //     this.alarmNo = res.data.currentNo;
+                //     this.downAlarmNo = res.data.downAlarmNo;
+                // }
             }
-            else if(!res.data.params.downAlarmNo){
-                this.upAlarmNo = res.data.params.upAlarmNo;
-                this.alarmNo = res.data.params.alarmNo;
-            }
-            else{
-                this.alarmNo = res.data.params.alarmNo;
-                this.downAlarmNo = res.data.params.downAlarmNo;
-            }
-        }
-        this.lodi =false
-        res = null;
-        }
+            this.lodi = false;
+            res = null;
+        },
     },
-    mounted(){
-    },
-    created:function(){
-        this.listId = this.$route.params.id;
-        this.currentN = this.listId.index;
-        this.dataMonday=this.$route.params.dataMonday;
-        this.dataSunday=this.$route.params.dataSunday;
-        this.tableDatas = this.$route.params.tableDatas;
-        this.companyId = this.$route.params.companyIds;
-        this.atypeParent = this.$route.params.atypeParent;
+    mounted() {},
+    created: function() {
+        // console.log(this.$route.params.tableDatas);
+        // this.listId = this.$route.params.id;
+        // this.currentN = this.listId.index;
+        // this.dataMonday=this.$route.params.dataMonday;
+        // this.dataSunday=this.$route.params.dataSunday;
+        // this.tableDatas = this.$route.params.tableDatas;
+        // this.companyId = this.$route.params.companyIds;
+        // this.atypeParent = this.$route.params.atypeParent;
+
+        this.alarmNo = this.$route.params.id.id;
+        this.tableDatas = this.$route.params.tableData;
+        this.currentN = this.$route.params.id.index;
+
+        console.log(this.alarmNo, this.tableDatas, this.currentN);
+
         this.getDetailPageData({
-            alarmNo:this.listId.id,
-            companyId:this.companyId,
-            vehicleId:this.tableDatas.vehicleId,
-            deriverId:this.tableDatas.deriveId,
-            startDate:this.dataMonday,
-            endDate:this.dataSunday,
-            atypeParent:this.atypeParent,
-            currentNo:this.listId.index,
-            
-        })
-        
+            alarmNo: this.alarmNo,
+            currentNo: this.currentN,
+        });
     },
     watch: {
-        '$route': function () {
+        $route: function() {
             //2. $route发生变化时再次赋值listId
-            this.listId = this.$route.params.id;
-            this.dataMonday=this.$route.params.dataMonday;
-            this.dataSunday=this.$route.params.dataSunday;
-            this.tableDatas = this.$route.params.tableDatas;
-            this.companyId = this.$route.params.companyIds;
-            this.atypeId = this.$route.params.atypeId;
-        }
+            this.alarmNo = this.$route.params.id.id;
+            this.tableDatas = this.$route.params.tableData;
+            this.currentN = this.$route.params.id.index;
+        },
     },
     components: {
-    BmlMarkerClusterer,
-    MapBox,
-  }
+        BmlMarkerClusterer,
+        MapBox,
+    },
 };
 </script>
 
 <style lang="less" scoped >
-.detail-main{
+.detail-main {
     padding: 20px;
     height: 100%;
     position: relative;
 }
-.detail-m{
+.detail-m {
     width: 100%;
-    height:100%;
+    height: 100%;
     overflow: hidden;
     background-color: #fff;
 }
 .map {
-  width: auto;
-  height: 300px;
+    width: auto;
+    height: 300px;
 }
 .cd-map {
-  background-color: #fff;
-  margin-top: 2%;
+    background-color: #fff;
+    margin-top: 2%;
 }
 .sample {
-  width: 200px;
-  background: rgba(0, 0, 0, 0.5);
-  overflow: hidden;
-  box-shadow: 0 0 5px #000;
-  color: #fff;
-  text-align: left;
-  padding: 10px;
-  position: absolute;
+    width: 200px;
+    background: rgba(0, 0, 0, 0.5);
+    overflow: hidden;
+    box-shadow: 0 0 5px #000;
+    color: #fff;
+    text-align: left;
+    padding: 10px;
+    position: absolute;
 }
 .sample.active {
-  background: rgba(0, 0, 0, 0.75);
-  color: #fff;
+    background: rgba(0, 0, 0, 0.75);
+    color: #fff;
 }
 .sample i {
-  position: absolute;
-  right: 10px;
-  top: 0;
-  font-style: normal;
+    position: absolute;
+    right: 10px;
+    top: 0;
+    font-style: normal;
 }
 .info {
-  margin: 0;
-  padding: 0;
-  font-size: 12px;
-  line-height: 20px;
-  text-align: left;
+    margin: 0;
+    padding: 0;
+    font-size: 12px;
+    line-height: 20px;
+    text-align: left;
 }
-.page-turning{
+.page-turning {
     width: 100%;
     height: 62px;
     border-bottom: 2px solid #d2d2d2;
     text-align: right;
     line-height: 62px;
 }
-.pages-next,.pages-prea{
+.pages-next,
+.pages-prea {
     float: right;
     text-align: center;
     width: 160px;
     height: 40px;
     cursor: pointer;
 }
-.pages-next a,.pages-prea a{
+.pages-next a,
+.pages-prea a {
     font-size: 14px;
     color: #474747;
     text-decoration: none;
     padding-left: 10px;
 }
-.pages-next a{
+.pages-next a {
     padding-right: 10px;
 }
-.pages-prea a{
+.pages-prea a {
     padding-right: 10px;
 }
-.pages-next a:hover,.pages-prea a:hover{
-  color: #474747
+.pages-next a:hover,
+.pages-prea a:hover {
+    color: #474747;
 }
-.detail-page-main{
+.detail-page-main {
     padding: 30px;
 }
-.detail-page-main h3{
+.detail-page-main h3 {
     height: 20px;
     text-align: left;
     font-size: 14px;
     font-weight: 600px;
     color: #474747;
 }
-.detail-page-main ul li{
+.detail-page-main ul li {
     float: left;
     width: 25%;
     margin-top: 30px;
+    height: 52px;
 }
 .detail-page-main ul {
     display: inline-block;
     width: 100%;
 }
-.detail-page-main .detail-warning-title{
+.detail-page-main .detail-warning-title {
     font-size: 12px;
     color: #5a5a5a;
 }
-.detail-main-info{
+.detail-main-info {
     // height: calc(100% - 382px);
 }
-.detail-warnig-text{
+.detail-warnig-text {
     margin-top: 10px;
     font-size: 14px;
     color: #333333;
 }
-.detail-warning-del li:last-child{
+.detail-warning-del li:last-child {
     width: 100%;
 }
-.detail-main-photo{
+.detail-main-photo {
     margin-top: 30px;
     clear: both;
-    ul li{
+    ul li {
         width: 234px;
         margin-right: 50px;
         margin-top: 14px;
     }
 }
-.detail-main-video{
+.detail-main-video {
     margin-top: 30px;
-    .detail-warning-video{
+    .detail-warning-video {
         width: 234px;
         height: 192px;
         margin-top: 10px;
     }
 }
 
-.message-box{
+.message-box {
     position: fixed;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    .message-box-bg{
+    .message-box-bg {
         width: 100%;
         height: 100%;
         z-index: 1;
         background: #333333;
         opacity: 0.5;
     }
-    .message-main{
-        position:absolute;
+    .message-main {
+        position: absolute;
         width: 704px;
         height: 576px;
         z-index: 2;
@@ -635,8 +700,8 @@ export default {
         margin-left: -352px;
         margin-top: -288px;
         overflow: hidden;
-        .message-close{
-            position:absolute;
+        .message-close {
+            position: absolute;
             right: 0;
             width: 50px;
             height: 50px;
@@ -653,20 +718,20 @@ export default {
         }
     }
 }
-.detail-main-images{
+.detail-main-images {
     width: 234px;
     height: 192px;
     cursor: pointer;
 }
-.mes-images{
+.mes-images {
     width: 100%;
     height: 576px;
 }
-.border-bottom{
+.border-bottom {
     border-bottom: 2px solid #d2d2d2;
 }
-.dialog{
+.dialog {
     font-size: 14px;
-    color: #666; 
+    color: #666;
 }
 </style>

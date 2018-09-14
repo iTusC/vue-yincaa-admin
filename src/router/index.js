@@ -57,7 +57,7 @@ export default new Router({
       component: r => require.ensure([], () => r(require('../pages/indM.vue')), 'indM'),
       meta:{
         breadcrumb:'首页',
-        requireAuth: true
+        requireAuth: true //
       }
     },
     {
@@ -134,7 +134,8 @@ export default new Router({
           redirect:'/ComprenensiveD',
           component: r => require.ensure([], () => r(require('../pages/EarlyWarning/EarlyIndex.vue')), 'ComprenensiveDIndex'),
           meta:{
-            breadcrumb:'预警统计'
+            breadcrumb:'预警统计',
+            requireAuth: true //表示需要验证token
           },
           children:[
             {
@@ -232,23 +233,23 @@ export default new Router({
           ]
         },
         {
-          path:'/OperationsIndex',
-          redirect:'/OperationsS',
-          component: r => require.ensure([], () => r(require('../pages/Operations/OperationsIndex.vue')), 'OperationsSIndex'),
+          path:'/VehicleDataManagement',
+          redirect:'/VehicleDataManagement',
+          component: r => require.ensure([], () => r(require('../pages/FileManagement/vehicle/VehicleDataManagement.vue')), 'VehicleDataManagementIndex'),
           meta:{
             breadcrumb:'资料档案库'
           },
           children:[
             {
-              path:'/OperationsS',
+              path:'/VehicleDataManagement',
               component:  r => require.ensure([], () => r(require('../pages/Operations/OperationsS.vue')), 'OperationsS'),
               meta:{
                 breadcrumb:'驾驶员资料管理'
               }
             },
             {
-              path:'/StateS',
-              component: r => require.ensure([], () => r(require('../pages/Operations/StateS.vue')), 'StateS'),
+              path:'/VehicleDataManagement',
+              component: r => require.ensure([], () => r(require('../pages/FileManagement/vehicle/VehicleDataManagement.vue')), 'VehicleDataManagement'),
               meta:{
                 breadcrumb:'车辆资料管理'
               }

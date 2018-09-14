@@ -3,8 +3,10 @@
     :data="tableListDatas"
     stripe
     style="width: 100%"
+    height="500"
     v-loading="lod"
-    @row-click="showDetail">
+    @row-click="showDetail"
+    v-loadmore="loadMore">
     <el-table-column
       type="index"
       width="50"
@@ -87,6 +89,9 @@ export default {
     },
     getDateil(id){
       this.$emit("getDateil",{id:id})
+    },
+    loadMore(){
+      this.$emit("loadMore")
     }
   }
 };

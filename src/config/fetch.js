@@ -86,6 +86,14 @@ axios.interceptors.response.use(response => {
 
           break;
         case 403:
+        router.replace({
+          path: '/login',
+          query: {redirect: router.currentRoute.fullPath}
+        })
+          // router.replace({path: '/login'})
+          // query: {redirect: to.fullPath}
+          clearCookie()
+
           // err.message = '拒绝访问'
           break;
         case 404:
@@ -123,7 +131,7 @@ axios.interceptors.response.use(response => {
     }
     return Promise.reject(error.response.data)   // 返回接口返回的错误信息
 })
-axios.defaults.baseURL = 'http://39.108.152.102:8083/'
+axios.defaults.baseURL = '/api'
 //设置默认请求头
 axios.defaults.headers = {
     'X-Requested-With': 'XMLHttpRequest'

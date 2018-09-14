@@ -109,7 +109,7 @@
                       children:[
                           {
                             name:'车辆资料管理',
-                            path:'/StateS',
+                            path:'/VehicleDataManagement',
                           },
                           {
                             name:'驾驶员资料管理',

@@ -12,7 +12,8 @@ module.exports = {
     proxyTable: { 
       '/api': {
           // 测试环境
-          target: 'http://39.108.152.102:8083/',  // 接口域名
+          target: 'http://39.108.152.102/admin/',  // 接口域名
+          // target: 'http://192.168.1.201:8180/',  // 接口域名
           changeOrigin: true,  //是否跨域
           pathRewrite: {
               '^/api': ''   //需要rewrite重写的,
