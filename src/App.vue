@@ -21,8 +21,20 @@
 <script>
 import Headers from "../src/components/Header";
 import NavMenu from "../src/components/Menu";
-import dialog from "../src/components/dialog"
+import dialog from "../src/components/dialog";
+import axios from "axios";
+let protocol = window.location.protocol;
+let host = window.location.host;
+let reg = /^localhost+/
 
+
+if(reg.test(host)) {
+  //若本地项目调试使用
+  axios.defaults.baseURL = '/api';
+} else {
+  //动态请求地址
+  axios.defaults.baseURL = protocol + "//" + host + "/admin/";
+}
 export default {
   components: {
     Headers,
@@ -211,5 +223,11 @@ body,
 }
 .el-main{
   padding: 0;
+}
+
+/* 全局hover */
+.el-radio-button__inner:hover {
+    color: #333;
+    font-weight:bold;
 }
 </style>

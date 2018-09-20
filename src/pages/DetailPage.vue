@@ -67,11 +67,11 @@
                                 </li>
                                 <li>
                                     <span class="detail-warning-title">海拔高度</span>
-                                    <p class="detail-warnig-text">{{ altitude }}</p>
+                                    <p class="detail-warnig-text">{{ altitude }} m</p>
                                 </li>
                                 <li>
                                     <span class="detail-warning-title">当前车速</span>
-                                    <p class="detail-warnig-text">{{ speed }}</p>
+                                    <p class="detail-warnig-text">{{ speed }} km/h</p>
                                 </li>
                                 <li>
                                     <span class="detail-warning-title">驾驶员</span>
@@ -98,14 +98,13 @@
                                 <h4 class="detail-warning-title">预警照片</h4>
                                 <ul>
                                     <li v-for="(item,i) in imagesList" :key="i">
-                                        <img :src="item" class="detail-main-images" @click.self="zommImages($event)">
+                                        <img :src="item" class="detail-main-images" @click.self="zommImages($event,i)">
                                     </li>
                                 </ul>
                             </article>
                             <article class="detail-main-video">
                                 <h4 class="detail-warning-title">预警视频</h4>
-                                <video controls="" name="media" @click.self="" class="detail-warning-video" v-if="videoShow">
-                                    <source :src="videos" type="video/mp4">
+                                <video controls="" id="vid" name="media" @click.self="" class="detail-warning-video" v-if="videoShow" :src="videos">
                                 </video>
                             </article>
                         </article>
@@ -133,7 +132,7 @@
                                 </li>
                                 <li>
                                     <span class="detail-warning-title">车辆颜色</span>
-                                    <p class="detail-warnig-text">{{ color }}</p>
+                                    <p class="detail-warnig-text">{{ vcolor }}</p>
                                 </li>
                                 <li>
                                     <span class="detail-warning-title">车辆类型</span>
@@ -178,7 +177,7 @@
                                 </li>
                                 <li>
                                     <span class="detail-warning-title">驾驶证类型</span>
-                                    <p class="detail-warnig-text">{{ vehicleType }}照</p>
+                                    <p class="detail-warnig-text">{{ vehicleType }}</p>
                                 </li>
                                 <li>
                                     <span class="detail-warning-title">发证机关</span>
@@ -199,7 +198,7 @@
                 <div class="message-main">
                     <span class="message-close el-icon-close" @click.self="closeMessageBox"></span>
                     <div class="block">
-                        <el-carousel trigger="click" height="576px" :autoplay="false">
+                        <el-carousel trigger="click" height="576px" :autoplay="false" :initial-index="imagesIndex">
                             <el-carousel-item v-for="item in imagesList" :key="item">
                                 <img v-if="imagesisshow" :src="item" :alt="messagesrctitle" class="mes-images">
                             </el-carousel-item>
@@ -207,7 +206,7 @@
                     </div>
                 </div>
             </div>
-            <el-dialog class="dialog" title="提示" :visible.sync="centerDialogVisible" width="20%" center>
+            <el-dialog class="dialog" title="提示" :visible.sync="centerDialogVisible" width="20%" center @click="clears">
                 <span style="display:inline-block;width:100%;text-align:center;font-size:14px;color:#666">{{ dialogText }}</span>
             </el-dialog>
         </div>
@@ -218,6 +217,10 @@
 import {BmlMarkerClusterer} from 'vue-baidu-map';
 import MapBox from '../components/MapBox';
 import {teamTree, alarmDetail} from '../api/getData';
+import {formatDate} from '../../static/js/data'
+import 'video.js/dist/video-js.css'
+import { videoPlayer } from 'vue-video-player'
+
 
 export default {
     data() {
@@ -237,6 +240,7 @@ export default {
             imgSrc: '', //图片路径
             messageisshow: false, //显示弹窗
             imagesisshow: false, //显示弹框图片
+            imagesIndex:'',//初始化显示
             messagesrc: '',
             messagesrctitle: '',
             imagesList: [],
@@ -251,7 +255,7 @@ export default {
             teamName: '-', //所属车队
             locationDesc: '广东省广州市荔湾区员村街道三元里抗英斗争纪念公园', //预警地点
             vehicleId: 'YY-CM-7694', //车辆ID
-            color: '红色', //车辆颜色
+            vcolor: '红色', //车辆颜色
             sex: '-', //性别
             birthday: '-', //生日
             vehicleType: '-', //驾驶证类型
@@ -311,10 +315,10 @@ export default {
         close() {
             this.isshow = false;
         },
-        zommImages(el) {
+        zommImages(el,i) {
             this.messageisshow = true;
             this.imagesisshow = true;
-            this.messagesrc = el.srcElement.currentSrc;
+            this.imagesIndex = i;
             this.messagesrctitle = el.srcElement.alt;
         },
         closeMessageBox() {
@@ -360,14 +364,21 @@ export default {
         onNext() {
             if (this.currentN < this.tableDatas.length - 1) {
                 this.lodi = true;
+
                 this.alarmNo = this.tableDatas[this.currentN + 1].alarmNo;
                 this.getDetailPageData({
                     alarmNo: this.alarmNo,
-                    currentNo: this.currentN++,
+                    currentNo: ++this.currentN,
                 });
+                if(this.videoShow){
+                    document.getElementById("vid").load();
+                }else{
+                    this.videoShow = false;
+                }
+                
                 this.$options.methods.setCookie(this.alarmNo,this.currentN,1);
             } else {
-                this.dialogText = '最后一页了！';
+                this.dialogText = '当前列表最后一页了！';
                 this.centerDialogVisible = true;
             }
         },
@@ -377,44 +388,71 @@ export default {
                 let newAlarmNo = this.tableDatas[this.currentN - 1].alarmNo;
                 this.getDetailPageData({
                     alarmNo: newAlarmNo,
-                    currentNo: this.currentN--,
+                    currentNo: --this.currentN,
                 });
+                if(this.videoShow){
+                    document.getElementById("vid").load();
+                }else{
+                    this.videoShow = false;
+                }
                 this.$options.methods.setCookie(this.alarmNo,this.currentN,1);
             } else {
-                this.dialogText = '第一页了！';
+                this.dialogText = '当前列表第一条了！';
                 this.centerDialogVisible = true;
             }
         },
         back() {
             this.$router.go(-1);
         },
+        clears(){
+            let _self = this;
+            this.$alert('请重新选择需要查看的预警信息!', '提示', {
+            confirmButtonText: '确定',
+            callback: action => {
+                _self.$router.go(-1)
+            }
+            });
+        },
+        formData(dataTime,shows=false){
+            let dataT = new Date(dataTime)
+            if(shows){
+                return formatDate(dataT,'yyyy-MM-dd')
+            }else{
+                return formatDate(dataT,'yyyy-MM-dd hh:mm')
+
+            }
+            
+        },
         //获取车辆搜索下拉列表
         async getDetailPageData(params) {
             let response = await alarmDetail(params);
             let res = response.data;
             let img = [];
+            let _self = this;
             if (res.code == 0) {
-                let _self = this;
-                let map = new BMap.Geocoder();
-                let locationDescs = map.getLocation(new BMap.Point(
-                        res.data.alarmInfoDto.longitude,
-                        res.data.alarmInfoDto.latitude
-                    ),
-                    function(result) {
-                        if (result) {
-                            _self.locationDesc = result.address;
-                            _self.infoL = result.address;
-                        }
-                    }
-                );
+                // let map = new BMap.Geocoder();
+                // let locationDescs = map.getLocation(new BMap.Point(
+                //         res.data.alarmInfoDto.longitude,
+                //         res.data.alarmInfoDto.latitude
+                //     ),
+                //     function(result) {
+                //         if (result) {
+                //             _self.locationDesc = result.address;
+                //             _self.infoL = result.address;
+                //         }
+                //     }
+                // );
+
                 //报警信息
+                this.locationDesc = res.data.alarmInfoDto.locationDesc;
+                this.infoL = res.data.alarmInfoDto.locationDesc;
                 this.alarm = res.data;
                 this.atpyePName = res.data.alarmInfoDto.atypeChildname;
                 this.atpyeName = res.data.alarmInfoDto.atypeParentName;
                 this.longitude = res.data.alarmInfoDto.longitude;
                 this.latitude = res.data.alarmInfoDto.latitude;
-                this.startDate = res.data.alarmInfoDto.alarmTime;
-                this.endDate = res.data.alarmInfoDto.receiptTime;
+                this.startDate = this.$options.methods.formData(res.data.alarmInfoDto.alarmTime);
+                this.endDate = this.$options.methods.formData(res.data.alarmInfoDto.receiptTime);
                 this.terminalNo = res.data.alarmInfoDto.commNo;
                 this.altitude = res.data.alarmInfoDto.elevetion;
                 this.speed = res.data.alarmInfoDto.speed;
@@ -427,7 +465,7 @@ export default {
                 this.deriverName = res.data.driverInfoDto.driverName;
                 this.deriverId = res.data.driverInfoDto.driverNo;
                 this.sex = res.data.driverInfoDto.sex;
-                this.validPeriod = res.data.driverInfoDto.validEndTime;
+                this.validPeriod = res.data.driverInfoDto.validEndTime; 
 
                 //车辆信息
                 this.issuingAuthority = res.data.vehicleInfoDto.certOrgName;
@@ -435,10 +473,10 @@ export default {
                 this.carIndustry = res.data.vehicleInfoDto.industryName;
                 this.licensePlateType = res.data.vehicleInfoDto.numberKindName;
                 this.teamName = res.data.vehicleInfoDto.teamName;
-                this.vehicleId = res.data.vehicleInfoDto.vehicleId;
+                this.vehicleId = res.data.vehicleInfoDto.vehicleNo;
                 this.vehicleCode = res.data.vehicleInfoDto.vehicleCode;
-                this.creationTime = res.data.vehicleInfoDto.vehicleCreateTime;
-                this.color = res.data.vehicleInfoDto.vehiclePlateColor;
+                this.creationTime = this.$options.methods.formData(res.data.vehicleInfoDto.vehicleCreateTime);
+                this.vcolor = res.data.vehicleInfoDto.color;
 
                 //地图显示
                 this.lng = res.data.alarmInfoDto.longitude;
@@ -446,48 +484,74 @@ export default {
                 this.infoD = res.data.driverInfoDto.driverName;
                 this.infoNP = res.data.vehicleInfoDto.vehicleCode; //车牌号码
                 this.infoTW = res.data.alarmInfoDto.atypeChildname; //报警类型
-                this.infoWT = res.data.alarmInfoDto.alarmTime; //时间
+                this.infoWT = this.$options.methods.formData(res.data.alarmInfoDto.alarmTime); //时间
                 // this.infoL = res.data.detailMap.locationDesc; //地点,
+                let imgPath = []
                 res.data.multimediaFiles.forEach(element => {
-                    if (element.fileType == 0) {
-                        img.push(
-                            'http://47.106.196.228:8888/' + element.filePath
-                        );
-                    } else if (element.fileType == 2) {
-                        this.videos =
-                            'http://47.106.196.228:8888/' + element.filePath;
-                    }
+                    imgPath.push(element);                    
                 });
-                this.imagesList = img;
-                this.videoShow = true;
-                this.alarmnNmber = this.alarmNo; 
+                let vide = ""
+                if(res.data.multimediaFiles!=[]){
+                    let indexs;
+                    this.imagesList = [];
+                    this.videos = [];
+                    for(let i = 0; i<imgPath.length;i++){
+                        indexs = imgPath[i].lastIndexOf(".");
+                        if( imgPath[i].substr(indexs+1) == 'jpg'&&imgPath[i].substr(indexs+1) !==''){
+                            img.push('http://47.106.196.228:8888/' + imgPath[i]);
+                        }else if(imgPath[i].substr(indexs+1) == 'MP4'&&imgPath[i].substr(indexs+1) !==''){
+                            vide = 'http://47.106.196.228:8888/' + imgPath[i];
+                        } 
+                    }
+                    this.imagesList = img;
+                    if(vide!=[]){
+                        this.videoShow = true;
+                        this.videos = vide;
+                    }else{
+                        this.videos = [];
+                        this.videoShow = false;                        
+                    }
+                }else{
+                    this.videos = [];
+                    this.imagesList = [];
+                }
+                this.alarmnNmber = params.alarmNo; 
             }
             this.lodi = false;
             res = null;
         },
     },
-    mounted() {},
-    created: function() {
-        this.alarmNo = this.$route.params.id.id;
-        this.tableDatas = this.$route.params.tableData;
-        this.currentN = this.$route.params.id.index;
-
-        this.getDetailPageData({
-            alarmNo: this.alarmNo,
-            currentNo: this.currentN,
-        });
-    },
-    watch: {
-        $route: function() {
-            //2. $route发生变化时再次赋值listId
+    mounted() {
             this.alarmNo = this.$route.params.id.id;
             this.tableDatas = this.$route.params.tableData;
             this.currentN = this.$route.params.id.index;
-        },
+            if(this.alarmNo){
+                this.getDetailPageData({
+                    alarmNo: this.alarmNo,
+                    currentNo: this.currentN,
+                });
+            }else{
+                this.clears()
+                // this.centerDialogVisible = true;
+                // this.back();
+
+            }
     },
+    created: function() {
+        
+    },
+    // watch: {
+    //     $route: function() {
+    //         //2. $route发生变化时再次赋值listId
+    //         this.alarmNo = this.$route.params.id.id;
+    //         this.tableDatas = this.$route.params.tableData;
+    //         this.currentN = this.$route.params.id.index;
+    //     },
+    // },
     components: {
         BmlMarkerClusterer,
         MapBox,
+        videoPlayer,
     },
 };
 </script>
@@ -585,7 +649,7 @@ export default {
     float: left;
     width: 25%;
     margin-top: 30px;
-    height: 52px;
+    min-height: 52px;
 }
 .detail-page-main ul {
     display: inline-block;

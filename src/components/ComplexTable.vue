@@ -32,7 +32,7 @@
                         </template>
                         <!-- <td width="31%">{{ tablechr.atypeName }}</td>
                         <td width="30%">{{ tablechr.deriverAlarmName }}</td> -->
-                        <td class="hovers" :title="tablechr.locationDesc " >{{ tablechr.alarmTime }} {{ tablechr.locationDesc.slice(0,8)+'...' }}</td>
+                        <td class="hovers" :title="tablechr.locationDesc " >{{ formData(tablechr.alarmTime) }} {{ tablechr.locationDesc.slice(0,8)+'...' }}</td>
                         <td @click.stop="getDateil(tablechr.alarmNo,index)" class="hovers">查看更多</td>
                       </tr>
                   </table>
@@ -53,6 +53,7 @@
 </template>
 
 <script>
+import {formatDate} from '../../static/js/data'
 export default {
   props: ["ctcspan", "showText", "tableData", "tableListShowi","tableDataAlarms","paths","loading","loadings"],
   methods: {
@@ -67,7 +68,11 @@ export default {
     },
     getPushApply(){
       this.$emit("getPushApply")
-    }
+    },
+    formData(dataTime){
+      let dataT = new Date(dataTime)
+      return formatDate(dataT,'yyyy-MM-dd hh:mm')
+    },
   },
   created(){
       let self = this;

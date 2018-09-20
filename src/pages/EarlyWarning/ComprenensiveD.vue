@@ -7,7 +7,7 @@
         <div class="yc-velist">
           <div class="yc-velist-title" @click="allData">
             <img :src="companyImagePath" alt="">
-            <h3>{{ comName }}</h3>
+            <h3>{{ companyName }}</h3>
           </div>
           <vehicle-list @handleSelect="handleSelect" :resL="resL" :selectNumber="selectNumber" :selectShow="selectShow" @Subm="Subm" :selectNull="selectNull" @selectAll="selectAll"></vehicle-list>
           <vehicle-menu @showFun="showFun" @itemOpened="itemOpened" :vehicleList="vehicleList" :ind="ind" :itemEnd="itemEnd" :isListShow="isListShow"></vehicle-menu>
@@ -76,7 +76,7 @@
 
           </div>
         </section>
-        <section class="cd-echart">
+        <section class="cd-echart">    
           <div class="cd-eachart-title">
             <el-col :span="10">
               <el-row :gutter="20">
@@ -142,12 +142,7 @@
             </el-col>
             <el-col :span="6" :offset="12">
               <el-row :gutter="20">
-                <el-col :span="12">
-                  <p v-if="onlineS" class="table-select-title">车辆/驾驶员筛选</p>
-                  <el-cascader :options="echartsOptions" v-model="listOptionsModel" @change="listhandleChange" @active-item-change="listhandleItemChange" size="mini" :props="echartsProps" v-if="onlineS">
-                  </el-cascader>
-                </el-col>
-                <el-col :span="12">
+                <el-col :span="12" v-if="AlarmTypeShow">
                   <p v-if="onlineS" class="table-select-title">预警类型</p>
                   <el-select v-if="onlineS" @change="getAlarmCode" v-model="value7" placeholder="请选择" size="mini">
                     <el-option-group size="mini" v-for="group in options3" :key="group.label" :label="group.label">
@@ -156,12 +151,17 @@
                     </el-option-group>
                   </el-select>
                 </el-col>
+                <el-col :span="12">
+                  <p v-if="onlineS" class="table-select-title">车辆/驾驶员筛选</p>
+                  <el-cascader :options="echartsOptions" v-model="listOptionsModel" @change="listhandleChange" @active-item-change="listhandleItemChange" size="mini" :props="echartsProps" v-if="onlineS">
+                  </el-cascader>
+                </el-col>
               </el-row>
             </el-col>
           </el-row>
           <div class="ul-itme">
             <c-table :ctcspan="ctcspan" :showText="showText" :tableData="tableData" @showList="showList" @getLocation="getLocation" :tableListShowi="tableListShowi" :tableDataAlarms="tableDataAlarms" @paths="paths" @getDateil="getDateil" :loading="loading" :loadings="loadings" @getPushApply="getPushApply"></c-table>
-            <el-pagination style="float:right;margin-top:20px;margin-bottom:20px;" background @size-change="handleSizeChange" @current-change="handleCurrentChange" :current-page.sync="currentPage3" :page-sizes="[10,30,40,50]" :page-size="10" layout="sizes,prev, pager, next, jumper" :total="200">
+            <el-pagination style="float:right;margin-top:20px;margin-bottom:20px;" background @size-change="handleSizeChange" @current-change="handleCurrentChange" :current-page.sync="currentPage3" :page-sizes="[10,30]" :page-size="10" layout="sizes,prev, pager, next, jumper" :total="100">
             </el-pagination>
           </div>
         </section>
@@ -210,6 +210,7 @@ import {
 export default {
     data() {
         return {
+            currentPage3:1,
             intervalId: 0,
             lods: true,
             loadings: true,
@@ -379,6 +380,7 @@ export default {
                 },
             ],
             //表格列表数据格式
+            AlarmTypeShow:false,
             tableListData: [],
             vehicleList: [],
             onlineOptions: [
@@ -473,7 +475,9 @@ export default {
     methods: {
         //翻页
         handleSizeChange(val) {
+            this.currentPage3 = 1;
             this.numbers = val;
+            this.pageNumber = 1;
             //默认综合统计表格数据
             this.loading = true;
             this.getAlarmCompsStat({
@@ -499,6 +503,7 @@ export default {
         getPushApply() {},
         //刷新在线车辆
         carNew() {
+            
             //获取车辆列表 搜索车辆个数
             this.getTeamTree({companyId: this.companyCode});
 
@@ -510,6 +515,9 @@ export default {
         },
         //点击公司获取所有数据
         allData() {
+            //默认不展开
+            this.ind = null;
+            this.itemEnd = null;
             //获取车辆列表 搜索车辆个数
             this.getTeamTree({
                 companyId: this.companyCode,
@@ -614,6 +622,7 @@ export default {
         },
         //点击车队，按照车队查询获取在线率&&预警统计&&预警表格数据
         showFun(msg) {
+            this.itemEnd = null;
             this.tableListShowi = '展开本行';
             this.close();
             let reg = /[\(（][^\)）]+[\)）]$/;
@@ -672,13 +681,12 @@ export default {
             this.ishowDLegend = true;
             if (this.itemEnd === msg.i) {
                 this.itemEnd = null;
+                msg.e.currentTarget.nextElementSibling.removeClass = 'vehile-item-list-isopened';
             } else {
                 this.itemEnd = msg.i;
-                msg.e.currentTarget.nextElementSibling.addClass =
-                    'vehile-item-list-isopened';
+                msg.e.currentTarget.nextElementSibling.addClass = 'vehile-item-list-isopened';
             }
-            msg.e.currentTarget.nextElementSibling.addClass =
-                'vehile-item-list-isopened';
+            msg.e.currentTarget.nextElementSibling.addClass = 'vehile-item-list-isopened';
             this.onlineD = false;
             //点击查询车辆在线情况
             this.getTeamTree(
@@ -690,6 +698,7 @@ export default {
             this.getComposAlarmCount({
                 companyId: this.companyCode,
                 vehicleId: msg.di,
+                teamId: this.teamCode,
                 startDate: this.starData,
                 endDate: this.endData,
             });
@@ -952,14 +961,13 @@ export default {
         getAlarmCode() {
             this.alarmCode = this.value7;
             if (this.ctcspan === 3) {
-                console.log(this.teamId);
                 this.getAlarmCompsDetail({
                     pageNum: this.listPageNumber,
                     pageSize: this.numbers,
                     companyId: this.companyCode,
                     teamId: this.teamCode,
                     vehicleId: this.tableData[this.indexShowList].vehicleId,
-                    deriverId: this.tableData[this.indexShowList].deriveId,
+                    deriverId: this.tableData[this.indexShowList].driverId,
                     startDate: this.starData,
                     endDate: this.endData,
                     atypeId: this.value7,
@@ -968,6 +976,7 @@ export default {
         },
         //预警统计表格，点击展开更多内容
         showList(i) {
+            this.AlarmTypeShow = true;
             this.indexShowList = i;
             if (this.tableListShowi === i) {
                 this.tableListShowi = '展开本行';
@@ -979,7 +988,7 @@ export default {
 
                 this.getAlarmCompsDetail({
                     pageNum: this.listPageNumber,
-                    pageSize: 20,
+                    pageSize: 200,
                     companyId: this.companyCode,
                     teamId: this.tableData[i].teamId,
                     vehicleId: this.tableData[i].vehicleId,
@@ -1002,7 +1011,7 @@ export default {
               name: 'CDdetail',
               params: {
                   id: id,
-                  tableDatas: this.tableDataAlarms,
+                  tableData: this.tableDataAlarms,
               },
             })
     
@@ -1174,7 +1183,7 @@ export default {
         this.getCookie();
         // this.getCompos({username:this.usersname});
         //图表查询默认时间（按照往后推7天）
-        this.endData = getDay(-1) + ' 23:23:59';
+        this.endData = getDay(0) + ' 23:23:59';
         this.starData = getDay(-7) + ' 00:00:00';
 
         //获取车辆列表 搜索车辆个数
@@ -1206,8 +1215,16 @@ export default {
         });
 
         this.intervalId = setInterval(() => {
+            this.getOnlineRateAll({companyId: this.companyCode});
             this.getTeamTree({companyId: this.companyCode});
-        }, 5000);
+
+            //默认获取预警统计echarts数据
+            this.getComposAlarmCount({
+                companyId: this.companyCode,
+                startDate: this.starData,
+                endDate: this.endData,
+            });
+        }, 20000);
     },
     beforeDestroy() {
         clearInterval(this.intervalId);
