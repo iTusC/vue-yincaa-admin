@@ -112,10 +112,12 @@ export default {
         },
 
         async logins(params) {
-            let response = await login(params);
+            this.log = true;
+            let response = await login(params).finally(() => {
+                this.log = false;
+            });
             let res = response.data;
             if (res.code == 0) {
-                this.log = true;
                 // let response = await getCompanyName(ps);
                 // if(response.status == 200){
                 // 	this.$options.methods.setCookie(params.username,response.data.companyId,1);
@@ -134,7 +136,7 @@ export default {
                     message: '登录成功',
                     type: 'success',
                 });
-                this.log = false;
+                // this.log = false;
             } else {
                 this.dialogText = res.data.message;
                 this.centerDialogVisible = true;

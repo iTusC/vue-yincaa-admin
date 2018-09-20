@@ -52,7 +52,7 @@
           <div class="bottom">
             <span class="more1"></span>
             <span class="more2"></span>
-            <h2>企业管理运营评分（2018.8）</h2>
+            <h2>企业管理运营评分（2018.9）</h2>
             <ul>
               <li>
                 <span>入网率 - 84</span>
@@ -100,7 +100,7 @@
           </div>
         </section>
         <section class="demo-echarts">
-          <h2>预警分类（2018.08）</h2>
+          <h2>预警分类（{{ statisticsTime }}）</h2>
           <span class="more"></span>
           <div id="myChart" class="myChart" :style="stylewh" style="margin-top:50px;margin-left:20px;"></div>
         </section>
@@ -190,6 +190,7 @@ export default {
         };
     },
     created() {
+        this.getLatestAlarms();
         this.intervalId = setInterval(() => {
             this.getLatestAlarms();
         }, 5000);
@@ -198,22 +199,28 @@ export default {
         this.messageNew();
         this.getData();
         this.getCookie();
-        this.getMapData();
+        
         //图表查询默认时间（按照30天查询）
         this.endData = thirtyDays().t1 + ' 23:23:59';
         this.starData = thirtyDays().t2 + ' 00:00:00';
-        this.statisticsTime = thirtyDays().t1
-        this.alarmTypeDayCount({
-            companyId: this.companyCode,
-            startDate: this.starData,
-            endDate: this.endData,
-        });
-        this.getDomeVerticals({
-            companyId: this.companyCode,
-            startDate: this.starData,
-            endDate: this.endData,
-        });
+        this.statisticsTime = `${thirtyDays().t2}~${thirtyDays().t1}`
+        Promise.all([
+            this.alarmTypeDayCount({
+                companyId: this.companyCode,
+                startDate: this.starData,
+                endDate: this.endData,
+            }),
+            this.getDomeVerticals({
+                companyId: this.companyCode,
+                startDate: this.starData,
+                endDate: this.endData,
+            })
+        ]).then(res => {
+            // 地图
+            setTimeout(this.getMapData, 1000)
+        })
         // this.drawLine();
+
     },
     beforeDestroy() {
         clearInterval(this.intervalId);
@@ -286,8 +293,10 @@ export default {
                 myCharts.setOption({
                     animation: true,
                     bmap: {
-                        center: [116.46, 39.92],
-                        zoom: 12,
+                        // center: [116.46, 39.92],
+                        // zoom: 12,
+                        center: [113.33, 23.13],
+                        zoom: 13,
                         roam: true,
                         mapStyle: {
                             styleJson: [
@@ -442,10 +451,11 @@ export default {
                                 },
                             },
                             effect: {
-                                constantSpeed: 20,
+                                /* 控制光点移动速度 */
+                                constantSpeed: 2,
                                 show: true,
                                 trailLength: 0.1,
-                                symbolSize: 1.5,
+                                symbolSize: 3,
                             },
                             zlevel: 1,
                         },
@@ -461,163 +471,167 @@ export default {
             //         this.animate=false;  // margin-top 为0 的时候取消过渡动画，实现无缝滚动
             // },500)
         },
-        async getDomeVerticals(param) {
-            let response = await getDomeVertical(param);
-            let res = response.data;
-            if (res.code == 0) {
-                let name = [];
-                let datas = [];
-                res.data.alarmTypeDriverCount.forEach(element => {
-                    name.push(element.aTypeName);
-                    this.ddData.push(element.aTypeCount);
-                });
-                res.data.alarmTypeVehicleCount.forEach(element => {
-                    name.push(element.aTypeName);
-                    this.vdData.push(element.aTypeCount);
-                });
-                this.legendName = name;
-                let myChart = this.$echarts.init(
-                    document.getElementById('myChart')
-                );
-                let _self = this;
-                myChart.setOption({
-                    tooltip: {
-                        trigger: 'item',
-                        formatter: '{a} <br/>{b}: {c}次 ({d}%)',
-                    },
-                    legend: {
-                        orient: 'vertical',
-                        x: 'left',
-                        itemGap: 20,
-                        data: _self.legendName,
-                        // data:["前车碰撞报警","车道偏离报警","车距过近报警","驻车滑行","疲劳驾驶报警","接打电话报警","抽烟报警","分神驾驶报警","驾驶员异常报警","左顾右盼","未系安全带"],
-                        textStyle: {
-                            color: '#fff',
+        getDomeVerticals(param) {
+            return getDomeVertical(param).then(response => {
+                let res = response.data;
+            
+                if (res.code == 0) {
+                    let name = [];
+                    let datas = [];
+                    res.data.alarmTypeDriverCount.forEach(element => {
+                        name.push(element.aTypeName);
+                        this.ddData.push(element.aTypeCount);
+                    });
+                    res.data.alarmTypeVehicleCount.forEach(element => {
+                        name.push(element.aTypeName);
+                        this.vdData.push(element.aTypeCount);
+                    });
+                    this.legendName = name;
+                    let myChart = this.$echarts.init(
+                        document.getElementById('myChart')
+                    );
+                    let _self = this;
+                    myChart.setOption({
+                        tooltip: {
+                            trigger: 'item',
+                            formatter: '{a} <br/>{b}: {c}次 ({d}%)',
                         },
-                    },
-                    // color:['#6B8FC9', '#2778A6','#DCBB4B','#E43D3D','#BF1F6F','#9A4DAD','#5445BB','#C65455','#18BCC3;','#4BB46C','#D06F33','#bf1f6f','#5445bb','#2778a6'],
-                    series: [
-                        {
-                            name: '车辆预警',
-                            type: 'pie',
-                            radius: [0, '30%'],
-                            center: ['60%', '45%'],
-                            label: {
-                                normal: {
-                                    position: 'inner',
-                                },
+                        legend: {
+                            orient: 'vertical',
+                            x: 'left',
+                            itemGap: 20,
+                            data: _self.legendName,
+                            // data:["前车碰撞报警","车道偏离报警","车距过近报警","驻车滑行","疲劳驾驶报警","接打电话报警","抽烟报警","分神驾驶报警","驾驶员异常报警","左顾右盼","未系安全带"],
+                            textStyle: {
+                                color: '#fff',
                             },
-                            labelLine: {
-                                normal: {
-                                    show: false,
-                                },
-                            },
-                            // data:dd
-                            data: [
-                                {
-                                    value: _self.vdData[0],
-                                    name: '前车碰撞报警',
-                                    itemStyle: {color: '#4bb46c'},
-                                },
-                                {
-                                    value: _self.vdData[1],
-                                    name: '车道偏离报警',
-                                    itemStyle: {color: '#d06f33'},
-                                },
-                                {
-                                    value: _self.vdData[2],
-                                    name: '车距过近报警',
-                                    itemStyle: {color: '#18bcc3'},
-                                },
-                                {
-                                    value: _self.vdData[3],
-                                    name: '驻车滑行',
-                                    itemStyle: {color: '#c65455'},
-                                },
-                            ],
                         },
-                        {
-                            name: '驾驶员预警',
-                            type: 'pie',
-                            radius: ['40%', '66%'],
-                            center: ['60%', '45%'],
-                            label: {
-                                normal: {
-                                    show: false,
+                        // color:['#6B8FC9', '#2778A6','#DCBB4B','#E43D3D','#BF1F6F','#9A4DAD','#5445BB','#C65455','#18BCC3;','#4BB46C','#D06F33','#bf1f6f','#5445bb','#2778a6'],
+                        series: [
+                            {
+                                name: '车辆预警',
+                                type: 'pie',
+                                radius: [0, '30%'],
+                                center: ['60%', '45%'],
+                                label: {
+                                    normal: {
+                                        position: 'inner',
+                                    },
                                 },
+                                labelLine: {
+                                    normal: {
+                                        show: false,
+                                    },
+                                },
+                                // data:dd
+                                data: [
+                                    {
+                                        value: _self.vdData[0],
+                                        name: '前车碰撞报警',
+                                        itemStyle: {color: '#4bb46c'},
+                                    },
+                                    {
+                                        value: _self.vdData[1],
+                                        name: '车道偏离报警',
+                                        itemStyle: {color: '#d06f33'},
+                                    },
+                                    {
+                                        value: _self.vdData[2],
+                                        name: '车距过近报警',
+                                        itemStyle: {color: '#18bcc3'},
+                                    },
+                                    {
+                                        value: _self.vdData[3],
+                                        name: '驻车滑行',
+                                        itemStyle: {color: '#c65455'},
+                                    },
+                                ],
                             },
-                            // data:vd
-                            data: [
-                                {
-                                    value: _self.ddData[0],
-                                    name: '疲劳驾驶报警',
-                                    itemStyle: {color: '#dcbb4b'},
+                            {
+                                name: '驾驶员预警',
+                                type: 'pie',
+                                radius: ['40%', '66%'],
+                                center: ['60%', '45%'],
+                                label: {
+                                    normal: {
+                                        show: false,
+                                    },
                                 },
-                                {
-                                    value: _self.ddData[1],
-                                    name: '接打电话报警',
-                                    itemStyle: {color: '#6b8fc9'},
-                                },
-                                {
-                                    value: _self.ddData[2],
-                                    name: '抽烟报警',
-                                    itemStyle: {color: '#2778a6'},
-                                },
-                                {
-                                    value: _self.ddData[3],
-                                    name: '分神驾驶报警',
-                                    itemStyle: {color: '#5445bb'},
-                                },
-                                {
-                                    value: _self.ddData[4],
-                                    name: '驾驶员异常报警',
-                                    itemStyle: {color: '#9a4dad'},
-                                },
-                                {
-                                    value: _self.ddData[5],
-                                    name: '左顾右盼',
-                                    itemStyle: {color: '#e43d3d'},
-                                },
-                                {
-                                    value: _self.ddData[6],
-                                    name: '未系安全带',
-                                    itemStyle: {color: '#bf1f6f'},
-                                },
-                            ],
-                            //  data:[]
-                        },
-                    ],
-                });
-            }
+                                // data:vd
+                                data: [
+                                    {
+                                        value: _self.ddData[0],
+                                        name: '疲劳驾驶报警',
+                                        itemStyle: {color: '#dcbb4b'},
+                                    },
+                                    {
+                                        value: _self.ddData[1],
+                                        name: '接打电话报警',
+                                        itemStyle: {color: '#6b8fc9'},
+                                    },
+                                    {
+                                        value: _self.ddData[2],
+                                        name: '抽烟报警',
+                                        itemStyle: {color: '#2778a6'},
+                                    },
+                                    {
+                                        value: _self.ddData[3],
+                                        name: '分神驾驶报警',
+                                        itemStyle: {color: '#5445bb'},
+                                    },
+                                    {
+                                        value: _self.ddData[4],
+                                        name: '驾驶员异常报警',
+                                        itemStyle: {color: '#9a4dad'},
+                                    },
+                                    {
+                                        value: _self.ddData[5],
+                                        name: '左顾右盼',
+                                        itemStyle: {color: '#e43d3d'},
+                                    },
+                                    {
+                                        value: _self.ddData[6],
+                                        name: '未系安全带',
+                                        itemStyle: {color: '#bf1f6f'},
+                                    },
+                                ],
+                                //  data:[]
+                            },
+                        ],
+                    });
+                }
+            })
         },
         //获取最新报警列表
-        async getLatestAlarms(param) {
-            let response = await getLatestAlarms(param);
-            let res = response.data;
+        getLatestAlarms(param) {
+            return getLatestAlarms(param).then(response => {
+                let res = response.data;
 
-            if (res.code == 0) {
-                if (res.data) {
-                    this.messages = res.data;
+                if (res.code == 0) {
+                    if (res.data) {
+                        this.messages = res.data;
+                    }
                 }
-            }
+            })
         },
         //获取30天报警数据统计
-        async alarmTypeDayCount(param) {
-            let response = await alarmTypeDayCount(param);
-            let res = response.data;
-            if (res.code == 0) {
-                this.earlyWList = res.data.alarmTypeDayCount;
-                let arr = [];
-                res.data.alarmTypeDayCount.forEach(ele => {
-                    arr.push(ele.vehicleCount);
-                });
-                res.data.alarmTypeDayCount.forEach(ele => {
-                    arr.push(ele.driverCount);
-                });
+        alarmTypeDayCount(param) {
+            return alarmTypeDayCount(param).then(response => {
+                let res = response.data;
+                if (res.code == 0) {
+                    this.earlyWList = res.data.alarmTypeDayCount;
+                    let arr = [];
+                    res.data.alarmTypeDayCount.forEach(ele => {
+                        arr.push(ele.vehicleCount);
+                    });
+                    res.data.alarmTypeDayCount.forEach(ele => {
+                        arr.push(ele.driverCount);
+                    });
 
-                this.arrMaxInNumber = Math.max.apply(Math, arr);
-                console.log(this.arrMaxInNumber);
-            }
+                    this.arrMaxInNumber = Math.max.apply(Math, arr);
+                    console.log(this.arrMaxInNumber);
+                }
+            })
         },
     },
 };
