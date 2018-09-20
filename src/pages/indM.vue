@@ -157,7 +157,7 @@ import {formatDate,thirtyDays} from '../../static/js/data'
 export default {
     data() {
         return {
-            statisticsTime:''//统计时间
+            statisticsTime:'',//统计时间
             intervalId: 0,
             dvecharts: {},
             ddData: [],
@@ -202,7 +202,7 @@ export default {
         //图表查询默认时间（按照30天查询）
         this.endData = thirtyDays().t1 + ' 23:23:59';
         this.starData = thirtyDays().t2 + ' 00:00:00';
-        this.statisticsTime = 
+        this.statisticsTime = thirtyDays().t1
         this.alarmTypeDayCount({
             companyId: this.companyCode,
             startDate: this.starData,
