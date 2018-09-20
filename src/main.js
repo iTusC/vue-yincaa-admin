@@ -17,6 +17,7 @@ import 'echarts/lib/chart/bar'
 import 'echarts/lib/chart/line'
 import 'echarts/lib/component/tooltip'
 import 'v-infinite-scroll/dist/v-infinite-scroll.css'
+import 'video.js/dist/video-js.css'
 import {
   getToken
 } from '../static/js/data'

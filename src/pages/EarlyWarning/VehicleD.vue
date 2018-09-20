@@ -1,8 +1,6 @@
 <template>
   <div style="height:100%;overflow:hidden">
-
     <router-view></router-view>
-
     <div class="yc-list">
       <div class="yc-velist-main">
         <div class="yc-velist">
@@ -15,9 +13,7 @@
         </div>
       </div>
     </div>
-
     <el-scrollbar style="height:100%;" class="yc-scrollbar">
-
       <div class="yc-cd-mains">
         <section class="cd-online">
           <div class="cd-online-title">
@@ -84,10 +80,27 @@
                 <el-col :span="9" style="padding-right:0">
                   <h3>车辆预警统计</h3>
                 </el-col>
-                <el-col :span="8">
-                  <!-- <date-w :datewSize="datewSize"  @dataMothe="dataMothe"></date-w> -->
-                  <el-date-picker v-model="selectData" align="right" type="date" size="mini" placeholder="选择日期" :picker-options="pickerOptions" style="width:150px;" @change="dataMothe" value-format="yyyy-MM-dd" :editable="false" :clearable="false">
-                  </el-date-picker>
+                <el-col :span="10" class="echarts-header">
+                    <!--<date-w :datewSize="datewSize"  @dataMothe="dataMothe"></date-w> -->
+                    <el-date-picker v-model="selectData" align="right" type="date" size="mini" placeholder="选择日期" :picker-options="pickerOptions" style="width:150px;" @change="dataMothe" value-format="yyyy-MM-dd" :editable="false" :clearable="false">
+                    </el-date-picker>
+                    <!--<el-radio-group v-model="radioDate"  size="mini" fill="#8f8f8f" @change="group" >
+                        <el-radio-button label="日" ></el-radio-button>
+                        <el-radio-button label="周" ></el-radio-button>         
+                        <el-radio-button label="月" ></el-radio-button>
+                    </el-radio-group>
+                    <span class="el-icon-date dateTimeIcon"></span>
+                    <el-date-picker
+                    class="echarts-date-picker"
+                    v-model="selectData"
+                    :clearable="false"
+                    :type="pickerType"
+                    @change="dataMothe"
+                    format="yyyy 年 MM 月 dd 日"
+                    :picker-options="pickerOptions"
+                    style="width: 21px;height: 20px;padding: 0;"
+                    >
+                    </el-date-picker>-->
                 </el-col>
               </el-row>
             </el-col>
@@ -155,15 +168,13 @@
           </el-row>
           <div class="ul-itme">
             <cd-table @getLocation="getLocation" :tableListDatas="tableListData" :tableTitle="tableTitle" :tableH="tableH" @getDateil="getDateil" :lod="lod" :loadMore="loadMore"></cd-table>
-              <el-pagination style="float:right;margin-top:20px;margin-bottom:20px;" background @size-change="handleSizeChange" @current-change="handleCurrentChange" :current-page.sync="currentPage3" :page-sizes="[10,30,40,50]" :page-size="10" layout="sizes,prev, pager, next, jumper" :total="200">
+              <el-pagination style="float:right;margin-top:20px;margin-bottom:20px;" background @size-change="handleSizeChange" @current-change="handleCurrentChange" :current-page.sync="currentPage3" :page-sizes="[10,30]" :page-size="10" layout="sizes,prev, pager, next, jumper" :total="100">
             </el-pagination>
           </div>
         </section>
       </div>
     </el-scrollbar>
-
   </div>
-
 </template>
 
 <script>
@@ -179,9 +190,11 @@ import DateW from '../../components/Datew';
 import 'echarts/lib/component/legend';
 import echarts from 'echarts';
 import invcat from '../../assets/invalid-name.png';
+import {formatDate,week} from  '../../../static/js/data'
 import invd from '../../assets/invalid-name2.png';
 // import '../../mock/mock'
 import {
+   
     teamTree,
     searchByName,
     teamTreeSelect,
@@ -202,48 +215,15 @@ import {getDay, getWeek} from '../../../static/js/data';
 export default {
     data() {
         return {
+            pickerType:'date',//日历类型
+            radioDate:'日',
             page: 1, //无限滚动
             intervalId: 0,
             //预计图表筛选
             pickerOptions: {
                 disabledDate(time) {
                     return time.getTime() > Date.now();
-                },
-                shortcuts: [
-                    {
-                        text: '今天',
-                        onClick(picker) {
-                            picker.$emit('pick', new Date());
-                        },
-                    },
-                    {
-                        text: '昨天',
-                        onClick(picker) {
-                            const date = new Date();
-                            date.setTime(date.getTime() - 3600 * 1000 * 24);
-                            picker.$emit('pick', date);
-                        },
-                    },
-                    {
-                        text: '一周前',
-                        onClick(picker) {
-                            const date = new Date();
-                            date.setTime(date.getTime() - 3600 * 1000 * 24 * 7);
-                            picker.$emit('pick', date);
-                        },
-                    },
-                    {
-                        text: '最近一个月',
-                        onClick(picker) {
-                            const end = new Date();
-                            const start = new Date();
-                            start.setTime(
-                                start.getTime() - 3600 * 1000 * 24 * 30
-                            );
-                            picker.$emit('pick', start);
-                        },
-                    },
-                ],
+                }
             },
             selectData: '',
             //列表报警类型配置
@@ -434,6 +414,7 @@ export default {
             infoL: '', //地点,
             tableH: '300', //表格高度,
             value6: '', //日期选择
+            echartsTimeSelect:'',//echats时间选择value
             size: 'mini',
             zoom: 12,
             selectSize: 'mini', //下拉框大小,
@@ -494,9 +475,26 @@ export default {
             lod: true,
             numbers: 10, //每页显示条数
             loadSign: false,
+            vehicleId:''//车辆id
         };
     },
     methods: {
+        //
+        group(val){
+            if(val === "日"){
+                this.pickerType = 'date'
+            }else if(val === "周"){
+                this.pickerType = 'week'
+            }else if(val === '月'){
+                this.pickerType = 'month'
+            }
+                
+        },
+         //时间戳转换
+        formData(dataTime){
+            let dataT = new Date(dataTime)
+            return formatDate(dataT,'yyyy-MM-dd hh:mm')
+        },
         // //翻页
         handleSizeChange(val) {
             this.numbers = val;
@@ -523,7 +521,15 @@ export default {
         },
         //点击公司获取所有数据
         allData() {
-            this.pageNumber = 1
+            //默认不展开
+            this.ind = null;
+            this.itemEnd = null;
+            this.pageNumber = 1;
+
+            //图表查询默认时间（按照往后推7天）
+            this.endData = getDay(0) + ' 23:23:59';
+            this.starData = getDay(-6) + ' 00:00:00';
+            
             //获取车辆列表 搜索车辆个数
             this.getTeamTree({companyId: this.companyCode});
 
@@ -533,9 +539,7 @@ export default {
             //默认获取车辆在线数
             this.getOnlineRateAll({companyId: this.companyCode});
 
-            //图表查询默认时间（按照往后推7天）
-            this.endData = getDay(0) + ' 23:23:59';
-            this.starData = getDay(-6) + ' 00:00:00';
+            
 
             //默认获取预警统计echarts数据
             this.getComposAlarmCount({
@@ -563,7 +567,6 @@ export default {
                 }
                 setTimeout(() => {
                     this.loadSign = true;
-                    console.log(1);
                 }, 1000);
                 console.log('到底了', this.page);
             }
@@ -655,7 +658,6 @@ export default {
         //预警车队选择
         echartshandleItemChange(val) {
             this.valueCode = val;
-
             this.echartsOptionsModel = val;
             this.getComposAlarmCount({
                 companyId: this.companyCode,
@@ -666,31 +668,37 @@ export default {
         },
         //图表时间选择
         dataMothe(val) {
-            if (this.selectData) {
+            let date = new Date(val).toLocaleDateString().slice().replace(/\//g, '-');
+            console.log(week(val),date);
+            if(this.pickerType === 'date'){
                 if (this.valueCode && this.dd) {
                     this.getComposAlarmCount({
                         companyId: this.companyCode,
                         vehicleId: this.valueCode,
-                        startDate: val + ' 00:00:00',
-                        endDate: this.endData,
+                        teamId: this.teamCodes,
+                        startDate: date + ' 00:00:00',
+                        endDate: date + ' 23:59:59',
                     });
-                    this.dataTime = val + ' 00:00:00' + '-' + this.endData;
+                    this.dataTime = date + ' 00:00:00' + '——' + date + ' 23:59:59';
                 } else if (this.valueName) {
                     this.getComposAlarmCount({
                         companyId: this.companyCode,
                         teamId: this.valueName,
-                        startDate: val + ' 00:00:00',
-                        endDate: this.endData,
+                        startDate: date + ' 00:00:00',
+                        endDate: date + ' 23:59:59',
                     });
-                    this.dataTime = val + ' 00:00:00' + '-' + this.endData;
+                    this.dataTime = date + ' 00:00:00' + '——' + date + ' 23:59:59'
                 } else {
                     this.getComposAlarmCount({
                         companyId: this.companyCode,
-                        startDate: val + ' 00:00:00',
-                        endDate: this.endData,
+                        teamId: this.teamCodes,
+                        startDate: date + ' 00:00:00',
+                        endDate: date + ' 23:59:59',
                     });
-                    this.dataTime = val;
+                    this.dataTime = date + ' 00:00:00' + '——' + date + ' 23:59:59'  ;
                 }
+            }else if(this.pickerType === 'week'){
+
             }
         },
 
@@ -720,6 +728,8 @@ export default {
         },
         //点击车队，按照车队查询获取在线率&&预警统计&&预警表格数据
         showFun(msg) {
+            
+            this.itemEnd = null;
             let reg = /[\(（][^\)）]+[\)）]$/;
             let dirverName = msg.e.target.innerText;
             this.onlineS = true; //显示预警筛选框
@@ -765,6 +775,7 @@ export default {
         },
         //点击车辆树，驾驶员树并根据点击的车辆信息查询在线、预计统计、预警统计列表数据
         itemOpened(msg) {
+            this.vehicleId = msg.di;
             let text = msg.e.target.innerText.substring(7, 0);
             this.ishowVLegend = false;
             this.ishowDLegend = true;
@@ -790,6 +801,7 @@ export default {
                 {
                     companyId: this.companyCode,
                     vehicleId: msg.di,
+                    teamId:this.teamCode,
                     startDate: this.starData,
                     endDate: this.endData,
                 },
@@ -800,7 +812,7 @@ export default {
                 pageNum: this.pageNumber,
                 pageSize: this.numbers,
                 companyId: this.companyCode,
-                teamId: msg.tm,
+                teamId: this.teamCode,
                 vehicleId: msg.di,
                 startDate: this.starData,
                 endDate: this.endData,
@@ -811,6 +823,8 @@ export default {
         //预警统计列表，点击筛选时间获取数据
         pcickValue(time) {
             this.pageNumber = 1
+            this.starData = time[0] + ' 00:00:00';
+            this.endData = time[1] + ' 23:59:59';
             this.tabletimestart = time[0] + ' 00:00:00';
             this.tabletimeend = time[1] + ' 23:59:59';
             this.dataMonday = time[0] + ' 00:00:00';
@@ -901,6 +915,7 @@ export default {
                 this.tabletimeend ||
                 this.value7
             ) {
+
                 this.getAlarmStatAll({
                     pageNum: this.pageNumber,
                     pageSize: this.numbers,
@@ -932,6 +947,7 @@ export default {
             this.dd = true;
             this.pageNumber = 1
             this.listOptionsModel = val;
+            this.vehicleId = this.listOptionsModel[0]
             //判断时间筛选是否为真
             if (this.tabletimestart || this.tabletimeend) {
                 this.getAlarmStatAll({
@@ -974,6 +990,7 @@ export default {
                     atypeId: this.value7,
                 });
             } else if (!this.dd && this.listOptionsModel) {
+
                 this.getAlarmStatAll({
                     pageNum: this.listPageNumber,
                     pageSize: this.numbers,
@@ -995,6 +1012,24 @@ export default {
             this.$router.push({
                 name: 'VDdetail',
                 params: {id: listidArray, tableData: tableData},
+            });
+        },
+        newData(){
+             this.getTeamTree({companyId: this.companyCode});
+            //默认获取车辆在线数
+            this.getOnlineRateAll({companyId: this.companyCode});
+             //默认综合统计表格数据
+            this.getAlarmStatAll({
+                aTypeId:this.alarmCode,
+                driverId:this.listDirver,
+                teamId:this.teamCode,
+                vehicleId:this.vehicleId,
+                pageNum: this.pageNumber,
+                pageSize: this.numbers,
+                companyId: this.companyCode,
+                startDate: this.starData,
+                endDate: this.endData,
+                pId: this.gategorys,
             });
         },
         //读取cookie
@@ -1093,12 +1128,17 @@ export default {
         },
         //获取统计表格数据
         async getAlarmStatAll(params, page = false) {
-            this.lod = true;
+            
             let response = await alarmStatAll(params);
             let res = response.data;
             if (res.code == 0) {
                 if (!page) {
-                    this.tableListData = res.data.alarmDetailOfVD;
+                    let time = []
+                    time= res.data.alarmDetailOfVD;
+                    for(let i = 0;i<time.length; i++){
+                        time[i].alarmTime = this.$options.methods.formData(time[i].alarmTime)
+                    }
+                    this.tableListData = time;
                     this.lod = false;
                 } else {
                     this.tableListData = this.tableListData.concat(
@@ -1139,7 +1179,7 @@ export default {
         this.starData = getDay(-6) + ' 00:00:00';
 
         //图表图例时间
-        this.dataTime = this.starData + '-' + this.endData;
+        this.dataTime = this.starData + '——' + this.endData;
 
         //获取车辆列表 搜索车辆个数
         this.getTeamTree({companyId: this.companyCode});
@@ -1152,7 +1192,7 @@ export default {
 
         //默认获取车辆在线数
         this.getOnlineRateAll({companyId: this.companyCode});
-
+        this.lod = true;
         //默认综合统计表格数据
         this.getAlarmStatAll({
             pageNum: this.pageNumber,
@@ -1169,8 +1209,8 @@ export default {
             endDate: this.endData,
         });
         this.intervalId = setInterval(() => {
-            this.getTeamTree({companyId: this.companyCode});
-        }, 5000);
+           this.newData();
+        }, 20000);
     },
     computed: {
         skcolors() {
@@ -1303,9 +1343,34 @@ export default {
     font-size: 12px;
     line-height: 20px;
     text-align: left;
+    
 }
 .ul-itme li:hover {
     cursor: pointer;
+}
+.dateTimeIcon{
+    font-size:22px;
+    cursor:point;
+    position:absolute;
+    left:150px;
+    top:3px;
+    color:#aba7a7;
+}
+.el-radio-button__inner:hover{
+    color:#333;
+}
+.echarts-header{
+    position:relative;
+}
+.echarts-date-picker{
+    cursor:point;
+    position:absolute;
+    height:16px;
+    width:200px;
+    left:150px;
+    top:5px;
+    z-index:2;
+   opacity:0;
 }
 .echarts {
     width: 100%;

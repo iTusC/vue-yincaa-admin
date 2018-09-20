@@ -1,10 +1,10 @@
 import axios from 'axios'
 import router from '../router/index'
 
-let cancel ,promiseArr = {}
+let cancel,promiseArr={};
 const CancelToken = axios.CancelToken;
-const axiosRef = axios
-let TOKEN = ""
+const axiosRef = axios;
+let TOKEN = "";
 
 const handleSetAxiosHeaders = (options) => {
   axiosRef.defaults.headers = Object.assign({}, axiosRef.defaults.headers, options)
@@ -131,13 +131,16 @@ axios.interceptors.response.use(response => {
     }
     return Promise.reject(error.response.data)   // 返回接口返回的错误信息
 })
-axios.defaults.baseURL = 'http://39.108.152.102/admin/'
+
+
+// axios.defaults.baseURL = 'http://yincaa.cn/admin/'
+// axios.defaults.baseURL = '/api'
 //设置默认请求头
 axios.defaults.headers = {
     'X-Requested-With': 'XMLHttpRequest'
 }
 
-axios.defaults.timeout = 10000
+axios.defaults.timeout = 50000
  
 export default {
   //get请求

@@ -1,41 +1,10 @@
 import Vue from 'vue'
 import Router from 'vue-router'
-// import IndexPage from '../pages/Index'
-// import EarlyIndex from '../pages/EarlyWarning/EarlyIndex'
-// import ComprenensiveD from '../pages/EarlyWarning/ComprenensiveD'
-// import DirverD from '../pages/EarlyWarning/DirverD'
-// import VehicleD from '../pages/EarlyWarning/VehicleD'
-// import AlarmIndex from '../pages/Alarm/AlarmIndex'
-// import AlarmS  from '../pages/Alarm/AlarmS'
-// import DriverAS  from '../pages/Alarm/DriverAS'
-// import FarltAS  from '../pages/Alarm/FarltAS'
-// import VehicleAS  from '../pages/Alarm/VehicleAS'
-// import BasicIndex from '../pages/BasicSkills/BasicIndex'
-// import BasicM  from '../pages/BasicSkills/BasicM'
-// import InstallatilM  from '../pages/BasicSkills/InstallatilM'
-// import RoadSafetyM  from '../pages/BasicSkills/RoadSafetyM'
-// import SeniorM  from '../pages/BasicSkills/SeniorM'
-// import GreenIndex  from '../pages/GreenDriving/GreenIndex'
-// import GDSParementerS  from '../pages/GreenDriving/GDSParementerS'
-// import KanBanS  from '../pages/GreenDriving/KanBanS'
-// import OBDcu  from '../pages/GreenDriving/OBDcu'
-// import OperationsIndex  from '../pages/Operations/OperationsIndex'
-// import ImageS  from '../pages/Operations/ImageS'
-// import OperationsS  from '../pages/Operations/OperationsS'
-// import StateS  from '../pages/Operations/StateS'
-// import UserS  from '../pages/Operations/UserS'
-// import { resolve } from 'upath';
 
 Vue.use(Router)
 
-// router.beforeEach((to, from, next) => {
-//   // to and from are both route objects
-
-// })
-
-
 export default new Router({
-  mode:"history",
+  mode:'history',
   routes: [
     {
       path:'/',
@@ -83,7 +52,6 @@ export default new Router({
             },
             {
               path:'/VehicleAS',
-              
               component: r => require.ensure([], () => r(require('../pages/Alarm/VehicleAS.vue')), 'VehicleAS'),
               meta:{
                 breadcrumb:'车辆报警分析'
@@ -150,9 +118,9 @@ export default new Router({
                   name:'CDdetail',
                   // component:require.ensure([], () => r(require('../pages/DetailPage.vue')), 'DetailPage'),
                   component: r => require.ensure([], () => r(require('../pages/DetailPage.vue')), 'CDdetail'),
-                  // meta:{
-                  //   breadcrumb:'预警详情'
-                  // }
+                  meta:{
+                    breadcrumb:'综合预警详情'
+                  }
                 }
               ]
             },
@@ -168,9 +136,9 @@ export default new Router({
                   name:'DDdetail',
                   // component:require.ensure([], () => r(require('../pages/DetailPage.vue')), 'DetailPage'),
                   component: r => require.ensure([], () => r(require('../pages/DetailPage.vue')), 'DDdetail'),
-                  // meta:{
-                  //   breadcrumb:'预警详情'
-                  // }
+                  meta:{
+                    breadcrumb:'驾驶员预警详情'
+                  }
                 }
               ]
             },
@@ -186,9 +154,9 @@ export default new Router({
                   name:'VDdetail',
                   // component:require.ensure([], () => r(require('../pages/DetailPage.vue')), 'DetailPage'),
                   component: r => require.ensure([], () => r(require('../pages/DetailPage.vue')), 'VDdetail'),
-                  // meta:{
-                  //   breadcrumb:'预警详情'
-                  // }
+                  meta:{
+                    breadcrumb:'车辆预警详情'
+                  }
                 }
               ]
             }

@@ -30,7 +30,7 @@
         <section class="demo-early">
           <div class="top">
             <span class="more"></span>
-            <h2>综合预警统计（2018.08）</h2>
+            <h2>综合预警统计（{{ statisticsTime }}）</h2>
             <div class="toplengs">
               <span>车辆预警</span>
               <span style="border-color:transparent transparent #1ea4b6;">驾驶员预警</span>
@@ -112,7 +112,7 @@
               <el-scrollbar style="height:100%;" class="yc-scrollbar">
                 <ul class="messageNew">
                   <li v-for="(item,i) in messages">
-                    {{ item.alarmTime }} 在{{ item.locationDesc === " " ? "未知地点" : item.locationDesc }}发生{{ item.pId === 65 ? "驾驶员预警" : "车辆预警" }}{{ item.atypeName }}。
+                    {{ formData(item.alarmTime) }} 在{{ item.locationDesc === " " ? "未知地点" : item.locationDesc }}发生{{ item.pId === 65 ? "驾驶员预警" : "车辆预警" }}{{ item.atypeName }}。
                   </li>
                 </ul>
               </el-scrollbar>
@@ -143,6 +143,7 @@ import {
     getDomeVertical,
     getLatestAlarms,
     alarmTypeDayCount,
+
 } from '../api/getData';
 import {
     getDay,
@@ -152,9 +153,11 @@ import {
     getCascaderObj,
 } from '../../static/js/data';
 import '../../static/js/bmap.min';
+import {formatDate,thirtyDays} from '../../static/js/data'
 export default {
     data() {
         return {
+            statisticsTime:''//统计时间
             intervalId: 0,
             dvecharts: {},
             ddData: [],
@@ -196,10 +199,10 @@ export default {
         this.getData();
         this.getCookie();
         this.getMapData();
-
-        //图表查询默认时间（按照往后推7天）
-        this.endData = getDay(0) + ' 23:23:59';
-        this.starData = getDay(-(this.day - 1) - 17) + ' 00:00:00';
+        //图表查询默认时间（按照30天查询）
+        this.endData = thirtyDays().t1 + ' 23:23:59';
+        this.starData = thirtyDays().t2 + ' 00:00:00';
+        this.statisticsTime = 
         this.alarmTypeDayCount({
             companyId: this.companyCode,
             startDate: this.starData,
@@ -216,6 +219,12 @@ export default {
         clearInterval(this.intervalId);
     },
     methods: {
+        
+         //时间戳转换
+        formData(dataTime){
+            let dataT = new Date(dataTime)
+            return formatDate(dataT,'yyyy-MM-dd hh:mm')
+        },
         getData() {
             let now = new Date();
             this.day = now.getDate();
@@ -236,7 +245,9 @@ export default {
             }
         },
         routoIndex() {
-            this.$router.push({path: '/ComprenensiveD'});
+            let routeData = this.$router.resolve({path: 'ComprenensiveD'});
+            window.open(routeData.href, '_blank');
+            // ;
         },
         messageNew() {
             let ul = document.getElementsByClassName('messageNew').childNodes;
@@ -594,7 +605,6 @@ export default {
         async alarmTypeDayCount(param) {
             let response = await alarmTypeDayCount(param);
             let res = response.data;
-
             if (res.code == 0) {
                 this.earlyWList = res.data.alarmTypeDayCount;
                 let arr = [];

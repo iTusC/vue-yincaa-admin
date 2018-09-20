@@ -8,7 +8,7 @@
         <div class="yc-velist">
           <div class="yc-velist-title" @click="allData">
             <img :src="companyImagePath" alt="">
-            <h3>{{ comName }}</h3>
+            <h3>{{ companyName }}</h3>
           </div>
           <vehicle-list @handleSelect="handleSelect" :resL="resL" :selectNumber="selectNumber" :selectShow="selectShow" @Subm="Subm" :selectNull="selectNull"></vehicle-list>
           <vehicle-menu @showFun="showFun" @itemOpened="itemOpened" :vehicleList="vehicleList" :ind="ind" :itemEnd="itemEnd" :isListShow="isListShow"></vehicle-menu>
@@ -98,7 +98,7 @@
           </el-row>
           <div class="ul-itme">
             <cd-table @getLocation="getLocation" :tableListDatas="tableListData" :tableTitle="tableTitle" :tableH="tableH" @getDateil="getDateil" :lod="lod"></cd-table>
-            <el-pagination style="float:right;margin-top:20px;margin-bottom:20px;" background @size-change="handleSizeChange" @current-change="handleCurrentChange" :current-page.sync="currentPage3" :page-sizes="[10,30,40,50]" :page-size="10" layout="sizes,prev, pager, next, jumper" :total="200">
+            <el-pagination style="float:right;margin-top:20px;margin-bottom:20px;" background @size-change="handleSizeChange" @current-change="handleCurrentChange" :current-page.sync="currentPage3" :page-sizes="[10,30]" :page-size="10" layout="sizes,prev, pager, next, jumper" :total="100">
             </el-pagination>
           </div>
         </section>
@@ -137,7 +137,7 @@ import {
     alarmStatAll,
     getCompanyName,
 } from '../../api/getData';
-import {getDay, getWeek} from '../../../static/js/data';
+import {getDay, getWeek,formatDate} from '../../../static/js/data';
 import Axios from 'axios';
 import _ from 'lodash';
 export default {
@@ -437,9 +437,15 @@ export default {
             companyImage: '',
             usersname: '',
             numbers: 10, //每页显示条数
+            vehicleId:''//车辆id
         };
     },
     methods: {
+        //时间戳转换
+        formData(dataTime){
+            let dataT = new Date(dataTime)
+            return formatDate(dataT,'yyyy-MM-dd hh:mm')
+        },
         //翻页
         handleSizeChange(val) {
             this.numbers = val;
@@ -467,6 +473,19 @@ export default {
         },
         //点击公司获取所有数据
         allData() {
+            this.numbers=10, //每页显示条数
+            this.vehicleId=''//车辆id
+            this.pageNumber = 1, //翻页，页数总览
+            this.listPageNumber = 1, //详细翻页
+            this.echartsOptionsModel = [], //预警图表下拉选择
+            this.vechartsOptions = [], //报警类型选择
+            this.egory = '', //预警选择
+            this.value7 = '',
+            this.listOptionsModel = [], //表格车辆驾驶员选择
+             //默认不展开
+            this.ind = null;
+            this.itemEnd = null;
+
             //获取车辆列表 搜索车辆个数
             this.getTeamTree({companyId: this.companyCode});
 
@@ -533,7 +552,6 @@ export default {
             this.isshow = false;
         },
 
-        PcickValue(time) {},
         CBValue(value) {},
         //---------- get data function------------//
 
@@ -559,6 +577,7 @@ export default {
         //条件车辆列表&&车辆在线率&&预警统计下拉选择
         //选择车队树
         showFun(msg) {
+            this.itemEnd = null;
             let reg = /[\(（][^\)）]+[\)）]$/;
             let dirverName = msg.e.target.innerText;
             this.teamCodes = msg.tm;
@@ -573,7 +592,7 @@ export default {
             //获取echarts数据
             this.getDeriverAlarmCount({
                 companyId: this.companyCode,
-                teamId: msg.tm,
+                teamId: this.teamCodes,
                 startDate: this.starData,
                 endDate: this.endData,
             });
@@ -608,6 +627,7 @@ export default {
         // 选择车辆列表
         itemOpened(msg) {
             this.vehicleNumbner = true;
+            this.vehicleId = msg.di;
             let text = msg.e.target.innerText.substring(7, 0);
             if (this.itemEnd === msg.i) {
                 this.itemEnd = null;
@@ -618,7 +638,7 @@ export default {
             //点击车辆获取echarts数据
             this.getDeriverVehicleAlarmCount({
                 companyId: this.companyCode,
-                teamId: msg.tm,
+                teamId: this.teamCodes,
                 vehicleId: msg.di,
                 startDate: this.starData,
                 endDate: this.endData,
@@ -628,7 +648,7 @@ export default {
                 pageNum: this.pageNumber,
                 pageSize: this.numbers,
                 companyId: this.companyCode,
-                teamId: msg.tm,
+                teamId: this.teamCodes,
                 vehicleId: msg.di,
                 startDate: this.starData,
                 endDate: this.endData,
@@ -643,6 +663,7 @@ export default {
             this.getDeriverAlarmCount({
                 companyId: this.companyCode,
                 driverId: this.valueCode,
+                teamId: this.teamCodes,
                 startDate: this.starData,
                 endDate: this.endData,
             });
@@ -668,6 +689,7 @@ export default {
                     this.getDeriverAlarmCount({
                         companyId: this.companyCode,
                         vehicleId: this.valueCode,
+                        teamId: this.teamCodes,
                         startDate: this.selectData + ' 00:00:00',
                         endDate: this.endData,
                     });
@@ -676,6 +698,7 @@ export default {
                     this.getDeriverAlarmCount({
                         companyId: this.companyCode,
                         driverId: this.valueCode,
+                        teamId: this.teamCodes,
                         startDate: this.selectData + ' 00:00:00',
                         endDate: this.endData,
                     });
@@ -685,6 +708,7 @@ export default {
             } else {
                 this.getDeriverAlarmCount({
                     companyId: this.companyCode,
+                    teamId: this.teamCodes,
                     startDate: this.selectData + ' 00:00:00',
                     endDate: this.endData,
                 });
@@ -705,6 +729,8 @@ export default {
         },
         //预警统计列表，点击筛选时间获取数据
         pcickValue(time) {
+            this.starData = time[0] + ' 00:00:00';
+            this.endData = time[1] + ' 23:59:59';
             this.tabletimestart = time[0] + ' 00:00:00';
             this.tabletimeend = time[1] + ' 23:59:59';
             this.dataMonday = time[0] + ' 00:00:00';
@@ -824,6 +850,7 @@ export default {
         listhandleItemChange(val) {
             this.dd = true;
             this.listOptionsModel = val;
+             this.vehicleId = this.listOptionsModel[0]
             //判断时间筛选是否为真
             if (this.tabletimestart || this.tabletimeend) {
                 this.getAlarmStatAll({
@@ -836,7 +863,20 @@ export default {
                     endDate: this.tabletimeend,
                     pId: this.gategorys,
                 });
-            } else {
+            } else if(this.alarmCode != "" && this.tabletimestart){ //判断时间和类型是否为真
+                this.getAlarmStatAll({
+                    pageNum: this.pageNumber,
+                    pageSize: this.numbers,
+                    companyId: this.companyCode,
+                    teamId: this.teamCodes,
+                    vehicleId: val[0],
+                     startDate: this.tabletimestart,
+                    endDate: this.tabletimeend,
+                    aTypeId:this.alarmCode,
+                    pId: this.gategorys,
+                });
+            }
+                else {
                 this.getAlarmStatAll({
                     pageNum: this.pageNumber,
                     pageSize: this.numbers,
@@ -857,7 +897,7 @@ export default {
                     pageNum: this.listPageNumber,
                     pageSize: this.numbers,
                     companyId: this.companyCode,
-                    vehicleId: this.listOptionsModel,
+                    vehicleId: this.listOptionsModel[0],
                     startDate: this.starData,
                     endDate: this.endData,
                     pId: this.gategorys,
@@ -882,8 +922,24 @@ export default {
             let tableData = this.tableListData;
             
             this.$router.push({
-                name: 'VDdetail',
+                name: 'DDdetail',
                 params: {id: listidArray, tableData: tableData},
+            });
+        },
+         newData(){
+            this.getTeamTree({companyId: this.companyCode});
+             //默认综合统计表格数据
+            this.getAlarmStatAll({
+                aTypeId:this.alarmCode,
+                driverId:this.listDirver,
+                teamId:this.teamCodes,
+                vehicleId:this.vehicleId,
+                pageNum: this.pageNumber,
+                pageSize: this.numbers,
+                companyId: this.companyCode,
+                startDate: this.starData,
+                endDate: this.endData,
+                pId: this.gategorys,
             });
         },
         /** 数据获取方法 */
@@ -983,11 +1039,17 @@ export default {
         },
         //获取统计表格数据
         async getAlarmStatAll(params) {
-            this.lod = true;
+            
+            let _self = this;
             let response = await alarmStatAll(params);
             let res = response.data;
             if (res.code == 0) {
-                this.tableListData = res.data.alarmDetailOfVD;
+                let time = []
+                time= res.data.alarmDetailOfVD;
+                for(let i = 0;i<time.length; i++){
+                    time[i].alarmTime = this.$options.methods.formData(time[i].alarmTime)
+                }
+                this.tableListData = time;
                 this.lod = false;
             }
         },
@@ -1074,6 +1136,7 @@ export default {
                 companyId: this.companyCode,
                 searchCondition: '',
             }),
+            this.lod = true,
             //默认图表数据
             this.getDeriverAlarmCount({
                 companyId: this.companyCode,
@@ -1091,8 +1154,8 @@ export default {
             }),
         ]);
         this.intervalId = setInterval(() => {
-            this.getTeamTree({companyId: this.companyCode});
-        }, 5000);
+           this.newData();
+        }, 20000);
     },
     beforeDestroy() {
         clearInterval(this.intervalId);

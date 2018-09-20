@@ -11,7 +11,9 @@
       width="50"
       label="序号">
     </el-table-column>
+  
      <template v-for="(items,ind) in tableTitle">
+        
        <template v-if="items.scope">
           <el-table-column
             :prop ="items.vul"
@@ -76,6 +78,7 @@
 </template>
 
 <script>
+import {formatDate} from '../../static/js/data'
 export default {
   // tableListDatas:列表详情，tableTitle：列表表头，tableH：表格高度
   props: ["tableListDatas", "tableTitle","lod"],
@@ -91,6 +94,11 @@ export default {
     },
     loadMore(){
       this.$emit("loadMore")
+    },
+    dateFormat(row,column){
+      let data = new Date(row.alarmTime) 
+      return formatDate(data,'yyyy-MM-dd hh:mm')
+       console.log(data);
     }
   }
 };

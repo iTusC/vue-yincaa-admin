@@ -27,15 +27,15 @@
             return {
                 value3:'',
                 pickerOptions1:{
-                     disabledDate(time) {
+                    disabledDate(time) {
                             return time.getTime() > Date.now();
-                        },
+                    },
                 }
             }
         },
         methods:{
             dataMothe(){
-                console.log(this.value3)
+                console.log(this.value3);
                 var now = new Date(this.value3); 
                 var nowTime = now.getTime() ; 
                 var day = now.getDay();
@@ -47,8 +47,8 @@
                 var sunday = new Date(SundayTime);
                 var dataMonday = monday.getFullYear() + '-' + (monday.getMonth() + 1<10?'0'+ (monday.getMonth() + 1):monday.getDate()-1) + '-' +(monday.getDate()<10?'0'+(monday.getDate()-1):monday.getDate()-1)+' 00:00:00'; 
                 var dataSunday = sunday.getFullYear() + '-' + (sunday.getMonth() + 1<10?'0'+ (sunday.getMonth() + 1):sunday.getDate()+1) + '-' +(sunday.getDate()<10?'0'+(sunday.getDate()-1):sunday.getDate()-1)+ ' 23:59:59'; 
+                console.log(dataMonday,dataSunday)
                 this.$emit('dataMothe',{dataMonday,dataSunday})
-                console.log(now.getDate());
             }
         }
     }
