@@ -252,7 +252,7 @@ export default {
             }
         },
         routoIndex() {
-            let routeData = this.$router.resolve({path: 'ComprenensiveD'});
+            let routeData = this.$router.resolve({path: '/EarlyIndex/ComprenensiveD'});
             window.open(routeData.href, '_blank');
             // ;
         },
@@ -452,10 +452,10 @@ export default {
                             },
                             effect: {
                                 /* 控制光点移动速度 */
-                                constantSpeed: 2,
+                                constantSpeed: 3,
                                 show: true,
                                 trailLength: 0.1,
-                                symbolSize: 3,
+                                symbolSize: 4,
                             },
                             zlevel: 1,
                         },

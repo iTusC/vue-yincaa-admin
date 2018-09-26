@@ -19,12 +19,14 @@
 <script>
 import Headers from '../components/Header';
 import NavMenu from '../components/Menu';
+import alarmWebsoketMixin from '../components/alarmWebsoket';
 
 export default {
-    components: {
-        Headers,
-        NavMenu,
-    },
+  components: {
+      Headers,
+      NavMenu,
+  },
+  mixins: [alarmWebsoketMixin]
 };
 </script>
 

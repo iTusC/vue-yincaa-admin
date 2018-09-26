@@ -86,6 +86,13 @@ axios.interceptors.response.use(response => {
 
           break;
         case 403:
+        console.log(`error 403`, error)
+        
+        /* 屏蔽403 */
+        if(document.cookie.indexOf('companyId') > -1){
+          return
+        }
+        
         router.replace({
           path: '/login',
           query: {redirect: router.currentRoute.fullPath}
