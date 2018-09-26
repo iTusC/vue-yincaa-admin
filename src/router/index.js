@@ -99,16 +99,16 @@ export default new Router({
         },
         {
           path:'/EarlyIndex',
-          redirect:'/ComprenensiveD',
-          component: r => require.ensure([], () => r(require('../pages/EarlyWarning/EarlyIndex.vue')), 'ComprenensiveDIndex'),
+          // redirect:'/ComprenensiveD',
+          component: r => require.ensure([], () => r(require('../pages/EarlyWarning/EarlyIndex.vue')), 'EarlyIndex'),
           meta:{
             breadcrumb:'预警统计',
             requireAuth: true //表示需要验证token
           },
           children:[
             {
-              path:'/ComprenensiveD',
-              component: r => require.ensure([], () => r(require('../pages/EarlyWarning/ComprenensiveD.vue')), 'ComprenensiveD'),
+              path:'ComprenensiveD',
+              component: r => require.ensure([], () => r(require('../pages/EarlyWarning/ComprenensiveD.vue')), 'EarlyWarningComprenensiveD'),
               meta:{
                 breadcrumb:'综合预警统计'
               },

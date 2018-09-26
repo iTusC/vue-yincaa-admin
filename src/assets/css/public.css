@@ -1,0 +1,46 @@
+/* 间距 */
+.margin-b{
+  margin-bottom: 20px;
+}
+
+
+/* 字体 */
+.f10{
+  font-size: 10px;
+}
+.f12{
+  font-size: 12px;
+}
+.f14{
+  font-size: 14px;
+}
+
+/* 颜色 */
+.color-grey{
+  color: #bbb;
+}
+.color-green{
+  color: #4B9843;
+}
+
+/* 定位 */
+.relative{
+  position: relative;
+}
+
+
+/* 改变chrome输入框颜色 */
+input:-webkit-autofill {
+  -webkit-box-shadow: 0 0 0px 1000px white inset !important;
+}
+
+input:-webkit-autofill, textarea:-webkit-autofill, select:-webkit-autofill{
+  background-color: transparent !important;
+  background: none !important;
+}
+
+.card{
+  background: #fff;
+  padding: 10px 20px;
+  margin-bottom: 20px;
+}

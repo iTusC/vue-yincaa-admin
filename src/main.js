@@ -29,6 +29,9 @@ import {
   put
 } from '../src/config/fetch'
 
+/* 引入公共样式 */
+import '../src/assets/css/public.css'
+
 Vue.use(infiniteScroll)
 Vue.prototype.$echarts = echarts
 Vue.prototype.$md5 = md5

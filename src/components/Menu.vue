@@ -55,7 +55,7 @@
                       children:[
                           {
                             name:'综合预警统计',
-                            path:'/ComprenensiveD',
+                            path:'/EarlyIndex/ComprenensiveD',
                           },
                           {
                             name:'车辆预警统计',

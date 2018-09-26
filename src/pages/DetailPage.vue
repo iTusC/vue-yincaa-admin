@@ -20,12 +20,12 @@
                         <p class="info">报警地点：{{ infoL }}</p>
                     </map-box>
                 </baidu-map>
-                <aside class="page-turning">
+                <aside class="page-turning" v-if="!isSingle">
                     <div class="pages-next" @click="back">
                         <i class="el-icon-back"></i>
                         <span> 返回列表</span>
                     </div>
-                    <div class="pages-next" @click="onNext">
+                    <div class="pages-next" @click="onNext" >
                         <span>下一条预警</span>
                         <i class="el-icon-arrow-right"></i>
                     </div>
@@ -225,7 +225,7 @@ import { videoPlayer } from 'vue-video-player'
 export default {
     data() {
         return {
-            lodi: true,
+            lodi: false,
             isshow: true,
             lng: null,
             lat: null,
@@ -288,6 +288,7 @@ export default {
             centerDialogVisible: false,
             dialogText: '',
             atypeParent: '',
+            isSingle: false
         };
     },
     methods: {
@@ -522,32 +523,36 @@ export default {
         },
     },
     mounted() {
-            this.alarmNo = this.$route.params.id.id;
-            this.tableDatas = this.$route.params.tableData;
-            this.currentN = this.$route.params.id.index;
-            if(this.alarmNo){
-                this.getDetailPageData({
-                    alarmNo: this.alarmNo,
-                    currentNo: this.currentN,
-                });
+            this.alarmNo = this.$route.params.id.id || this.$route.query.alarmNo;
+            
+            console.log(`alarmNo`, this.alarmNo)
+            
+            if(this.$route.query.type === 'single'){
+                this.isSingle = true
+                if(this.alarmNo){
+                    this.getDetailPageData({
+                        alarmNo: this.alarmNo,
+                        currentNo: 0,
+                    });
+                }
             }else{
-                this.clears()
-                // this.centerDialogVisible = true;
-                // this.back();
-
+                this.tableDatas = this.$route.params.tableData;
+                this.currentN = this.$route.params.id.index;
+                if(this.alarmNo){
+                    this.getDetailPageData({
+                        alarmNo: this.alarmNo,
+                        currentNo: this.currentN,
+                    });
+                }else{
+                    this.clears()
+                }
             }
     },
     created: function() {
         
     },
-    // watch: {
-    //     $route: function() {
-    //         //2. $route发生变化时再次赋值listId
-    //         this.alarmNo = this.$route.params.id.id;
-    //         this.tableDatas = this.$route.params.tableData;
-    //         this.currentN = this.$route.params.id.index;
-    //     },
-    // },
+    watch: {
+    },
     components: {
         BmlMarkerClusterer,
         MapBox,

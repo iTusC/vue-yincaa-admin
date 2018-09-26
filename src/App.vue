@@ -41,7 +41,10 @@ export default {
     NavMenu,
     dialog
   },
-  name: "App"
+  name: "App",
+  created(){
+    window.$YINCAAROUTER = this.$router
+  }
 };
 </script>
 
@@ -160,7 +163,7 @@ select {
 html,
 body,
 #app {
-  min-width: 1410px;
+  /* min-width: 1410px; */
   height: 100%;
   background-color: #eee;
 }
