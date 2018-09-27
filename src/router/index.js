@@ -4,7 +4,7 @@ import Router from 'vue-router'
 Vue.use(Router)
 
 export default new Router({
-  mode:'history',
+  // mode:'history',
   routes: [
     {
       path:'/',
@@ -99,7 +99,7 @@ export default new Router({
         },
         {
           path:'/EarlyIndex',
-          // redirect:'/ComprenensiveD',
+          redirect:'/ComprenensiveD',
           component: r => require.ensure([], () => r(require('../pages/EarlyWarning/EarlyIndex.vue')), 'EarlyIndex'),
           meta:{
             breadcrumb:'预警统计',
@@ -107,7 +107,7 @@ export default new Router({
           },
           children:[
             {
-              path:'ComprenensiveD',
+              path:'/ComprenensiveD',
               component: r => require.ensure([], () => r(require('../pages/EarlyWarning/ComprenensiveD.vue')), 'EarlyWarningComprenensiveD'),
               meta:{
                 breadcrumb:'综合预警统计'

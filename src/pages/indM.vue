@@ -252,7 +252,7 @@ export default {
             }
         },
         routoIndex() {
-            let routeData = this.$router.resolve({path: '/EarlyIndex/ComprenensiveD'});
+            let routeData = this.$router.resolve({path: 'ComprenensiveD'});
             window.open(routeData.href, '_blank');
             // ;
         },
