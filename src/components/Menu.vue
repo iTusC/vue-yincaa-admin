@@ -110,7 +110,7 @@
                       children:[
                           {
                             name:'车辆资料管理',
-                            path:'/VehicleDataManagement',
+                            path:'/FileManagement/VehicleDataManagement',
                           },
                           {
                             name:'驾驶员资料管理',
@@ -185,7 +185,7 @@
 </script>
 
 <style scoped>
-@import url("../assets/css/iconfont");
+
 .fade-enter-active, .fade-leave-active {
   transition: opacity .5s;
 }

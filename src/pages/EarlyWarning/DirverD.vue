@@ -98,7 +98,7 @@
           </el-row>
           <div class="ul-itme">
             <cd-table @getLocation="getLocation" :tableListDatas="tableListData" :tableTitle="tableTitle" :tableH="tableH" @getDateil="getDateil" :lod="lod"></cd-table>
-            <el-pagination style="float:right;margin-top:20px;margin-bottom:20px;" background @size-change="handleSizeChange" @current-change="handleCurrentChange" :current-page.sync="currentPage3" :page-sizes="[10,30]" :page-size="10" layout="sizes,prev, pager, next, jumper" :total="100">
+            <el-pagination style="float:right;margin-top:20px;margin-bottom:20px;" background @size-change="handleSizeChange" @current-change="handleCurrentChange" :current-page.sync="currentPage3" :page-sizes="[10, 30, 50, 70, 100]" :page-size="10" layout="total, sizes, prev, pager, next, jumper" :total="pageTotal">
             </el-pagination>
           </div>
         </section>
@@ -136,6 +136,7 @@ import {
     alarmStatAlarmCode,
     alarmStatAll,
     getCompanyName,
+    getAlarmListByFilter
 } from '../../api/getData';
 import {getDay, getWeek,formatDate} from '../../../static/js/data';
 import Axios from 'axios';
@@ -274,7 +275,7 @@ export default {
             },
             tableTitle: [
                 {
-                    vul: 'deriveName',
+                    vul: 'driverName',
                     title: '驾驶员',
                 },
                 {
@@ -427,6 +428,7 @@ export default {
             listDirver: '', //查询驾驶员
             tableDataAlarms: [], //综合统计列表
             pageNumber: 1, //翻页，页数总览
+            pageTotal: 0,
             listPageNumber: 1, //详细翻页
             indexShowList: '', //保存点击的行数
             dd: false, //判断是驾驶员/车辆
@@ -449,6 +451,8 @@ export default {
         //翻页
         handleSizeChange(val) {
             this.numbers = val;
+            this.pageNumber = 1
+
             //默认综合统计表格数据
             //默认综合统计表格数据
             this.getAlarmStatAll({
@@ -735,6 +739,9 @@ export default {
             this.tabletimeend = time[1] + ' 23:59:59';
             this.dataMonday = time[0] + ' 00:00:00';
             this.dataSunday = time[1] + '23:59:59';
+
+            this.pageNumber = 1;
+
             if (!this.onlineS) {
                 this.getAlarmStatAll({
                     pageNum: this.listPageNumber,
@@ -928,19 +935,19 @@ export default {
         },
          newData(){
             this.getTeamTree({companyId: this.companyCode});
-             //默认综合统计表格数据
-            this.getAlarmStatAll({
-                aTypeId:this.alarmCode,
-                driverId:this.listDirver,
-                teamId:this.teamCodes,
-                vehicleId:this.vehicleId,
-                pageNum: this.pageNumber,
-                pageSize: this.numbers,
-                companyId: this.companyCode,
-                startDate: this.starData,
-                endDate: this.endData,
-                pId: this.gategorys,
-            });
+            //默认综合统计表格数据
+            // this.getAlarmStatAll({
+            //     aTypeId:this.alarmCode,
+            //     driverId:this.listDirver,
+            //     teamId:this.teamCodes,
+            //     vehicleId:this.vehicleId,
+            //     pageNum: this.pageNumber,
+            //     pageSize: this.numbers,
+            //     companyId: this.companyCode,
+            //     startDate: this.starData,
+            //     endDate: this.endData,
+            //     pId: this.gategorys,
+            // });
         },
         /** 数据获取方法 */
         //获取车辆树结构
@@ -1039,18 +1046,25 @@ export default {
         },
         //获取统计表格数据
         async getAlarmStatAll(params) {
+            const combParams = Object.assign({
+                atypeParentId: 65
+            }, params)
             
+            this.lod = true;
+
             let _self = this;
-            let response = await alarmStatAll(params);
+            let response = await getAlarmListByFilter(combParams).finally(() => {
+                this.lod = false
+            });
             let res = response.data;
             if (res.code == 0) {
                 let time = []
-                time= res.data.alarmDetailOfVD;
+                time= res.data;
                 for(let i = 0;i<time.length; i++){
                     time[i].alarmTime = this.$options.methods.formData(time[i].alarmTime)
                 }
                 this.tableListData = time;
-                this.lod = false;
+                this.pageTotal = res.total || 0;
             }
         },
         //获取综合统计表格车辆类型筛选条件

@@ -89,9 +89,12 @@ axios.interceptors.response.use(response => {
         console.log(`error 403`, error)
         
         /* 屏蔽403 */
-        if(document.cookie.indexOf('companyId') > -1){
-          return
-        }
+        // if(document.cookie.indexOf('companyId') > -1){
+        //   return
+        // }
+        // if(error.response.config.url.indexOf('ws_sockjs_stomp') > -1){
+        //   return
+        // }
         
         router.replace({
           path: '/login',

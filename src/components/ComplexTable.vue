@@ -5,17 +5,23 @@
         <th width="5%">序号</th>
         <th width="10%">车牌号</th>
         <th width="10%">驾驶员</th>
-        <th width="20%">车辆预警统计</th>
-        <th width="20%">驾驶员预警统计</th>
-        <th width="25%"></th>
-        <th width="10%">更多操作</th>
+        <th width="15%">预警类型</th>
+        <th width="20%">预警子类型</th>
+        <th width="15%">预警时间</th>
+        <th width="20%">预警地点</th>
+        <th width="100">更多操作</th>
       </tr>
       <template v-for="(tableDatas,i) in tableData">
-        <tr >
+        <tr :key="tableDatas.alarmNo">
           <td >{{ i + 1 }}</td>
           <td >{{ tableDatas.vehicleCode }}</td>
           <td >{{ tableDatas.driverName }}</td>
-          <template v-if="tableListShowi === i">
+          <td >{{ +tableDatas.atypeParentId === 65 ? '驾驶员预警' : '车辆预警' }}</td>
+          <td >{{ tableDatas.atypeName }}</td>
+          <td >{{ tableDatas.alarmTime }}</td>
+          <td @click="getLocation(tableData, i)" style="padding-right: 20px;cursor: pointer;">{{ tableDatas.locationDesc }}</td>
+          <td @click.stop="getDateil(tableDatas.alarmNo, i)" class="hovers">查看更多</td>
+          <!-- <template v-if="tableListShowi === i">
             <td :colspan="ctcspan" style="padding:0;">
               <div class="cm-table-d">
                 <el-scrollbar style="height:100%;" class="yc-scrollbar" @scroll="getPushApply">
@@ -23,15 +29,12 @@
                       <tr v-for="(tablechr,index) in tableDataAlarms" @click="getLocation(tableDataAlarms,tableData,index,i)">
                         <template v-if="tablechr.atypeParent === 64">
                           <td width="31%">{{ tablechr.atypeName }}</td>
-                          <!-- <td width="30%">{{ tablechr.deriverAlarmName }}</td> -->
                           <td width="30%">-</td>
                         </template>
                         <template v-else>
                           <td width="31%">-</td>
                           <td width="30%">{{ tablechr.atypeName }}</td>
                         </template>
-                        <!-- <td width="31%">{{ tablechr.atypeName }}</td>
-                        <td width="30%">{{ tablechr.deriverAlarmName }}</td> -->
                         <td class="hovers" :title="tablechr.locationDesc " >{{ formData(tablechr.alarmTime) }} {{ tablechr.locationDesc.slice(0,8)+'...' }}</td>
                         <td @click.stop="getDateil(tablechr.alarmNo,index)" class="hovers">查看更多</td>
                       </tr>
@@ -45,7 +48,7 @@
               <td>{{ tableDatas.derivCount }} 次</td>
               <td></td>
             </template>
-            <td  @click="showList(i)" :tableListShow="tableListShowi" class="show" v-text="tableListShowi === i?'收起本行':'展开本行'"></td>
+            <td  @click="showList(i)" :tableListShow="tableListShowi" class="show" v-text="tableListShowi === i?'收起本行':'展开本行'"></td> -->
         </tr>
       </template>
     </table>
@@ -60,8 +63,8 @@ export default {
     showList(i) {
       this.$emit("showList", i);
     },
-    getLocation(tablechr,tableData,index,i){
-      this.$emit("getLocation",{tablechr,tableData,index,i})
+    getLocation(tableData, i){
+      this.$emit("getLocation",{tableData ,i})
     },
     getDateil(id,index){
       this.$emit("getDateil",{id:id,index:index})

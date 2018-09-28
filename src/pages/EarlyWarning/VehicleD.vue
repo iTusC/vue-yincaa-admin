@@ -168,7 +168,7 @@
           </el-row>
           <div class="ul-itme">
             <cd-table @getLocation="getLocation" :tableListDatas="tableListData" :tableTitle="tableTitle" :tableH="tableH" @getDateil="getDateil" :lod="lod" :loadMore="loadMore"></cd-table>
-              <el-pagination style="float:right;margin-top:20px;margin-bottom:20px;" background @size-change="handleSizeChange" @current-change="handleCurrentChange" :current-page.sync="currentPage3" :page-sizes="[10,30]" :page-size="10" layout="sizes,prev, pager, next, jumper" :total="100">
+              <el-pagination style="float:right;margin-top:20px;margin-bottom:20px;" background @size-change="handleSizeChange" @current-change="handleCurrentChange" :current-page.sync="currentPage3" :page-sizes="[10, 30, 50, 70, 100]" :page-size="10" layout="total, sizes,prev, pager, next, jumper" :total="pageTotal">
             </el-pagination>
           </div>
         </section>
@@ -194,7 +194,6 @@ import {formatDate,week} from  '../../../static/js/data'
 import invd from '../../assets/invalid-name2.png';
 // import '../../mock/mock'
 import {
-   
     teamTree,
     searchByName,
     teamTreeSelect,
@@ -210,6 +209,7 @@ import {
     alarmStat,
     alarmStatTeamCode,
     alarmStatAlarmCode,
+    getAlarmListByFilter
 } from '../../api/getData';
 import {getDay, getWeek} from '../../../static/js/data';
 export default {
@@ -362,12 +362,12 @@ export default {
             },
             tableTitle: [
                 {
-                    vul: 'deriveName',
-                    title: '驾驶员',
-                },
-                {
                     vul: 'vehicleCode',
                     title: '车牌号',
+                },
+                {
+                    vul: 'driverName',
+                    title: '驾驶员',
                 },
                 {
                     vul: 'atypeName',
@@ -463,6 +463,7 @@ export default {
             valueName: '', //车辆
             teamCodeNumber: '1',
             pageNumber: 1, //页码
+            pageTotal: 0,
             gategorys: '64', //报警类别
             dd: false, //判断显示车辆/车队
             listPageNumber: 1, //页码
@@ -603,7 +604,7 @@ export default {
             this.lat = row.latitude;
             this.infoD = row.deriveName;
             this.infoNP = row.vehicleCode;
-            this.infoTW = row.atpyeName;
+            this.infoTW = row.atypeName;
             this.infoWT = row.alarmTime;
             this.infoL = row.locationDesc;
         },
@@ -668,6 +669,7 @@ export default {
         },
         //图表时间选择
         dataMothe(val) {
+            
             let date = new Date(val).toLocaleDateString().slice().replace(/\//g, '-');
             console.log(week(val),date);
             if(this.pickerType === 'date'){
@@ -829,6 +831,9 @@ export default {
             this.tabletimeend = time[1] + ' 23:59:59';
             this.dataMonday = time[0] + ' 00:00:00';
             this.dataSunday = time[1] + '23:59:59';
+
+            this.pageNumber = 1;
+
             if (!this.onlineS) {
                 this.getAlarmStatAll({
                     pageNum: this.listPageNumber,
@@ -1015,22 +1020,22 @@ export default {
             });
         },
         newData(){
-             this.getTeamTree({companyId: this.companyCode});
+            this.getTeamTree({companyId: this.companyCode});
             //默认获取车辆在线数
             this.getOnlineRateAll({companyId: this.companyCode});
-             //默认综合统计表格数据
-            this.getAlarmStatAll({
-                aTypeId:this.alarmCode,
-                driverId:this.listDirver,
-                teamId:this.teamCode,
-                vehicleId:this.vehicleId,
-                pageNum: this.pageNumber,
-                pageSize: this.numbers,
-                companyId: this.companyCode,
-                startDate: this.starData,
-                endDate: this.endData,
-                pId: this.gategorys,
-            });
+            //默认综合统计表格数据
+            // this.getAlarmStatAll({
+            //     aTypeId:this.alarmCode,
+            //     driverId:this.listDirver,
+            //     teamId:this.teamCode,
+            //     vehicleId:this.vehicleId,
+            //     pageNum: this.pageNumber,
+            //     pageSize: this.numbers,
+            //     companyId: this.companyCode,
+            //     startDate: this.starData,
+            //     endDate: this.endData,
+            //     pId: this.gategorys,
+            // });
         },
         //读取cookie
         getCookie: function() {
@@ -1129,12 +1134,17 @@ export default {
         //获取统计表格数据
         async getAlarmStatAll(params, page = false) {
             
-            let response = await alarmStatAll(params);
+            const combParams = Object.assign({
+                atypeParentId: 64
+            }, params)
+            this.lod = true
+            
+            let response = await getAlarmListByFilter(combParams);
             let res = response.data;
             if (res.code == 0) {
                 if (!page) {
                     let time = []
-                    time= res.data.alarmDetailOfVD;
+                    time= res.data;
                     for(let i = 0;i<time.length; i++){
                         time[i].alarmTime = this.$options.methods.formData(time[i].alarmTime)
                     }
@@ -1142,10 +1152,11 @@ export default {
                     this.lod = false;
                 } else {
                     this.tableListData = this.tableListData.concat(
-                        res.data.alarmDetailOfVD
+                        res.data
                     );
                     this.lod = false;
                 }
+                this.pageTotal = res.total || 0
             }
         },
         //获取综合统计表格车辆类型筛选条件

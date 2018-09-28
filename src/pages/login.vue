@@ -1,5 +1,5 @@
 <template>
-	<div class="main" style="height:100%">
+	<div class="main" style="height:100%" >
 		<div class="container demo-1" style="height:100%">
 			<div class="content" style="height:100%">
 				<div id="large-header" class="large-header" style="height:100%">
@@ -138,8 +138,12 @@ export default {
                 });
                 // this.log = false;
             } else {
-                this.dialogText = res.data.message;
-                this.centerDialogVisible = true;
+                // this.dialogText = res.data.message;
+                // this.centerDialogVisible = true;
+                this.$message({
+                    message: '登录失败，请确认账号名或密码',
+                    type: 'warning',
+                })
             }
         },
     },

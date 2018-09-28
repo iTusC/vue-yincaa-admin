@@ -30,7 +30,7 @@ import {
 } from '../src/config/fetch'
 
 /* 引入公共样式 */
-import '../src/assets/css/public.css'
+import '../src/assets/css/app.css'
 
 Vue.use(infiniteScroll)
 Vue.prototype.$echarts = echarts

@@ -161,7 +161,7 @@
           </el-row>
           <div class="ul-itme">
             <c-table :ctcspan="ctcspan" :showText="showText" :tableData="tableData" @showList="showList" @getLocation="getLocation" :tableListShowi="tableListShowi" :tableDataAlarms="tableDataAlarms" @paths="paths" @getDateil="getDateil" :loading="loading" :loadings="loadings" @getPushApply="getPushApply"></c-table>
-            <el-pagination style="float:right;margin-top:20px;margin-bottom:20px;" background @size-change="handleSizeChange" @current-change="handleCurrentChange" :current-page.sync="currentPage3" :page-sizes="[10,30]" :page-size="10" layout="sizes,prev, pager, next, jumper" :total="100">
+            <el-pagination style="float:right;margin-top:20px;margin-bottom:20px;" background @size-change="handleSizeChange" @current-change="handleCurrentChange" :current-page.sync="currentPage3" :page-sizes="[10,30]" :page-size="10" layout="total, sizes, prev, pager, next, jumper" :total="pageTotal">
             </el-pagination>
           </div>
         </section>
@@ -198,6 +198,7 @@ import {
     ByGategory,
     getCompanyName,
     login,
+    getAlarmListByFilter
 } from '../../api/getData';
 import {
     getDay,
@@ -470,6 +471,7 @@ export default {
             usersname: '',
             numbers: 10,
             teamId: 1,
+            pageTotal: 0
         };
     },
     methods: {
@@ -814,18 +816,22 @@ export default {
         getLocation(row) {
             this.zoom = 34;
             this.isshow = true;
-            this.lng = Object.freeze(row.tablechr[row.index].longitude);
-            this.lat = Object.freeze(row.tablechr[row.index].latitude);
-            this.infoD = Object.freeze(row.tableData[row.i].deriveName);
+            this.lng = Object.freeze(row.tableData[row.i].longitude || '');
+            this.lat = Object.freeze(row.tableData[row.i].latitude || '');
+            this.infoD = Object.freeze(row.tableData[row.i].driverName);
             this.infoNP = Object.freeze(row.tableData[row.i].vehicleCode);
-            this.infoTW = Object.freeze(row.tablechr[row.index].atpyeName);
-            this.infoWT = Object.freeze(row.tablechr[row.index].alarmTime);
-            this.infoL = Object.freeze(row.tablechr[row.index].locationDesc);
+            this.infoTW = Object.freeze(row.tableData[row.i].atypeName);
+            this.infoWT = Object.freeze(row.tableData[row.i].alarmTime);
+            this.infoL = Object.freeze(row.tableData[row.i].locationDesc);
         },
         //预警统计列表，点击筛选时间获取数据
         pcickValue(time) {
             this.tabletimestart = time[0] + ' 00:00:00';
             this.tabletimeend = time[1] + ' 23:59:59';
+
+            /* 重置页码 */
+            this.pageNumber = 1
+
             if (!this.onlineS) {
                 this.getAlarmCompsStat({
                     pageNum: this.listPageNumber,
@@ -1011,7 +1017,8 @@ export default {
               name: 'CDdetail',
               params: {
                   id: id,
-                  tableData: this.tableDataAlarms,
+                //   tableData: this.tableDataAlarms,
+                tableData: this.tableData,
               },
             })
     
@@ -1125,10 +1132,12 @@ export default {
         },
         //综合统计表格综合数据
         async getAlarmCompsStat(params) {
-            let response = await alarmCompsStat(params);
+            const combParams = Object.assign(params)
+            let response = await getAlarmListByFilter(combParams);
             let res = response.data;
             if (res.code == 0) {
                 this.tableData = res.data;
+                this.pageTotal = res.total || 0;
                 this.teamId = res.data.teamId;
                 this.loading = false;
             }

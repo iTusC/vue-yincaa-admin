@@ -28,6 +28,24 @@
   position: relative;
 }
 
+/* 对齐 */
+.tc{
+  text-align: center;
+  justify-content: center;
+}
+
+/*布局*/
+.flex-cloumn{
+  display: flex;
+  flex-direction: column;
+}
+.flex-row{
+  display: flex;
+  flex-direction: row;
+}
+.flex-auto{
+  flex: auto;
+}
 
 /* 改变chrome输入框颜色 */
 input:-webkit-autofill {
@@ -43,4 +61,29 @@ input:-webkit-autofill, textarea:-webkit-autofill, select:-webkit-autofill{
   background: #fff;
   padding: 10px 20px;
   margin-bottom: 20px;
+}
+
+
+.yc-panel{
+  display: flex;
+  padding: 20px;
+  background-color: #fff;
+}
+
+.toolbar{
+  display: flex;
+  margin-bottom: 16px;
+  > * {
+    margin-right: 10px;
+    margin-left: 0 !important;
+  }
+}
+
+.btn-purple, .btn-purple:focus{
+  color: #fff !important;
+  background-color: #44599D !important;
+  border-color: #44599D !important;
+}
+.btn-purple:hover{
+  opacity: 0.75;
 }

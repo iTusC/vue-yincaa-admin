@@ -30,7 +30,10 @@ export const alarmCompsDetails = param => {
 export const ByGategory = param =>{
     return fetch.post('/alarm/alarmType',param);
 }
-
+//预警详情分页列表(优化后新接口)
+export const getAlarmListByFilter = param =>{
+    return fetch.post('/alarm/getAlarmListByFilter',param);
+}
 
 /************************************** 驾驶员获取数据api ********************************/
 
@@ -88,3 +91,36 @@ export const alarmTypeDayCount = param =>{
 export const getLatestAlarms = param =>{
     return fetch.post('/alarm/getLatestAlarms',param)
 }
+
+
+/************************************** 档案库api ********************************/
+
+//首页-日志信息
+export const getLogs = param =>{
+    return fetch.post('/archives/getLogs',param)
+}
+//首页-主页统计指标
+export const getStatisticData = param =>{
+    return fetch.post('/archives/getStatisticData',param)
+}
+//终端机-批量添加终端
+export const addTerminals = param =>{
+    return fetch.post('/archives/terminal/addTerminals',param)
+}
+//终端机-批量删除终端
+export const deleteTerminals = param =>{
+    return fetch.post('/archives/terminal/deleteTerminals',param)
+}
+//终端机-获取终端所有品牌
+export const getAllTerminalBrand = param =>{
+    return fetch.post('/archives/terminal/getAllTerminalBrand',param)
+}
+//终端机-获取终端信息列表
+export const getTerminalInfoList = param =>{
+    return fetch.post('/archives/terminal/getTerminalInfoList',param)
+}
+//终端机-获取指定品牌终端下所有机型
+export const getTerminalType = param =>{
+    return fetch.post('/archives/terminal/getTerminalType',param)
+}
+

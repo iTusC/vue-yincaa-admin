@@ -201,22 +201,40 @@ export default new Router({
           ]
         },
         {
-          path:'/VehicleDataManagement',
-          redirect:'/VehicleDataManagement',
-          component: r => require.ensure([], () => r(require('../pages/FileManagement/vehicle/VehicleDataManagement.vue')), 'VehicleDataManagementIndex'),
+          path:'/FileManagement',
+          redirect:'/FileManagement/VehicleDataManagement',
+          component: r => require.ensure([], () => r(require('../pages/FileManagement/index.vue')), 'FileManagement'),
           meta:{
             breadcrumb:'资料档案库'
           },
           children:[
             {
-              path:'/VehicleDataManagement',
+              path:'VehicleDataManagement',
+              component: r => require.ensure([], () => r(require('../pages/FileManagement/vehicle/VehicleDataManagement.vue')), 'VehicleDataManagementIndex'),
+            },
+            {
+              path:'terminal',
+              component:  r => require.ensure([], () => r(require('../pages/FileManagement/terminal/terminalList.vue')), 'terminalList'),
+              meta:{
+                breadcrumb:'终端机列表'
+              }
+            },
+            {
+              path:'terminalView',
+              component:  r => require.ensure([], () => r(require('../pages/FileManagement/terminal/terminalView.vue')), 'terminalView'),
+              meta:{
+                breadcrumb:'终端机视图'
+              }
+            },
+            {
+              path:'VehicleDataManagement',
               component:  r => require.ensure([], () => r(require('../pages/Operations/OperationsS.vue')), 'OperationsS'),
               meta:{
                 breadcrumb:'驾驶员资料管理'
               }
             },
             {
-              path:'/VehicleDataManagement',
+              path:'VehicleDataManagement',
               component: r => require.ensure([], () => r(require('../pages/FileManagement/vehicle/VehicleDataManagement.vue')), 'VehicleDataManagement'),
               meta:{
                 breadcrumb:'车辆资料管理'
